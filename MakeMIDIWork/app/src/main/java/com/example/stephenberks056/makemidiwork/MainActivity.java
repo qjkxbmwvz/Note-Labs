@@ -1,0 +1,183 @@
+package com.example.stephenberks056.makemidiwork;
+
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.Spinner;
+
+import org.billthefarmer.mididriver.MidiDriver;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidiStartListener,
+                                                               View.OnTouchListener {
+    private MidiDriver midiDriver;
+    private byte[] event;
+    private List<Button> keys;
+    private static final int[] BUTTON_IDS = {
+        R.id.C3,
+        R.id.Db3,
+        R.id.D3,
+        R.id.Eb3,
+        R.id.E3,
+        R.id.F3,
+        R.id.Gb3,
+        R.id.G3,
+        R.id.Ab3,
+        R.id.A3,
+        R.id.Bb3,
+        R.id.B3,
+        R.id.C4,
+        R.id.Db4,
+        R.id.D4,
+        R.id.Eb4,
+        R.id.E4,
+        R.id.F4,
+        R.id.Gb4,
+        R.id.G4,
+        R.id.Ab4,
+        R.id.A4,
+        R.id.Bb4,
+        R.id.B4,
+        R.id.C5,
+        R.id.Db5,
+        R.id.D5,
+        R.id.Eb5,
+        R.id.E5,
+        R.id.F5,
+        R.id.Gb5,
+        R.id.G5,
+        R.id.Ab5,
+        R.id.A5,
+        R.id.Bb5,
+        R.id.B5,
+    };
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        keys = new ArrayList<>(BUTTON_IDS.length);
+
+        for (int id : BUTTON_IDS) {
+            Button key = findViewById(id);
+            key.setOnTouchListener(this);
+        }
+
+        Spinner spInstruments = findViewById(R.id.spInstruments);
+        spInstruments.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                changeInstrument((byte)0, (byte)position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        Button test = findViewById(R.id.Test);
+        test.setOnTouchListener(this);
+
+        // Instantiate the driver.
+        midiDriver = new MidiDriver();
+        // Set the listener.
+        midiDriver.setOnMidiStartListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        midiDriver.start();
+
+        // Get the configuration.
+        int[] config = midiDriver.config();
+
+        // Print out the details.
+        Log.d(this.getClass().getName(), "maxVoices: " + config[0]);
+        Log.d(this.getClass().getName(), "numChannels: " + config[1]);
+        Log.d(this.getClass().getName(), "sampleRate: " + config[2]);
+        Log.d(this.getClass().getName(), "mixBufferSize: " + config[3]);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        midiDriver.stop();
+    }
+
+    @Override
+    public void onMidiStart() { Log.d(this.getClass().getName(), "onMidiStart()"); }
+
+    private void playNote(byte channel, byte note, byte velocity) {
+        // Construct a note ON message for the middle C at maximum velocity on channel 1:
+        event = new byte[3];
+        event[0] = (byte) (0x90 | channel);  // 0x90 = note On, 0x00 = channel 1
+        event[1] = note;  // 0x3C = middle C
+        event[2] = velocity;  // 0x7F = the maximum velocity (127)
+
+        // Send the MIDI event to the synthesizer.
+        midiDriver.write(event);
+    }
+
+    private void stopNote(byte channel, byte note, byte velocity) {
+        // Construct a note OFF message for the middle C at minimum velocity on channel 1:
+        event = new byte[3];
+        event[0] = (byte) (0x80 | channel);  // 0x80 = note Off, 0x00 = channel 1
+        event[1] = note;  // 0x3C = middle C
+        event[2] = velocity;  // 0x00 = the minimum velocity (0)
+
+        // Send the MIDI event to the synthesizer.
+        midiDriver.write(event);
+    }
+
+    private void changeInstrument(byte channel, byte instrument) {
+        // Construct a note OFF message for the middle C at minimum velocity on channel 1:
+        event = new byte[2];
+        event[0] = (byte) (0xC0 | channel);  // 0xC0 = program change, 0x00 = channel 1
+        event[1] = instrument;
+
+        // Send the MIDI event to the synthesizer.
+        midiDriver.write(event);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        Log.d(this.getClass().getName(), "Motion event: " + event);
+        int note = -1, tempNote = 0;
+
+        int bId = v.getId();
+        for (int id : BUTTON_IDS) {
+            ++tempNote;
+            if (bId == id) {
+                break;
+            }
+        }
+        if (tempNote != 36)
+            note = tempNote + 0x2F;
+        if (note != -1) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                Log.d(this.getClass().getName(), "MotionEvent.ACTION_DOWN");
+                playNote((byte)0, (byte)(note & 0xFF), (byte)0x7F);
+            }
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                Log.d(this.getClass().getName(), "MotionEvent.ACTION_UP");
+                stopNote((byte)0, (byte)(note & 0xFF), (byte)0x7F);
+            }
+        } else {
+            if (bId == R.id.Test)
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    Score score = new Score(midiDriver);
+                    score.play();
+                }
+        }
+
+        return false;
+    }
+}

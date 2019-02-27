@@ -1,0 +1,151 @@
+<resources>
+    <string name="app_name">MakeMIDIWork</string>
+    <string name="action_settings">Settings</string>
+    <string name="play_button_text">Play a note</string>
+    <string name="instrument_prompt">Select an instrument</string>
+    <string-array name="instruments_array">
+        <item>"Acoustic Grand Piano"</item>
+        <item>"Bright Acoustic Piano"</item>
+        <item>"Electric Grand Piano"</item>
+        <item>"Honky-tonk Piano"</item>
+        <item>"Electric Piano 1"</item>
+        <item>"Electric Piano 2"</item>
+        <item>"Harpsichord"</item>
+        <item>"Clavinet"</item>
+
+        <item>"Celesta"</item>
+        <item>"Glockenspiel"</item>
+        <item>"Music Box"</item>
+        <item>"Vibraphone"</item>
+        <item>"Marimba"</item>
+        <item>"Xylophone"</item>
+        <item>"Tubular Bells"</item>
+        <item>"Dulcimer"</item>
+
+        <item>"Drawbar Organ"</item>
+        <item>"Percussive Organ"</item>
+        <item>"Rock Organ"</item>
+        <item>"Church Organ"</item>
+        <item>"Reed Organ"</item>
+        <item>"Accordion"</item>
+        <item>"Harmonica"</item>
+        <item>"Tango Accordion"</item>
+
+        <item>"Acoustic Guitar (nylon)"</item>
+        <item>"Acoustic Guitar (steel)"</item>
+        <item>"Electric Guitar (jazz)"</item>
+        <item>"Electric Guitar (clean)"</item>
+        <item>"Electric Guitar (muted)"</item>
+        <item>"Overdriven Guitar"</item>
+        <item>"Distortion Guitar"</item>
+        <item>"Guitar Harmonics"</item>
+
+        <item>"Acoustic Bass"</item>
+        <item>"Electric Bass (finger)"</item>
+        <item>"Electric Bass (pick)"</item>
+        <item>"Fretless Bass"</item>
+        <item>"Slap Bass 1"</item>
+        <item>"Slap Bass 2"</item>
+        <item>"Synth Bass 1"</item>
+        <item>"Synth Bass 2"</item>
+
+        <item>"Violin"</item>
+        <item>"Viola"</item>
+        <item>"Cello"</item>
+        <item>"Contrabass"</item>
+        <item>"Tremolo Strings"</item>
+        <item>"Pizzicato Strings"</item>
+        <item>"Orchestral Harp"</item>
+        <item>"Timpani"</item>
+
+        <item>"String Ensemble 1"</item>
+        <item>"String Ensemble 2"</item>
+        <item>"Synth Strings 1"</item>
+        <item>"Synth Strings 2"</item>
+        <item>"Choir Aahs"</item>
+        <item>"Voice Oohs"</item>
+        <item>"Synth Choir"</item>
+        <item>"Orchestra Hit"</item>
+
+        <item>"Trumpet"</item>
+        <item>"Trombone"</item>
+        <item>"Tuba"</item>
+        <item>"Muted Trumpet"</item>
+        <item>"French Horn"</item>
+        <item>"Brass Section"</item>
+        <item>"Synth Brass 1"</item>
+        <item>"Synth Brass 2"</item>
+
+        <item>"Soprano Sax"</item>
+        <item>"Alto Sax"</item>
+        <item>"Tenor Sax"</item>
+        <item>"Baritone Sax"</item>
+        <item>"Oboe"</item>
+        <item>"English Horn"</item>
+        <item>"Bassoon"</item>
+        <item>"Clarinet"</item>
+
+        <item>"Piccolo"</item>
+        <item>"Flute"</item>
+        <item>"Recorder"</item>
+        <item>"Pan Flute"</item>
+        <item>"Blown bottle"</item>
+        <item>"Shakuhachi"</item>
+        <item>"Whistle"</item>
+        <item>"Ocarina"</item>
+
+        <item>"Lead (square)"</item>
+        <item>"Lead (sawtooth)"</item>
+        <item>"Lead (calliope)"</item>
+        <item>"Lead (chiff)"</item>
+        <item>"Lead (charang)"</item>
+        <item>"Lead (voice)"</item>
+        <item>"Lead (fifths)"</item>
+        <item>"Lead (bass + lead)"</item>
+
+        <item>"Pad (new age)"</item>
+        <item>"Pad (warm)"</item>
+        <item>"Pad (polysynth)"</item>
+        <item>"Pad (choir)"</item>
+        <item>"Pad (bowed)"</item>
+        <item>"Pad (metallic)"</item>
+        <item>"Pad (halo)"</item>
+        <item>"Pad (sweep)"</item>
+
+        <item>"FX (rain)"</item>
+        <item>"FX (soundtrack)"</item>
+        <item>"FX (crystal)"</item>
+        <item>"FX (atmosphere)"</item>
+        <item>"FX (brightness)"</item>
+        <item>"FX (goblins)"</item>
+        <item>"FX (echoes)"</item>
+        <item>"FX (sci-fi)"</item>
+
+        <item>"Sitar"</item>
+        <item>"Banjo"</item>
+        <item>"Shamisen"</item>
+        <item>"Koto"</item>
+        <item>"Kalimba"</item>
+        <item>"Bagpipe"</item>
+        <item>"Fiddle"</item>
+        <item>"Shanai"</item>
+
+        <item>"Tinkle Bell"</item>
+        <item>"Agogo"</item>
+        <item>"Steel Drums"</item>
+        <item>"Woodblock"</item>
+        <item>"Taiko Drum"</item>
+        <item>"Melodic Tom"</item>
+        <item>"Synth Drum"</item>
+        <item>"Reverse Cymbal"</item>
+
+        <item>"Guitar Fret Noise"</item>
+        <item>"Breath Noise"</item>
+        <item>"Seashore"</item>
+        <item>"Bird Tweet"</item>
+        <item>"Telephone Ring"</item>
+        <item>"Helicopter"</item>
+        <item>"Applause"</item>
+        <item>"Gunshot"</item>
+    </string-array>
+</resources>
