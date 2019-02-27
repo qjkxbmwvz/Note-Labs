@@ -1,6 +1,11 @@
 package com.example.stephenberks056.makemidiwork;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -173,7 +178,15 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
         } else {
             if (bId == R.id.Test)
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[] {
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    }, 100);
+                    int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+
                     Score score = new Score(midiDriver);
+                    if (permissionCheck == PackageManager.PERMISSION_GRANTED)
+                        score.load();
                     score.play();
                 }
         }

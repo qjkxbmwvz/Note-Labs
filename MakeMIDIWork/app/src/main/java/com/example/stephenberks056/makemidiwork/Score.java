@@ -2,8 +2,15 @@ package com.example.stephenberks056.makemidiwork;
 
 import org.billthefarmer.mididriver.MidiDriver;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
+
+import android.os.Environment;
 
 public class Score {
     private MidiDriver midiDriver;
@@ -14,7 +21,7 @@ public class Score {
     Score(MidiDriver midiDriver) {
         this.midiDriver = midiDriver;
         notes = new ArrayList<>();
-        notes.add(new LinkedList<NoteEvent>());
+        /*notes.add(new LinkedList<NoteEvent>());
         notes.add(new LinkedList<NoteEvent>());
         notes.add(new LinkedList<NoteEvent>());
         notes.add(new LinkedList<NoteEvent>());
@@ -157,7 +164,7 @@ public class Score {
         notes.get(44).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0x7F, (byte)0x40, (byte)0));
         notes.get(45).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0x7F, (byte)0x40, (byte)0));
         notes.get(45).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 1200, (byte)0x7F, (byte)0x3E, (byte)0));
-        notes.get(46).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0x7F, (byte)0x3E, (byte)0));
+        notes.get(46).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0x7F, (byte)0x3E, (byte)0));*/
     }
 
     public void play() {
@@ -173,5 +180,53 @@ public class Score {
                 Thread.sleep(shortest);
             } catch (Exception ignored) {}
         }
+    }
+
+    public void save() {
+        try {
+            File out = new File(Environment.getExternalStorageDirectory() + "/saved.nl");
+            DataOutputStream os = new DataOutputStream(new FileOutputStream(out, false));
+
+            for (LinkedList<NoteEvent> noteEventList : notes) {
+                os.writeInt(noteEventList.size());
+                for (NoteEvent noteEvent : noteEventList) {
+                    os.writeInt( noteEvent.getEventType().ordinal());
+                    os.writeInt( noteEvent.getDuration());
+                    os.writeByte(noteEvent.getVelocity());
+                    os.writeByte(noteEvent.getPitch());
+                    os.writeByte(noteEvent.getChannel());
+                }
+            }
+            os.flush();
+            os.close();
+        } catch (Exception ignored) {}
+    }
+
+    public void load() {
+        try {
+            File in = new File(Environment.getExternalStorageDirectory() + "/saved.nl");
+            DataInputStream is = new DataInputStream(new FileInputStream(in));
+
+            notes.clear();
+            int count = 0;
+
+            while (is.available() > 0) {
+                notes.add(new LinkedList<NoteEvent>());
+                int listLength = is.readInt();
+
+                for (int i = 0; i < listLength; ++i) {
+                    NoteEvent.EventType eventType = NoteEvent.EventType.values()[is.readInt()];
+                    int duration  = is.readInt();
+                    byte velocity = is.readByte();
+                    byte pitch    = is.readByte();
+                    byte channel  = is.readByte();
+
+                    notes.get(count).add(new NoteEvent(midiDriver, eventType, duration,
+                                                       velocity, pitch, channel));
+                }
+                ++count;
+            }
+            is.close();
+        } catch (Exception ignored) {}
     }
 }
