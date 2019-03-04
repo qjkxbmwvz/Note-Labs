@@ -16,14 +16,10 @@ import android.widget.Spinner;
 
 import org.billthefarmer.mididriver.MidiDriver;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidiStartListener,
                                                                View.OnTouchListener {
     private MidiDriver midiDriver;
     private byte[] event;
-    private List<Button> keys;
     private static final int[] BUTTON_IDS = {
         R.id.C3,
         R.id.Db3,
@@ -68,8 +64,6 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        keys = new ArrayList<>(BUTTON_IDS.length);
 
         for (int id : BUTTON_IDS) {
             Button key = findViewById(id);
@@ -182,12 +176,16 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
                         Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     }, 100);
-                    int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
-
                     Score score = new Score(midiDriver);
-                    if (permissionCheck == PackageManager.PERMISSION_GRANTED)
+                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+                                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                            == PackageManager.PERMISSION_GRANTED)
                         score.load();
                     score.play();
+//                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+//                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                            == PackageManager.PERMISSION_GRANTED)
+//                    score.save();
                 }
         }
 

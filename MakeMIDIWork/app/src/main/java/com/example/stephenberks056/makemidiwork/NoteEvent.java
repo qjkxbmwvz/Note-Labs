@@ -8,27 +8,27 @@ public class NoteEvent {
     private MidiDriver midiDriver;
     private EventType eventType;
     private int duration;
-    private byte velocity;
-    private byte pitch;
     private byte channel;
+    private byte pitch;
+    private byte velocity;
 
     NoteEvent(MidiDriver midiDriver, EventType eventType,
-              int duration, byte velocity, byte pitch, byte channel) {
+              int duration, byte channel, byte pitch, byte velocity) {
         this.midiDriver = midiDriver;
         this.eventType  = eventType;
         this.duration   = duration;
-        this.velocity   = velocity;
-        this.pitch      = pitch;
         this.channel    = channel;
+        this.pitch      = pitch;
+        this.velocity   = velocity;
     }
 
     public EventType getEventType() { return eventType; }
 
     public int getDuration() { return duration; }
 
-    public byte getVelocity() { return velocity; }
-    public byte getPitch()    { return pitch; }
     public byte getChannel()  { return channel; }
+    public byte getPitch()    { return pitch; }
+    public byte getVelocity() { return velocity; }
 
     public void play() {
         byte command = 0;
