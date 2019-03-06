@@ -182,10 +182,10 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
                             == PackageManager.PERMISSION_GRANTED)
                         score.load();
                     score.play();
-//                    if (ContextCompat.checkSelfPermission(MainActivity.this,
-//                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                            == PackageManager.PERMISSION_GRANTED)
-//                    score.save();
+                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            == PackageManager.PERMISSION_GRANTED)
+                    score.save();
                 }
         }
 
