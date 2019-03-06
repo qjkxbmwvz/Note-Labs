@@ -27,161 +27,97 @@ public class Score {
     Score(MidiDriver midiDriver) {
         this.midiDriver = midiDriver;
         times = new TreeMap<>();
-//        tempo = 72;
-//
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 600, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x4A, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x4A, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x49, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x49, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x47, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x47, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 600, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x47, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x47, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x49, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x49, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x4A, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x4A, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 450, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 150, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 450, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 450, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 900, (byte)0, (byte)0x39, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 300, (byte)0, (byte)0x39, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x3B, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3B, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x3D, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3D, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x45, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x3B, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3B, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x43, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x42, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x39, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x39, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x3D, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3D, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 600, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x39, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x39, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 300, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x40, (byte)0x7F));
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.START, 1200, (byte)0, (byte)0x3E, (byte)0x7F));
-//        notes.add(new LinkedList<NoteEvent>());
-//        notes.get(notes.size() - 1).add(new NoteEvent(midiDriver, NoteEvent.EventType.STOP, 0, (byte)0, (byte)0x3E, (byte)0x7F));
+        tempo = 36;
+        tracks = new Track[1];
+
+        tracks[0] = new Track((byte)0x00);
+        tracks[0].addNote(   0, new Note(Note.NoteType.MELODIC, 24, (byte)0x3E, (byte)0x7F));
+        tracks[0].addNote(  24, new Note(Note.NoteType.MELODIC, 24, (byte)0x40, (byte)0x7F));
+        tracks[0].addNote(  48, new Note(Note.NoteType.MELODIC, 24, (byte)0x42, (byte)0x7F));
+        tracks[0].addNote(  72, new Note(Note.NoteType.MELODIC, 24, (byte)0x45, (byte)0x7F));
+        tracks[0].addNote(  96, new Note(Note.NoteType.MELODIC, 48, (byte)0x40, (byte)0x7F));
+        tracks[0].addNote( 144, new Note(Note.NoteType.REST,    48, (byte)0x00, (byte)0x00));
+        tracks[0].addNote( 192, new Note(Note.NoteType.MELODIC, 24, (byte)0x4A, (byte)0x7F));
+        tracks[0].addNote( 216, new Note(Note.NoteType.MELODIC, 24, (byte)0x49, (byte)0x7F));
+        tracks[0].addNote( 240, new Note(Note.NoteType.MELODIC, 24, (byte)0x47, (byte)0x7F));
+        tracks[0].addNote( 264, new Note(Note.NoteType.MELODIC, 24, (byte)0x42, (byte)0x7F));
+        tracks[0].addNote( 288, new Note(Note.NoteType.MELODIC, 48, (byte)0x45, (byte)0x7F));
+        tracks[0].addNote( 336, new Note(Note.NoteType.REST,    48, (byte)0x00, (byte)0x00));
+        tracks[0].addNote( 384, new Note(Note.NoteType.MELODIC, 24, (byte)0x47, (byte)0x7F));
+        tracks[0].addNote( 408, new Note(Note.NoteType.MELODIC, 24, (byte)0x49, (byte)0x7F));
+        tracks[0].addNote( 432, new Note(Note.NoteType.MELODIC, 24, (byte)0x4A, (byte)0x7F));
+        tracks[0].addNote( 456, new Note(Note.NoteType.MELODIC, 36, (byte)0x45, (byte)0x7F));
+        tracks[0].addNote( 492, new Note(Note.NoteType.REST,    12, (byte)0x00, (byte)0x00));
+        tracks[0].addNote( 504, new Note(Note.NoteType.MELODIC, 36, (byte)0x3E, (byte)0x7F));
+        tracks[0].addNote( 540, new Note(Note.NoteType.REST,    36, (byte)0x00, (byte)0x00));
+        tracks[0].addNote( 576, new Note(Note.NoteType.MELODIC, 24, (byte)0x43, (byte)0x7F));
+        tracks[0].addNote( 600, new Note(Note.NoteType.MELODIC, 24, (byte)0x42, (byte)0x7F));
+        tracks[0].addNote( 624, new Note(Note.NoteType.MELODIC, 24, (byte)0x3E, (byte)0x7F));
+        tracks[0].addNote( 648, new Note(Note.NoteType.MELODIC, 96, (byte)0x39, (byte)0x7F));
+        tracks[0].addNote( 744, new Note(Note.NoteType.REST,    24, (byte)0x00, (byte)0x00));
+        tracks[0].addNote( 768, new Note(Note.NoteType.MELODIC, 48, (byte)0x3B, (byte)0x7F));
+        tracks[0].addNote( 816, new Note(Note.NoteType.MELODIC, 48, (byte)0x3D, (byte)0x7F));
+        tracks[0].addNote( 864, new Note(Note.NoteType.MELODIC, 48, (byte)0x3E, (byte)0x7F));
+        tracks[0].addNote( 912, new Note(Note.NoteType.MELODIC, 48, (byte)0x43, (byte)0x7F));
+        tracks[0].addNote( 960, new Note(Note.NoteType.MELODIC, 24, (byte)0x42, (byte)0x7F));
+        tracks[0].addNote( 984, new Note(Note.NoteType.MELODIC, 24, (byte)0x43, (byte)0x7F));
+        tracks[0].addNote(1008, new Note(Note.NoteType.MELODIC, 24, (byte)0x45, (byte)0x7F));
+        tracks[0].addNote(1032, new Note(Note.NoteType.MELODIC, 24, (byte)0x42, (byte)0x7F));
+        tracks[0].addNote(1056, new Note(Note.NoteType.MELODIC, 24, (byte)0x40, (byte)0x7F));
+        tracks[0].addNote(1080, new Note(Note.NoteType.MELODIC, 24, (byte)0x42, (byte)0x7F));
+        tracks[0].addNote(1104, new Note(Note.NoteType.MELODIC, 24, (byte)0x43, (byte)0x7F));
+        tracks[0].addNote(1128, new Note(Note.NoteType.MELODIC, 24, (byte)0x40, (byte)0x7F));
+        tracks[0].addNote(1152, new Note(Note.NoteType.MELODIC, 24, (byte)0x3B, (byte)0x7F));
+        tracks[0].addNote(1176, new Note(Note.NoteType.MELODIC, 24, (byte)0x43, (byte)0x7F));
+        tracks[0].addNote(1200, new Note(Note.NoteType.MELODIC, 24, (byte)0x42, (byte)0x7F));
+        tracks[0].addNote(1224, new Note(Note.NoteType.MELODIC, 24, (byte)0x39, (byte)0x7F));
+        tracks[0].addNote(1248, new Note(Note.NoteType.MELODIC, 48, (byte)0x40, (byte)0x7F));
+        tracks[0].addNote(1296, new Note(Note.NoteType.MELODIC, 48, (byte)0x3D, (byte)0x7F));
+        tracks[0].addNote(1344, new Note(Note.NoteType.MELODIC, 48, (byte)0x3E, (byte)0x7F));
+        tracks[0].addNote(1392, new Note(Note.NoteType.MELODIC, 24, (byte)0x39, (byte)0x7F));
+        tracks[0].addNote(1416, new Note(Note.NoteType.MELODIC, 24, (byte)0x40, (byte)0x7F));
+        tracks[0].addNote(1440, new Note(Note.NoteType.MELODIC, 96, (byte)0x3E, (byte)0x7F));
     }
 
     public void play() {
         times.clear();
 
-        for (Track track : tracks) {
-            Iterator<Pair<Integer, Note>> nIt = track.getNoteIterator();
+        for (byte i = 0; i < tracks.length; ++i) {
+            Iterator<Pair<Integer, Note>> nIt = tracks[i].getNoteIterator();
 
             while (nIt.hasNext()) {
                 Pair<Integer, Note> p = nIt.next();
-                if (!times.containsKey(p.first)) {
-                    times.put(p.first, new TimePosition(p.first));
+
+                switch (p.second.getNoteType()) {
+                case MELODIC:
+                case PERCUSSIVE:
+                    if (!times.containsKey(p.first))
+                        times.put(p.first, new TimePosition(p.first));
+                    if (!times.containsKey(p.first + p.second.getDuration()))
+                        times.put(p.first + p.second.getDuration(),
+                                  new TimePosition(p.first + p.second.getDuration()));
+                    times.get(p.first).addNote(new NoteEvent(midiDriver, NoteEvent.EventType.START,
+                                                             i, p.second));
+                    times.get(p.first + p.second.getDuration()).addNote(new NoteEvent(midiDriver,
+                            NoteEvent.EventType.STOP, i, p.second));
+                    break;
+                case REST:
+                    break;
                 }
+
             }
         }
 
-        Iterator<TimePosition> tpIt = times.iterator();
+        Iterator<TimePosition> tpIt = times.values().iterator();
         int prevTime = 0;
         while (tpIt.hasNext()) {
             TimePosition tp = tpIt.next();
             int time = tp.getTime();
             if (time > prevTime) {
                 try {
-                    Thread.sleep(time - prevTime);
+                    Thread.sleep((time - prevTime) * 2000 * tempo / 5760);
                 } catch (Exception ignored) {}
+                prevTime = time;
             }
             Iterator<NoteEvent> neIt = tp.getNoteEventIterator();
 

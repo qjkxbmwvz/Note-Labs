@@ -19,6 +19,14 @@ public class NoteEvent {
         this.velocity   = velocity;
     }
 
+    NoteEvent(MidiDriver midiDriver, EventType eventType, byte channel, Note note) {
+        this.midiDriver = midiDriver;
+        this.eventType  = eventType;
+        this.channel    = channel;
+        this.pitch      = note.getPitch();
+        this.velocity   = note.getVelocity();
+    }
+
     public EventType getEventType() { return eventType; }
 
     public byte getChannel()  { return channel; }

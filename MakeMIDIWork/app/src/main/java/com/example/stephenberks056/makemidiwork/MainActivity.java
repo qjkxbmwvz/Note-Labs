@@ -177,10 +177,10 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     }, 100);
                     Score score = new Score(midiDriver);
-                    if (ContextCompat.checkSelfPermission(MainActivity.this,
-                                    Manifest.permission.READ_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_GRANTED)
-                        score.load();
+//                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+//                                    Manifest.permission.READ_EXTERNAL_STORAGE)
+//                            == PackageManager.PERMISSION_GRANTED)
+//                        score.load();
                     score.play();
                     if (ContextCompat.checkSelfPermission(MainActivity.this,
                                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
