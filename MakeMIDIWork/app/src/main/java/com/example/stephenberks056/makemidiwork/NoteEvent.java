@@ -3,7 +3,7 @@ package com.example.stephenberks056.makemidiwork;
 import org.billthefarmer.mididriver.MidiDriver;
 
 public class NoteEvent {
-    enum EventType { START, STOP };
+    enum EventType { START, STOP }
 
     private MidiDriver midiDriver;
     private EventType eventType;
@@ -33,7 +33,7 @@ public class NoteEvent {
     public byte getPitch()    { return pitch; }
     public byte getVelocity() { return velocity; }
 
-    public void play() {
+    void play() {
         byte command = 0;
 
         switch (eventType) {

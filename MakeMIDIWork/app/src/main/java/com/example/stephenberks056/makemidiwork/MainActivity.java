@@ -1,7 +1,7 @@
 package com.example.stephenberks056.makemidiwork;
 
 import android.Manifest;
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -19,6 +19,7 @@ import org.billthefarmer.mididriver.MidiDriver;
 public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidiStartListener,
                                                                View.OnTouchListener {
     private MidiDriver midiDriver;
+    Score score;
     private byte[] event;
     private static final int[] BUTTON_IDS = {
         R.id.C3,
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
     };
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
         midiDriver.write(event);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         Log.d(this.getClass().getName(), "Motion event: " + event);
@@ -176,16 +179,18 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
                         Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     }, 100);
-                    Score score = new Score(midiDriver);
-//                    if (ContextCompat.checkSelfPermission(MainActivity.this,
-//                                    Manifest.permission.READ_EXTERNAL_STORAGE)
-//                            == PackageManager.PERMISSION_GRANTED)
-//                        score.load();
-                    score.play();
-                    if (ContextCompat.checkSelfPermission(MainActivity.this,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_GRANTED)
-                    score.save();
+                    if (score == null) {
+                        score = new Score(midiDriver);
+                        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                                Manifest.permission.READ_EXTERNAL_STORAGE)
+                                == PackageManager.PERMISSION_GRANTED)
+                            score.load();
+                        score.play();
+    //                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+    //                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    //                            == PackageManager.PERMISSION_GRANTED)
+    //                        score.save();
+                    }
                 }
         }
 

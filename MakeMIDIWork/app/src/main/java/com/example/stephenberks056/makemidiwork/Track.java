@@ -5,7 +5,7 @@ import android.util.Pair;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class Track {
+class Track {
     private byte instrument;
     private LinkedList<Pair<Integer, Note>> notes;
 
@@ -22,5 +22,5 @@ public class Track {
 
     int getTrackLength() { return notes.size(); }
 
-    void addNote(int time, Note note) { notes.add(new Pair<Integer, Note>(time, note)); }
+    void addNote(int time, Note note) { notes.add(new Pair<>(time, note)); }
 }

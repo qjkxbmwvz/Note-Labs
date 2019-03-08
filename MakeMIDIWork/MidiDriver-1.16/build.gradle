@@ -1,2 +1,4 @@
 configurations.maybeCreate("default")
 artifacts.add("default", file('MidiDriver-1.16.aar'))
+dependencies {
+}

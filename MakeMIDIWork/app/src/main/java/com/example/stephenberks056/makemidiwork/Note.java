@@ -1,7 +1,7 @@
 package com.example.stephenberks056.makemidiwork;
 
 public class Note {
-    enum NoteType { MELODIC, PERCUSSIVE, REST };
+    enum NoteType { MELODIC, PERCUSSIVE, REST }
 
     private NoteType noteType;
     private int duration;

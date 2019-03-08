@@ -3,8 +3,8 @@ package com.example.stephenberks056.makemidiwork;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class TimePosition {
-    int time;
+class TimePosition {
+    private int time;
     private LinkedList<NoteEvent> noteEvents;
 
     TimePosition(int time) {
