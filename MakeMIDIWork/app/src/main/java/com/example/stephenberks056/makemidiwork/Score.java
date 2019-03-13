@@ -1,32 +1,24 @@
 package com.example.stephenberks056.makemidiwork;
 
-import org.billthefarmer.mididriver.MidiDriver;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import android.os.Environment;
+import android.util.Log;
 import android.util.Pair;
 
 class Score {
-    private MidiDriver midiDriver;
-
-    private TreeMap<Integer, TimePosition> times;
     private int tempo;
     private Track[] tracks;
+    private Player player;
+    private Thread playerThread;
 
-    Score(MidiDriver midiDriver) {
-        this.midiDriver = midiDriver;
-        times = new TreeMap<>();
+    Score(Player player) {
+        this.player = player;
 //        tempo = 36;
 //        tracks = new Track[1];
 //
@@ -80,54 +72,15 @@ class Score {
     }
 
     void play() {
-        byte[] event = new byte[2];
-
-        times.clear();
-
-        for (byte i = 0; i < tracks.length; ++i) {
-            Iterator<Pair<Integer, Note>> nIt = tracks[i].getNoteIterator();
-
-            event[0] = (byte) (0xC0 | i);  // 0xC0 = program change, 0x0X = channel X
-            event[1] = tracks[i].getInstrument();
-            midiDriver.write(event);
-
-            while (nIt.hasNext()) {
-                Pair<Integer, Note> p = nIt.next();
-
-                switch (p.second.getNoteType()) {
-                    case MELODIC:
-                    case PERCUSSIVE:
-                        if (!times.containsKey(p.first))
-                            times.put(p.first, new TimePosition(p.first));
-                        if (!times.containsKey(p.first + p.second.getDuration()))
-                            times.put(p.first + p.second.getDuration(),
-                                    new TimePosition(p.first + p.second.getDuration()));
-                        times.get(p.first).addNote(new NoteEvent(midiDriver, NoteEvent.EventType.START,
-                                i, p.second));
-                        times.get(p.first + p.second.getDuration()).addNote(new NoteEvent(midiDriver,
-                                NoteEvent.EventType.STOP, i, p.second));
-                        break;
-                    case REST:
-                        break;
-                }
-            }
-        }
-
-        Iterator<TimePosition> tpIt = times.values().iterator();
-        int prevTime = 0;
-        while (tpIt.hasNext()) {
-            TimePosition tp = tpIt.next();
-            int time = tp.getTime();
-            if (time > prevTime) {
-                try {
-                    Thread.sleep((time - prevTime) * 300 / tempo);
-                } catch (Exception ignored) {}
-                prevTime = time;
-            }
-            Iterator<NoteEvent> neIt = tp.getNoteEventIterator();
-
-            while (neIt.hasNext())
-                neIt.next().play();
+        if (!player.running) {
+            player.prepare(tempo, tracks);
+            playerThread = new Thread(player);
+            playerThread.start();
+        } else {
+            playerThread.interrupt();
+            try {
+                playerThread.join();
+            } catch (Exception ignored) {}
         }
     }
 
@@ -170,7 +123,7 @@ class Score {
                 tracks[i] = new Track(is.readByte());
                 event[0] = (byte) (0xC0 | i);  // 0xC0 = program change, 0x0X = channel X
                 event[1] = tracks[i].getInstrument();
-                midiDriver.write(event);
+                player.directWrite(event);
 
                 int tl = is.readInt();
 

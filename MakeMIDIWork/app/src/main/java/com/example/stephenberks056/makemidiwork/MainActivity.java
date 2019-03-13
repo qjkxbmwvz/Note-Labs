@@ -14,11 +14,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import org.billthefarmer.mididriver.MidiDriver;
-
-public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidiStartListener,
-                                                               View.OnTouchListener {
-    private MidiDriver midiDriver;
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
+    private Player player = new Player();
     Score score;
     private byte[] event;
     private static final int[] BUTTON_IDS = {
@@ -85,67 +82,49 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
 
         Button test = findViewById(R.id.Test);
         test.setOnTouchListener(this);
-
-        // Instantiate the driver.
-        midiDriver = new MidiDriver();
-        // Set the listener.
-        midiDriver.setOnMidiStartListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        midiDriver.start();
-
-        // Get the configuration.
-        int[] config = midiDriver.config();
-
-        // Print out the details.
-        Log.d(this.getClass().getName(), "maxVoices: " + config[0]);
-        Log.d(this.getClass().getName(), "numChannels: " + config[1]);
-        Log.d(this.getClass().getName(), "sampleRate: " + config[2]);
-        Log.d(this.getClass().getName(), "mixBufferSize: " + config[3]);
+        player.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        midiDriver.stop();
+        player.pause();
     }
 
-    @Override
-    public void onMidiStart() { Log.d(this.getClass().getName(), "onMidiStart()"); }
-
     private void playNote(byte channel, byte note, byte velocity) {
-        // Construct a note ON message for the middle C at maximum velocity on channel 1:
         event = new byte[3];
         event[0] = (byte) (0x90 | channel);  // 0x90 = note On, 0x00 = channel 1
         event[1] = note;  // 0x3C = middle C
         event[2] = velocity;  // 0x7F = the maximum velocity (127)
 
         // Send the MIDI event to the synthesizer.
-        midiDriver.write(event);
+        if (player == null)
+            player = new Player();
+        player.directWrite(event);
     }
 
     private void stopNote(byte channel, byte note, byte velocity) {
-        // Construct a note OFF message for the middle C at minimum velocity on channel 1:
         event = new byte[3];
         event[0] = (byte) (0x80 | channel);  // 0x80 = note Off, 0x00 = channel 1
         event[1] = note;  // 0x3C = middle C
         event[2] = velocity;  // 0x00 = the minimum velocity (0)
 
         // Send the MIDI event to the synthesizer.
-        midiDriver.write(event);
+        player.directWrite(event);
     }
 
     private void changeInstrument(byte channel, byte instrument) {
-        // Construct a note OFF message for the middle C at minimum velocity on channel 1:
         event = new byte[2];
         event[0] = (byte) (0xC0 | channel);  // 0xC0 = program change, 0x00 = channel 1
         event[1] = instrument;
 
         // Send the MIDI event to the synthesizer.
-        midiDriver.write(event);
+        player.directWrite(event);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -180,17 +159,17 @@ public class MainActivity extends AppCompatActivity implements MidiDriver.OnMidi
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     }, 100);
                     if (score == null) {
-                        score = new Score(midiDriver);
+                        score = new Score(player);
                         if (ContextCompat.checkSelfPermission(MainActivity.this,
                                 Manifest.permission.READ_EXTERNAL_STORAGE)
                                 == PackageManager.PERMISSION_GRANTED)
                             score.load();
-                        score.play();
-    //                    if (ContextCompat.checkSelfPermission(MainActivity.this,
-    //                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    //                            == PackageManager.PERMISSION_GRANTED)
-    //                        score.save();
                     }
+                    score.play();
+//                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+//                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                            == PackageManager.PERMISSION_GRANTED)
+//                        score.save();
                 }
         }
 
