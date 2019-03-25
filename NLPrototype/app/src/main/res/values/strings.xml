@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">NL Prototype</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_projects_page">ProjectsPage</string>
+    <string name="title_activity_music_sheet">MusicSheet</string>
+    <string name="help_text">Help text: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vitae lacus iaculis, dignissim urna sed, mollis nisl. Integer et accumsan arcu. Proin dignissim egestas bibendum.</string>
+    <string name="title_activity_instrument_panel">InstrumentPanel</string>
+    <string name="title_activity_note_panel">NotePanel</string>
+</resources>
