@@ -12,6 +12,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
     private MidiDriver midiDriver;
     private TreeMap<Integer, TimePosition> times;
     private int tempo;
+    private int startTime;
     private byte[] instruments;
     boolean running;
 
@@ -21,8 +22,9 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
         instruments = new byte[16];
     }
 
-    void prepare(int tempo, Track[] tracks) {
+    void prepare(int tempo, int startTime, Track[] tracks) {
         this.tempo = tempo;
+        this.startTime = startTime;
         times = new TreeMap<>();
 
         for (byte i = 0; i < tracks.length; ++i) {
@@ -64,6 +66,8 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
         while (tpIt.hasNext()) {
             TimePosition tp = tpIt.next();
             int time = tp.getTime();
+            if (time < startTime)
+                continue;
 
             if (time > prevTime) {
                 try {
@@ -74,6 +78,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
                     return;
                 }
                 prevTime = time;
+                startTime = time;
             }
             Iterator<NoteEvent> neIt = tp.getNoteEventIterator();
 
@@ -102,6 +107,8 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
 
         setAllInstruments();
     }
+
+    int getStartTime() { return startTime; }
 
     void pause() { midiDriver.stop(); }
 
