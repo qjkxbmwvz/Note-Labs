@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 
 public class MusicSheet extends AppCompatActivity {
+    private Player player = new Player();
+    Score score;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +22,18 @@ public class MusicSheet extends AppCompatActivity {
 
         goToInstrumentPanel();
         goToNotePanel();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        player.resume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        player.pause();
     }
 
     private void goToInstrumentPanel(){
@@ -41,5 +55,4 @@ public class MusicSheet extends AppCompatActivity {
             }
         });
     }
-
 }
