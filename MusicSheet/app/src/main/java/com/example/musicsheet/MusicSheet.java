@@ -21,9 +21,9 @@ public class MusicSheet extends AppCompatActivity {
         //Toolbar toolbar = findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
 
-        goToInstrumentPanel();
-        goToNotePanel();
-        if (score == null) {
+        /*goToInstrumentPanel();
+        goToNotePanel();*/
+        /*if (score == null) {
             ActivityCompat.requestPermissions(MusicSheet.this, new String[] {
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -36,7 +36,7 @@ public class MusicSheet extends AppCompatActivity {
                     score.load();
             }
             score.play();
-        }
+        }*/
     }
 
     //synchronize a click on a staff to the score.tracks.addNote(time, note)
