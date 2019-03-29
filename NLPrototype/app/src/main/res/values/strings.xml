@@ -6,4 +6,8 @@
     <string name="help_text">Help text: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vitae lacus iaculis, dignissim urna sed, mollis nisl. Integer et accumsan arcu. Proin dignissim egestas bibendum.</string>
     <string name="title_activity_instrument_panel">InstrumentPanel</string>
     <string name="title_activity_note_panel">NotePanel</string>
+    <string name="new_button">NEW</string>
+    <string name="load_button">LOAD</string>
+    <string name="note_lab_title">Note Lab</string>
+    <string name="title_activity_interactive_music_sheet">InteractiveMusicSheet</string>
 </resources>

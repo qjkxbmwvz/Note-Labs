@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".MainActivity"
+    tools:context=".TimePosition$MainActivity"
     tools:showIn="@layout/activity_main">
 
     <TextView
@@ -14,7 +14,7 @@
         android:layout_height="63dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="328dp"
-        android:text="Note Labs"
+        android:text="@string/note_lab_title"
         android:textColor="@android:color/black"
         android:textSize="45sp"
         app:layout_constraintBottom_toTopOf="@+id/button"
@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="75dp"
-        android:text="NEW"
+        android:text="@string/new_button"
         app:layout_constraintBottom_toTopOf="@+id/button2"
         app:layout_constraintStart_toStartOf="@+id/button2"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="60dp"
-        android:text="LOAD"
+        android:text="@string/load_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

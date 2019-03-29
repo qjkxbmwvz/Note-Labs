@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MusicSheet</string>
+    <string name="note_lab_title">Note Labs</string>
+    <string name="new_button">NEW</string>
+    <string name="load_button">LOAD</string>
+    <string name="todo">TODO</string>
+    <string name="sample_text">SampleSampleSampleSample</string>
+</resources>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MusicSheet">
+
+    <ScrollView
+        android:id="@+id/musicSheetScroll"
+        android:layout_width="match_parent"
+        android:layout_height="649dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageButton
+                    android:id="@+id/staffButton0"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="false"
+                    android:background="#0000"
+                    android:contentDescription="@string/todo"
+                    android:cropToPadding="false"
+                    android:onClick="AddNote"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+                <ImageView
+                    android:id="@+id/staffBar0"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:adjustViewBounds="false"
+                    android:contentDescription="@string/todo"
+                    android:cropToPadding="false"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+                <ImageView
+                    android:id="@+id/staffBar1"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/staffBar2"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+                <ImageView
+                    android:id="@+id/staffBar3"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/staffBar4"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+                <ImageView
+                    android:id="@+id/staffBar5"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="440dp"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/staffBar6"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+                <ImageView
+                    android:id="@+id/staffBar7"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/staffBar8"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+                <ImageView
+                    android:id="@+id/staffBar9"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="168dp">
+
+                <ImageView
+                    android:id="@+id/staffBar10"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+                <ImageView
+                    android:id="@+id/staffBar11"
+                    android:layout_width="206dp"
+                    android:layout_height="130dp"
+                    android:contentDescription="@string/todo"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_staff_bar" />
+
+            </TableRow>
+
+        </TableLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/ToolbarLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/musicSheetScroll">
+
+        <ImageButton
+            android:id="@+id/playButton"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/todo"
+            app:srcCompat="@android:drawable/ic_media_play"
+            tools:layout_editor_absoluteX="124dp"
+            tools:layout_editor_absoluteY="514dp" />
+
+        <ImageButton
+            android:id="@+id/pauseButton"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/todo"
+            app:srcCompat="@android:drawable/ic_media_pause" />
+
+        <ImageButton
+            android:id="@+id/restartButton"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/todo"
+            app:srcCompat="@android:drawable/ic_media_previous" />
+
+        <ImageButton
+            android:id="@+id/undoButton"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/todo"
+            app:srcCompat="@android:drawable/ic_menu_revert" />
+
+        <ImageButton
+            android:id="@+id/addInstrumentButton"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/todo"
+            app:srcCompat="@android:drawable/ic_menu_add" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="206dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="248dp"
+        android:text="@string/load_button"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/musicSheetScroll"
+        app:layout_constraintStart_toEndOf="@+id/musicSheetScroll"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>
