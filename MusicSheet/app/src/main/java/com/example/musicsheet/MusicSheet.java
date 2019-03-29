@@ -39,6 +39,8 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
+    //synchronize a click on a staff to the score.tracks.addNote(time, note)
+
     @Override
     protected void onResume() {
         super.onResume();
