@@ -34,21 +34,21 @@ class TimePosition {
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
-            Toolbar toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
+            /*Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);*/
 
-            goToProjects();
-            goToMusicSheet();
+            /*goToProjects();
+            goToMusicSheet();*/
         }
 
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
             // Inflate the menu; this adds items to the action bar if it is present.
-            getMenuInflater().inflate(R.menu.menu_main, menu);
+            //getMenuInflater().inflate(R.menu.menu_main, menu);
             return true;
         }
 
-        @Override
+       /* @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             // Handle action bar item clicks here. The action bar will
             // automatically handle clicks on the Home/Up button, so long
@@ -57,9 +57,9 @@ class TimePosition {
 
             //noinspection SimplifiableIfStatement
             return (id == R.id.action_settings) || super.onOptionsItemSelected(item);
-        }
+        }*/
 
-        private void goToProjects(){
+       /* private void goToProjects(){
             Button btnNew = (Button)findViewById(R.id.button2);
             btnNew.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -67,9 +67,9 @@ class TimePosition {
                     startActivity(new Intent(MainActivity.this, ProjectsPage.class));
                 }
             });
-        }
+        }*/
 
-        private void goToMusicSheet(){
+     /*   private void goToMusicSheet(){
             Button btnLoad = (Button)findViewById(R.id.button);
             btnLoad.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -77,6 +77,6 @@ class TimePosition {
                     startActivity(new Intent(MainActivity.this, MusicSheet.class));
                 }
             });
-        }
+        }*/
     }
 }
