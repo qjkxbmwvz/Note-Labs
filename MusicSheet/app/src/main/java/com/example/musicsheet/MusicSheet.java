@@ -1,55 +1,74 @@
 package com.example.musicsheet;
 
-import android.support.v7.app.AppCompatActivity;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.ImageButton;
 
 public class MusicSheet extends AppCompatActivity {
 
-    ImageView imageView;
-    TextView textView;
-    ScrollView scrollView;
+    private Player player = new Player();
+    Score score;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_sheet);
+        //Toolbar toolbar = findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
 
-      /*  imageView = findViewById(R.id.staffBar0);
-
-        imageView.setClickable(true);*/
-
-        textView = findViewById(R.id.textView);
-        /*scrollView = findViewById(R.id.musicSheetScroll);
-
-        //imageView.getDrawable().getBounds();
-        //x and y calculated relative to imageView bound
-
-        scrollView.setOnTouchListener(new View.OnTouchListener(){
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                int x = (int)event.getX();
-                int y = (int)event.getY();
-                switch(event.getAction()){
-                    default:
-                }
-                textView.setText("X: " + x + " Y: " + y);
-                return true;
-            }});*/
+        goToInstrumentPanel();
+        goToNotePanel();
+        if (score == null) {
+            ActivityCompat.requestPermissions(MusicSheet.this, new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            }, 100);
+            if (score == null) {
+                score = new Score(player);
+                if (ContextCompat.checkSelfPermission(MusicSheet.this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED)
+                    score.load();
+            }
+            score.play();
+        }
     }
 
-    public void AddNote(View view){
-        int x = (int)view.getX();
-        int y = (int)view.getY();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        player.resume();
+    }
 
-        textView.setText("X: " + x + " Y: " + y);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        player.pause();
+    }
+
+    private void goToInstrumentPanel(){
+        ImageButton btnInstr = (ImageButton)findViewById(R.id.addInstrumentButton);
+        btnInstr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //startActivity(new Intent(MusicSheet.this, InstrumentPanel.class));
+            }
+        });
+    }
+
+    private void goToNotePanel(){
+        ImageButton btnNote = (ImageButton)findViewById(R.id.noteButton);
+        btnNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //startActivity(new Intent(MusicSheet.this, NotePanel.class));
+            }
+        });
     }
 
 
