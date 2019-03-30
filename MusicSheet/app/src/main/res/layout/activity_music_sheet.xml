@@ -16,24 +16,13 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TableLayout
+            android:id="@+id/staffs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
-                <ImageButton
-                    android:id="@+id/staffButton0"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:adjustViewBounds="false"
-                    android:background="#0000"
-                    android:contentDescription="@string/todo"
-                    android:cropToPadding="false"
-                    android:onClick="AddNote"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
 
                 <ImageView
                     android:id="@+id/staffBar0"
@@ -121,50 +110,6 @@
 
             </TableRow>
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/staffBar8"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-                <ImageView
-                    android:id="@+id/staffBar9"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="168dp">
-
-                <ImageView
-                    android:id="@+id/staffBar10"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-                <ImageView
-                    android:id="@+id/staffBar11"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-            </TableRow>
-
         </TableLayout>
     </ScrollView>
 
@@ -225,15 +170,16 @@
             android:layout_width="68dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:contentDescription="@string/todo"
             app:srcCompat="@drawable/ic_note_quarter" />
 
     </LinearLayout>
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="206dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="248dp"
+        android:layout_width="391dp"
+        android:layout_height="337dp"
+        android:layout_marginTop="312dp"
         android:text="@string/load_button"
         android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/musicSheetScroll"
