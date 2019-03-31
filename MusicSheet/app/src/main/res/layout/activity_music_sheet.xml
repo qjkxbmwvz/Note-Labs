@@ -40,7 +40,7 @@
                     android:layout_height="130dp"
                     android:contentDescription="@string/todo"
                     android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
+                    app:srcCompat="@drawable/ic_clef_note" />
 
             </TableRow>
 
@@ -54,7 +54,7 @@
                     android:layout_height="130dp"
                     android:contentDescription="@string/todo"
                     android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
+                    app:srcCompat="@drawable/ic_note_quarter" />
 
                 <ImageView
                     android:id="@+id/staffBar3"
@@ -179,7 +179,7 @@
         android:id="@+id/textView"
         android:layout_width="391dp"
         android:layout_height="337dp"
-        android:layout_marginTop="312dp"
+        android:layout_marginTop="356dp"
         android:text="@string/load_button"
         android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/musicSheetScroll"
