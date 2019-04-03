@@ -18,6 +18,11 @@ class Score {
 
     Score(Player player) { this.player = player; }
 
+    void addNote(int track, int timePosition, int duration, byte pitch, byte velocity) {
+        tracks[track].addNote(timePosition, new Note(Note.NoteType.MELODIC,
+                                                     duration, pitch, velocity));
+    }
+
     void play() {
         if (!player.running) {
             player.prepare(tempo, 0, tracks);
