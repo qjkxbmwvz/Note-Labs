@@ -54,7 +54,7 @@
                     android:layout_height="130dp"
                     android:contentDescription="@string/todo"
                     android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_note_quarter" />
+                    app:srcCompat="@drawable/ic_staff_bar" />
 
                 <ImageView
                     android:id="@+id/staffBar3"
@@ -115,14 +115,15 @@
 
     <LinearLayout
         android:id="@+id/ToolbarLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="411dp"
+        android:layout_height="105dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/musicSheetScroll">
+        app:layout_constraintTop_toBottomOf="@+id/musicSheetScroll"
+        app:layout_constraintVertical_bias="0.867">
 
         <ImageButton
             android:id="@+id/playButton"
@@ -179,10 +180,11 @@
         android:id="@+id/textView"
         android:layout_width="391dp"
         android:layout_height="337dp"
-        android:layout_marginTop="356dp"
+        android:layout_marginTop="96dp"
         android:text="@string/load_button"
         android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/musicSheetScroll"
+        app:layout_constraintHorizontal_bias="0.473"
         app:layout_constraintStart_toEndOf="@+id/musicSheetScroll"
         app:layout_constraintTop_toTopOf="parent" />
 

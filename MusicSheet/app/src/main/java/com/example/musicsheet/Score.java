@@ -16,8 +16,13 @@ class Score {
     private Player player;
     private Thread playerThread;
 
-    Score(Player player) { this.player = player; }
+    Score(Player player) {
+        tracks = new Track[1];
+        tracks[0] = new Track((byte)0);
+        this.player = player;
+    }
 
+    //velocity 127: good volume
     void addNote(int track, int timePosition, int duration, byte pitch, byte velocity) {
         tracks[track].addNote(timePosition, new Note(Note.NoteType.MELODIC,
                                                      duration, pitch, velocity));

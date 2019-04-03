@@ -17,6 +17,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.io.Console;
 import java.util.ArrayList;
 
 public class MusicSheet extends AppCompatActivity {
@@ -41,6 +42,8 @@ public class MusicSheet extends AppCompatActivity {
     int verticalOffset = 25; //hard-coded: eye-balled the distance between each bar lol
     int verticalMax = 310;
 
+    int lastTouchPointX = 0, lastTouchPointY = 0;
+
     private Player player = new Player();
     Score score;
 
@@ -49,12 +52,12 @@ public class MusicSheet extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_sheet);
-        //Toolbar toolbar = findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
 
         scrollView = findViewById(R.id.musicSheetScroll);
         textView = findViewById(R.id.textView);
         table = findViewById(R.id.staffs);
+
+        score = new Score(player);
 
         /*if(horizontalMax <= (horizontalStart + horizontalOffset*staffPositions.length)){
             textView.setText("Good Vertical");
@@ -81,15 +84,61 @@ public class MusicSheet extends AppCompatActivity {
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
 
+
+
+
+
                         imageX = Snap(imageX, horizontalMax, horizontalStart, horizontalOffset, staffPositions.length);
                         imageY = Snap(imageY, verticalMax, verticalStart, verticalOffset, staffPositions[0].length);
-                        if(imageX < 0)
-                            textView.setText("Touch: " + (int)event.getX());
-                        else
+
+                        /*if(lastTouchPointX != imageX || lastTouchPointY != imageY)
                             textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
+                        lastTouchPointX = imageX;
+                        lastTouchPointY = imageY;*/
+
+                        switch(event.getAction()){
+
+                            case MotionEvent.ACTION_DOWN:
+                                if (imageY == 310) {
+                                    byte[] midiEvent = new byte[3];
+
+                                    midiEvent[0] = (byte) (0x90 | 0);  // 0x90 = note On, 0x00 = channel 1
+                                    midiEvent[1] = 64;  // 0x3C = middle C
+                                    midiEvent[2] = 127;  // 0x00 = the minimum velocity (0)
+
+                                    // Send the MIDI event to the synthesizer.
+                                    player.directWrite(midiEvent);
+                                }
+                            case MotionEvent.ACTION_MOVE:
+                                //if(lastTouchPointX != imageX || lastTouchPointY != imageY)
+                                textView.setText("imageX: " + imageX + " imageY: " + imageY);
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                if (imageY == 310) {
+                                    byte[] midiEvent = new byte[3];
+
+                                    midiEvent[0] = (byte) (0x80 | 0);  // 0x80 = note Off, 0x00 = channel 1
+                                    midiEvent[1] = 64;  // 0x3C = middle C
+                                    midiEvent[2] = 127;  // 0x00 = the minimum velocity (0)
+
+                                    // Send the MIDI event to the synthesizer.
+                                    player.directWrite(midiEvent);
+                                    score.addNote(0, 48 * (imageX - 60) / 64, 48, (byte) 64, (byte) 127);
+                                }
+                                break;
+
+                        }
+
+                        //textView.setText("imageX: " + imageX + " imageY: " + imageY);
+
+                       /* if(imageX < 0)
+                            textView.setText("Touch: " + (int)event.getX());
+                        else
+                            textView.setText("imageX: " + imageX + " imageY: " + imageY + " " + v.toString());*/
+
                         //textView.setText("sX:"+ scrollX + "sY:" + scrollY + " iX:" + imageX + "iY:" + imageY + " lX:" + localX + "lY:" + localY);
-                        return false;
+                        return true;
                     }
                 });
             }
