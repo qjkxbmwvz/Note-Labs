@@ -12,11 +12,14 @@ import java.util.Iterator;
 
 class Score {
     private int tempo;
+    private int startTime;
     private Track[] tracks;
     private Player player;
     private Thread playerThread;
 
     Score(Player player) {
+        tempo = 120;
+        startTime = 0;
         tracks = new Track[1];
         tracks[0] = new Track((byte)0);
         this.player = player;
@@ -30,16 +33,23 @@ class Score {
 
     void play() {
         if (!player.running) {
-            player.prepare(tempo, 0, tracks);
+            player.prepare(tempo, startTime, tracks);
             playerThread = new Thread(player);
             playerThread.start();
-        } else {
+        }
+    }
+
+    void pause() {
+        if (player.running) {
             playerThread.interrupt();
             try {
                 playerThread.join();
+                startTime = player.getStartTime();
             } catch (Exception ignored) {}
         }
     }
+
+    void resetPlayPos() { startTime = 0; }
 
     void save() {
         try {

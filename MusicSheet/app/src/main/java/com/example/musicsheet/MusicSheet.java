@@ -19,9 +19,10 @@ import android.widget.TextView;
 
 import java.io.Console;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MusicSheet extends AppCompatActivity {
-
+    HashMap<Integer, Byte> posToPitch;
     final int horizontal = 4;
     final int vertical = 9;
 
@@ -38,9 +39,9 @@ public class MusicSheet extends AppCompatActivity {
     int horizontalMax = 720;
     int horizontalOffset = (horizontalMax-horizontalStart)/staffPositions.length-1; //hard-coded: splits bar into 4
 
-    int verticalStart = 130;
-    int verticalOffset = 25; //hard-coded: eye-balled the distance between each bar lol
-    int verticalMax = 310;
+    int verticalStart = 82;
+    int verticalOffset = 21; //hard-coded: eye-balled the distance between each bar lol
+    int verticalMax = 339;
 
     int lastTouchPointX = 0, lastTouchPointY = 0;
 
@@ -50,6 +51,17 @@ public class MusicSheet extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        posToPitch = new HashMap<>();
+        posToPitch.put( 82, (byte)77);
+        posToPitch.put(103, (byte)76);
+        posToPitch.put(124, (byte)74);
+        posToPitch.put(145, (byte)72);
+        posToPitch.put(166, (byte)71);
+        posToPitch.put(187, (byte)69);
+        posToPitch.put(208, (byte)67);
+        posToPitch.put(229, (byte)65);
+        posToPitch.put(250, (byte)64);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_sheet);
 
@@ -84,51 +96,63 @@ public class MusicSheet extends AppCompatActivity {
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
 
+                        imageX = Snap(imageX, horizontalMax, horizontalStart,
+                                      horizontalOffset, staffPositions.length);
+                        imageY = Snap(imageY, verticalMax,   verticalStart,
+                                      verticalOffset,   staffPositions[0].length);
 
-
-
-
-                        imageX = Snap(imageX, horizontalMax, horizontalStart, horizontalOffset, staffPositions.length);
-                        imageY = Snap(imageY, verticalMax, verticalStart, verticalOffset, staffPositions[0].length);
+                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
                         /*if(lastTouchPointX != imageX || lastTouchPointY != imageY)
                             textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
-                        lastTouchPointX = imageX;
-                        lastTouchPointY = imageY;*/
+                        lastTouchPointX = imageX;*/
 
                         switch(event.getAction()){
+                        case MotionEvent.ACTION_DOWN: {
+                            byte[] midiEvent = new byte[3];
 
-                            case MotionEvent.ACTION_DOWN:
-                                if (imageY == 310) {
-                                    byte[] midiEvent = new byte[3];
+                            midiEvent[0] = (byte) (0x90 | 0);
+                            midiEvent[1] = posToPitch.get(imageY);
+                            midiEvent[2] = 127;
 
-                                    midiEvent[0] = (byte) (0x90 | 0);  // 0x90 = note On, 0x00 = channel 1
-                                    midiEvent[1] = 64;  // 0x3C = middle C
-                                    midiEvent[2] = 127;  // 0x00 = the minimum velocity (0)
-
-                                    // Send the MIDI event to the synthesizer.
-                                    player.directWrite(midiEvent);
-                                }
-                            case MotionEvent.ACTION_MOVE:
-                                //if(lastTouchPointX != imageX || lastTouchPointY != imageY)
-                                textView.setText("imageX: " + imageX + " imageY: " + imageY);
-                                break;
-                            case MotionEvent.ACTION_UP:
-                                if (imageY == 310) {
-                                    byte[] midiEvent = new byte[3];
-
-                                    midiEvent[0] = (byte) (0x80 | 0);  // 0x80 = note Off, 0x00 = channel 1
-                                    midiEvent[1] = 64;  // 0x3C = middle C
-                                    midiEvent[2] = 127;  // 0x00 = the minimum velocity (0)
-
-                                    // Send the MIDI event to the synthesizer.
-                                    player.directWrite(midiEvent);
-                                    score.addNote(0, 48 * (imageX - 60) / 64, 48, (byte) 64, (byte) 127);
-                                }
-                                break;
-
+                            // Send the MIDI event to the synthesizer.
+                            player.directWrite(midiEvent);
                         }
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            if (lastTouchPointY != imageY) {
+                                byte[] midiEvent = new byte[6];
+
+                                midiEvent[0] = (byte) (0x80 | 0);
+                                midiEvent[1] = posToPitch.get(lastTouchPointY);
+                                midiEvent[2] = 127;
+                                midiEvent[3] = (byte) (0x90 | 0);
+                                midiEvent[4] = posToPitch.get(imageY);
+                                midiEvent[5] = 127;
+
+                                // Send the MIDI event to the synthesizer.
+                                player.directWrite(midiEvent);
+                            }
+
+                            //textView.setText("imageX: " + imageX + " imageY: " + imageY);
+                            break;
+                        case MotionEvent.ACTION_UP: {
+                            byte[] midiEvent = new byte[3];
+
+                            midiEvent[0] = (byte) (0x80 | 0);
+                            midiEvent[1] = posToPitch.get(imageY);;
+                            midiEvent[2] = 127;
+
+                            // Send the MIDI event to the synthesizer.
+                            player.directWrite(midiEvent);
+                            // TODO: get measure number (0-indexed) and add it multiplied by 192 to timePosition
+                            score.addNote(0, 48 * (imageX - 60) / 164,
+                                    48, posToPitch.get(imageY), (byte) 127);
+                        }
+                            break;
+                        }
+                        lastTouchPointY = imageY;
 
                         //textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
@@ -180,12 +204,6 @@ public class MusicSheet extends AppCompatActivity {
         }*/
     }
 
-    public void AddNote(View view){
-
-    }
-
-    //synchronize a click on a staff to the score.tracks.addNote(time, note)
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -203,13 +221,13 @@ public class MusicSheet extends AppCompatActivity {
     private int Snap(int touchPoint, int max, int start, int offset, int points){
         int prevPoint;
         int nextPoint = 0;
+
         //if not in range, snap to nearest edge
-        if(touchPoint <= start){
+        if (touchPoint <= start)
             return start;
-        }
         else if(touchPoint >= max)
             return max;
-        else{
+        else {
             for(int i = 0; i < points-1; i++){ //horizontal positions, 4
                 prevPoint = start + (i * offset);
                 nextPoint = prevPoint + offset;
@@ -217,8 +235,8 @@ public class MusicSheet extends AppCompatActivity {
                 //find specific range
                 if(touchPoint >= prevPoint && touchPoint <= nextPoint){
                     //compare distances
-                    int leftDistance = touchPoint - prevPoint;
-                    int rightDistance = nextPoint - touchPoint;
+                    int leftDistance  = touchPoint - prevPoint;
+                    int rightDistance = nextPoint  - touchPoint;
 
                     if(leftDistance < rightDistance)
                         return prevPoint;
@@ -253,22 +271,14 @@ public class MusicSheet extends AppCompatActivity {
 
     //BUTTONS---
 
-    public void Play(View view){
-        //begin playback
-    }
+    public void play(View view)    { score.play(); }
 
-    public void Pause(View view){
-        //Pause playback
-        //store current position
-    }
+    public void pause(View view)   { score.pause(); }
 
-    public void Restart(View view){
-        //set playerMarker position to 0
-        //syncronize with note data
-    }
+    public void restart(View view) { score.resetPlayPos(); }
 
     //this method requires that the last note be stored
-    public void Undo(View view){
+    public void undo(View view){
         //remove last note added
     }
 
