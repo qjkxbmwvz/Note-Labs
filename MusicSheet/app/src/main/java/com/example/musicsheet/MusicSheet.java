@@ -1,12 +1,7 @@
 package com.example.musicsheet;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
-import android.media.Image;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,8 +12,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.io.Console;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MusicSheet extends AppCompatActivity {
@@ -39,19 +32,23 @@ public class MusicSheet extends AppCompatActivity {
     int horizontalMax = 720;
     int horizontalOffset = (horizontalMax-horizontalStart)/staffPositions.length-1; //hard-coded: splits bar into 4
 
-    int verticalStart = 82;
+    int verticalStart = 19;
     int verticalOffset = 21; //hard-coded: eye-balled the distance between each bar lol
-    int verticalMax = 339;
+    int verticalMax = 324;
 
     int lastTouchPointX = 0, lastTouchPointY = 0;
 
     private Player player = new Player();
     Score score;
+    Fraction timeSignature;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         posToPitch = new HashMap<>();
+        posToPitch.put( 19, (byte)83);
+        posToPitch.put( 40, (byte)81);
+        posToPitch.put( 61, (byte)79);
         posToPitch.put( 82, (byte)77);
         posToPitch.put(103, (byte)76);
         posToPitch.put(124, (byte)74);
@@ -61,6 +58,10 @@ public class MusicSheet extends AppCompatActivity {
         posToPitch.put(208, (byte)67);
         posToPitch.put(229, (byte)65);
         posToPitch.put(250, (byte)64);
+        posToPitch.put(271, (byte)62);
+        posToPitch.put(282, (byte)60);
+        posToPitch.put(303, (byte)59);
+        posToPitch.put(324, (byte)67);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_sheet);
@@ -70,6 +71,10 @@ public class MusicSheet extends AppCompatActivity {
         table = findViewById(R.id.staffs);
 
         score = new Score(player);
+        timeSignature = new Fraction(4, 4);
+        score.addMeasure(timeSignature);
+
+        final int measureLength = 192 * timeSignature.num / timeSignature.den;
 
         /*if(horizontalMax <= (horizontalStart + horizontalOffset*staffPositions.length)){
             textView.setText("Good Vertical");
@@ -84,10 +89,10 @@ public class MusicSheet extends AppCompatActivity {
 
         for(int i = 0; i < table.getChildCount(); i++){
             //for each row
-            row = (TableRow) table.getChildAt(i);
+            row = (TableRow)table.getChildAt(i);
             for(int j = 0; j < row.getChildCount(); j++){
                 //each imageView in row
-                imageView = (ImageView) row.getChildAt(j);
+                imageView = (ImageView)row.getChildAt(j);
 
                 //create onTouchListener for each ImageView
                 imageView.setOnTouchListener(new View.OnTouchListener() {
@@ -96,10 +101,9 @@ public class MusicSheet extends AppCompatActivity {
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
 
-                        imageX = Snap(imageX, horizontalMax, horizontalStart,
-                                      horizontalOffset, staffPositions.length);
-                        imageY = Snap(imageY, verticalMax,   verticalStart,
-                                      verticalOffset,   staffPositions[0].length);
+                        imageX = snapToTime(imageX, measureLength, horizontalMax,
+                                            score.getMeasure(0, 0, timeSignature));
+                        imageY = snapToHeight(imageY, verticalMax, verticalStart, verticalOffset);
 
                         textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
@@ -147,8 +151,7 @@ public class MusicSheet extends AppCompatActivity {
                             // Send the MIDI event to the synthesizer.
                             player.directWrite(midiEvent);
                             // TODO: get measure number (0-indexed) and add it multiplied by 192 to timePosition
-                            score.addNote(0, 48 * (imageX - 60) / 164,
-                                    48, posToPitch.get(imageY), (byte) 127);
+                            score.addNote(0, imageX, 48, posToPitch.get(imageY), (byte)127);
                         }
                             break;
                         }
@@ -218,19 +221,19 @@ public class MusicSheet extends AppCompatActivity {
 
 
     //returns nearest point relative to where the user touched
-    private int Snap(int touchPoint, int max, int start, int offset, int points){
+    private int snapToTime(int touchPoint, int fromWidth, int toWidth, int[] points){
         int prevPoint;
         int nextPoint = 0;
 
         //if not in range, snap to nearest edge
-        if (touchPoint <= start)
-            return start;
-        else if(touchPoint >= max)
-            return max;
+        if (touchPoint <= points[0])
+            return points[0];
+        else if(touchPoint >= points[points.length - 1])
+            return points[points.length - 1];
         else {
-            for(int i = 0; i < points-1; i++){ //horizontal positions, 4
-                prevPoint = start + (i * offset);
-                nextPoint = prevPoint + offset;
+            for(int i = 0; i < points.length - 1; i++) {
+                prevPoint = points[i]     * toWidth / fromWidth;
+                nextPoint = points[i + 1] * toWidth / fromWidth;
 
                 //find specific range
                 if(touchPoint >= prevPoint && touchPoint <= nextPoint){
@@ -245,6 +248,20 @@ public class MusicSheet extends AppCompatActivity {
                 }//end range check
             }//end for
             return nextPoint;
+        }
+    }
+
+    private int snapToHeight(int touchPoint, int max, int start, int offset){
+        //if not in range, snap to nearest edge
+        if (touchPoint <= start)
+            return start;
+        else if(touchPoint >= max)
+            return max;
+        else {
+            touchPoint -= start;
+
+            return start + ((touchPoint / offset)
+                         + ((touchPoint % offset) * 2 / offset)) * offset;
         }
     }
 

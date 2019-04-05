@@ -6,6 +6,7 @@ import android.util.Pair;
 import org.billthefarmer.mididriver.MidiDriver;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 public class Player implements Runnable, MidiDriver.OnMidiStartListener {
@@ -28,28 +29,31 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
         times = new TreeMap<>();
 
         for (byte i = 0; i < tracks.length; ++i) {
-            Iterator<Pair<Integer, Note>> nIt = tracks[i].getNoteIterator();
+            Iterator<Integer> tIt = tracks[i].getTimeIterator();
+            Iterator<LinkedList<Note>> nIt = tracks[i].getNoteIterator();
             instruments[i] = tracks[i].getInstrument();
 
-            while (nIt.hasNext()) {
-                Pair<Integer, Note> p = nIt.next();
+            while (tIt.hasNext()) {
+                int t = tIt.next();
+                LinkedList<Note> nl = nIt.next();
 
-                switch (p.second.getNoteType()) {
-                    case MELODIC:
-                    case PERCUSSIVE:
-                        if (!times.containsKey(p.first))
-                            times.put(p.first, new TimePosition(p.first));
-                        if (!times.containsKey(p.first + p.second.getDuration()))
-                            times.put(p.first + p.second.getDuration(),
-                                    new TimePosition(p.first + p.second.getDuration()));
-                        times.get(p.first).addNote(new NoteEvent(midiDriver,
-                                                                 NoteEvent.EventType.START,
-                                                                 i, p.second));
-                        times.get(p.first + p.second.getDuration()).addNote(
-                                new NoteEvent(midiDriver, NoteEvent.EventType.STOP, i, p.second));
-                        break;
-                    case REST:
-                        break;
+                for (Note n : nl) {
+                    switch (n.getNoteType()) {
+                        case MELODIC:
+                        case PERCUSSIVE:
+                            if (!times.containsKey(t))
+                                times.put(t, new TimePosition(t));
+                            if (!times.containsKey(t + n.getDuration()))
+                                times.put(t + n.getDuration(),
+                                          new TimePosition(t + n.getDuration()));
+                            times.get(t).addNote(
+                                    new NoteEvent(midiDriver, NoteEvent.EventType.START, i, n));
+                            times.get(t + n.getDuration()).addNote(
+                                    new NoteEvent(midiDriver, NoteEvent.EventType.STOP, i, n));
+                            break;
+                        case REST:
+                            break;
+                    }
                 }
             }
         }

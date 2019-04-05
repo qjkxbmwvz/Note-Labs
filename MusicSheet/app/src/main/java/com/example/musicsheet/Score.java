@@ -8,11 +8,15 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.sql.Time;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.TreeSet;
 
 class Score {
     private int tempo;
     private int startTime;
+    private int measureCount;
     private Track[] tracks;
     private Player player;
     private Thread playerThread;
@@ -20,6 +24,7 @@ class Score {
     Score(Player player) {
         tempo = 120;
         startTime = 0;
+        measureCount = 0;
         tracks = new Track[1];
         tracks[0] = new Track((byte)0);
         this.player = player;
@@ -29,6 +34,34 @@ class Score {
     void addNote(int track, int timePosition, int duration, byte pitch, byte velocity) {
         tracks[track].addNote(timePosition, new Note(Note.NoteType.MELODIC,
                                                      duration, pitch, velocity));
+        tracks[track].addNote(timePosition + duration, new Note(Note.NoteType.REST,
+                                                                      0, (byte)0,
+                                                                      (byte)0));
+    }
+
+    void addMeasure(Fraction timeSignature) {
+        int measureSize = 192 * timeSignature.num / timeSignature.den;
+
+        for (Track track : tracks)
+            track.addNote(measureCount * measureSize, new Note(Note.NoteType.REST,
+                                                                     measureSize,
+                                                                     (byte)0, (byte)0));
+        ++measureCount;
+    }
+
+    int[] getMeasure(int track, int measureNum, Fraction timeSignature) {
+        if (measureNum >= measureCount)
+            throw new IndexOutOfBoundsException();
+        else {
+            TreeSet<Integer> times = tracks[track].getMeasure(measureNum, timeSignature);
+            int[] ret = new int[times.size()];
+            Iterator<Integer> it = times.iterator();
+
+            for (int i = 0; i < ret.length; ++i)
+                ret[i] = it.next();
+
+            return ret;
+        }
     }
 
     void play() {
@@ -61,15 +94,20 @@ class Score {
             for (Track track : tracks) {
                 os.writeByte(track.getInstrument());
                 os.writeInt(track.getTrackLength());
-                Iterator<Pair<Integer, Note>> it = track.getNoteIterator();
-                while (it.hasNext()) {
-                    Pair<Integer, Note> p = it.next();
-                    os.writeInt(p.first);
-                    os.writeInt(p.second.getNoteType().ordinal());
-                    os.writeInt(p.second.getDuration());
+                Iterator<Integer> tIt = track.getTimeIterator();
+                Iterator<LinkedList<Note>> nIt = track.getNoteIterator();
+                while (tIt.hasNext()) {
+                    int t = tIt.next();
+                    LinkedList<Note> nl = nIt.next();
 
-                    os.writeByte(p.second.getPitch());
-                    os.writeByte(p.second.getVelocity());
+                    for (Note n : nl) {
+                        os.writeInt(t);
+                        os.writeInt(n.getNoteType().ordinal());
+                        os.writeInt(n.getDuration());
+
+                        os.writeByte(n.getPitch());
+                        os.writeByte(n.getVelocity());
+                    }
                 }
             }
             os.flush();
