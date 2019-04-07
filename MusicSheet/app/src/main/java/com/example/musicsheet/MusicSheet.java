@@ -37,6 +37,11 @@ public class MusicSheet extends AppCompatActivity {
     final int horizontal = 4;
     final int vertical = 9;
 
+    //Drawing Variables
+    Bitmap bitmap;
+    Canvas canvas;
+    Paint linePaint;
+
     int[][] staffPositions = new int[horizontal][vertical];
 
     ScrollView scrollView;
@@ -100,9 +105,8 @@ public class MusicSheet extends AppCompatActivity {
             for(int j = 0; j < row.getChildCount(); j++){
                 //each imageView in row
                 imageView = (ImageView)row.getChildAt(j);
-
-
                 DrawStaff(imageView);
+
 
                 //create onTouchListener for each ImageView
                 imageView.setOnTouchListener(new View.OnTouchListener() {
@@ -110,12 +114,14 @@ public class MusicSheet extends AppCompatActivity {
                     public boolean onTouch(View v, MotionEvent event) {
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
+                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
+                        DrawNote(imageView, imageX, imageY);
 
                         imageX = snapToTime(imageX, measureLength, horizontalMax,
                                             score.getMeasure(0, 0, timeSignature));
                         imageY = snapToHeight(imageY, verticalMax, verticalStart, verticalOffset);
 
-                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
+
 
                         /*if(lastTouchPointX != imageX || lastTouchPointY != imageY)
                             textView.setText("imageX: " + imageX + " imageY: " + imageY);
@@ -163,6 +169,7 @@ public class MusicSheet extends AppCompatActivity {
                             // TODO: get measure number (0-indexed) and add it multiplied by 192 to timePosition
                             score.addNote(0, imageX, 48, posToPitch.get(imageY), (byte)127);
                             // TODO: add image of note on position imageX, imageY on staff
+
                             break;
                         }
                         lastTouchPointY = imageY;
@@ -183,38 +190,37 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void DrawStaff(ImageView iv){
-        //Drawable d = getResources().getDrawable(R.drawable.ic_staff_bar, null);
-        //d.setBounds(imageView.getLeft(), imageView.getTop(), imageView.getRight(), imageView.getBottom());
 
-        //drawLine(float startX, float startY, float stopX, float stopY, Paint paint)
+        //create bitmap and link to canvas (bitmap is a grid/matrix of pixels, canvas lets you change the pixels)
+        bitmap = Bitmap.createBitmap(206, 130, Bitmap.Config.ARGB_8888); //working variabes 206, 130
+        canvas = new Canvas(bitmap);
 
-        Bitmap bitmap = Bitmap.createBitmap(206, 130, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-
-        /*Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_staff_bar);
-        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(mutableBitmap);*/
-
-        int[] barValues = {35, 0, 90, 120, 150};
-
-        Paint linePaint = new Paint();
+        //create the paint variable used by the canvas
+        linePaint = new Paint();
         linePaint.setColor(Color.BLACK);
         linePaint.setAntiAlias(true);
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);
 
+        //use drawLine to draw the lines from a start point x,y to an end point x,y
         float startPointY = 32;
         for(int i = 0; i < 5; i++){//5 lines printed
             canvas.drawLine(0, startPointY, horizontalMax, startPointY, linePaint);
             startPointY += 16;
         }
 
-
         //draw vertical lines
         canvas.drawLine(2, 32, 2, startPointY - 16, linePaint);
         canvas.drawLine(207, 32, 207, startPointY - 16, linePaint);
 
+        //update imageViews bitmap
         imageView.setImageBitmap(bitmap);
+    }
+
+    public void DrawNote(ImageView iv, int x, int y){
+        //drawOval(float left, float top, float right, float bottom, Paint paint)
+        canvas.drawCircle (x, y, 5, linePaint);
+        iv.setImageBitmap(bitmap);
     }
 
     @Override
