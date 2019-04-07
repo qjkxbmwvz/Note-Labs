@@ -1,10 +1,28 @@
 package com.example.musicsheet;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Gallery;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -42,7 +60,7 @@ public class MusicSheet extends AppCompatActivity {
     Score score;
     Fraction timeSignature;
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "NewApi"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         posToPitch = new HashMap<>();
@@ -76,23 +94,15 @@ public class MusicSheet extends AppCompatActivity {
 
         final int measureLength = 192 * timeSignature.num / timeSignature.den;
 
-        /*if(horizontalMax <= (horizontalStart + horizontalOffset*staffPositions.length)){
-            textView.setText("Good Vertical");
-        }
-        else{
-            textView.setText("bad");
-            horizontalMax = horizontalStart + horizontalOffset*staffPositions.length;
-        }*/
-
-        /*if(verticalMax <= (verticalStart + verticalOffset*staffPositions[0].length))
-            textView.setText("Good Vertical");*/
-
         for(int i = 0; i < table.getChildCount(); i++){
             //for each row
             row = (TableRow)table.getChildAt(i);
             for(int j = 0; j < row.getChildCount(); j++){
                 //each imageView in row
                 imageView = (ImageView)row.getChildAt(j);
+
+
+                DrawStaff(imageView);
 
                 //create onTouchListener for each ImageView
                 imageView.setOnTouchListener(new View.OnTouchListener() {
@@ -141,18 +151,18 @@ public class MusicSheet extends AppCompatActivity {
 
                             //textView.setText("imageX: " + imageX + " imageY: " + imageY);
                             break;
-                        case MotionEvent.ACTION_UP: {
+                        case MotionEvent.ACTION_UP:
                             byte[] midiEvent = new byte[3];
 
                             midiEvent[0] = (byte) (0x80 | 0);
-                            midiEvent[1] = posToPitch.get(imageY);;
+                            midiEvent[1] = posToPitch.get(imageY);
                             midiEvent[2] = 127;
 
                             // Send the MIDI event to the synthesizer.
                             player.directWrite(midiEvent);
                             // TODO: get measure number (0-indexed) and add it multiplied by 192 to timePosition
                             score.addNote(0, imageX, 48, posToPitch.get(imageY), (byte)127);
-                        }
+                            // TODO: add image of note on position imageX, imageY on staff
                             break;
                         }
                         lastTouchPointY = imageY;
@@ -170,41 +180,41 @@ public class MusicSheet extends AppCompatActivity {
                 });
             }
         }
+    }
 
-        /*btnNew.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ProjectsPage.class));
-            }
-        });*/
+    public void DrawStaff(ImageView iv){
+        //Drawable d = getResources().getDrawable(R.drawable.ic_staff_bar, null);
+        //d.setBounds(imageView.getLeft(), imageView.getTop(), imageView.getRight(), imageView.getBottom());
 
-        /*TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
-        TableRow row = (TableRow)tblLayout.getChildAt(0); // Here get row id depending on number of row
-        Button button = (Button)row.getChildAt(XXX); // get child index on particular row
-        String buttonText = button.getText().toString();*/
+        //drawLine(float startX, float startY, float stopX, float stopY, Paint paint)
+
+        Bitmap bitmap = Bitmap.createBitmap(206, 130, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        /*Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_staff_bar);
+        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(mutableBitmap);*/
+
+        int[] barValues = {35, 0, 90, 120, 150};
+
+        Paint linePaint = new Paint();
+        linePaint.setColor(Color.BLACK);
+        linePaint.setAntiAlias(true);
+        linePaint.setStyle(Paint.Style.STROKE);
+        linePaint.setStrokeWidth(2);
+
+        float startPointY = 32;
+        for(int i = 0; i < 5; i++){//5 lines printed
+            canvas.drawLine(0, startPointY, horizontalMax, startPointY, linePaint);
+            startPointY += 16;
+        }
 
 
-        //run this code for each view you click on
+        //draw vertical lines
+        canvas.drawLine(2, 32, 2, startPointY - 16, linePaint);
+        canvas.drawLine(207, 32, 207, startPointY - 16, linePaint);
 
-
-
-
-        /*goToInstrumentPanel();
-        goToNotePanel();*/
-        /*if (score == null) {
-            ActivityCompat.requestPermissions(MusicSheet.this, new String[] {
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            }, 100);
-            if (score == null) {
-                score = new Score(player);
-                if (ContextCompat.checkSelfPermission(MusicSheet.this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_GRANTED)
-                    score.load();
-            }
-            score.play();
-        }*/
+        imageView.setImageBitmap(bitmap);
     }
 
     @Override
@@ -294,14 +304,11 @@ public class MusicSheet extends AppCompatActivity {
 
     public void restart(View view) { score.resetPlayPos(); }
 
-    //this method requires that the last note be stored
     public void undo(View view){
         //remove last note added
     }
 
     //END BUTTONS---
-
-
 
 /*    //@Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -345,5 +352,40 @@ public class MusicSheet extends AppCompatActivity {
             }
         });
     }*/
+
+/*btnNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, ProjectsPage.class));
+            }
+        });*/
+
+        /*TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
+        TableRow row = (TableRow)tblLayout.getChildAt(0); // Here get row id depending on number of row
+        Button button = (Button)row.getChildAt(XXX); // get child index on particular row
+        String buttonText = button.getText().toString();*/
+
+
+    //run this code for each view you click on
+
+
+
+
+        /*goToInstrumentPanel();
+        goToNotePanel();*/
+        /*if (score == null) {
+            ActivityCompat.requestPermissions(MusicSheet.this, new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            }, 100);
+            if (score == null) {
+                score = new Score(player);
+                if (ContextCompat.checkSelfPermission(MusicSheet.this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED)
+                    score.load();
+            }
+            score.play();
+        }*/
 
 }

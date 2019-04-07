@@ -22,7 +22,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
                 <ImageView
                     android:id="@+id/staffBar0"
@@ -116,13 +117,13 @@
     <LinearLayout
         android:id="@+id/ToolbarLayout"
         android:layout_width="411dp"
-        android:layout_height="105dp"
+        android:layout_height="0dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/musicSheetScroll"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
         app:layout_constraintVertical_bias="0.867">
 
         <ImageButton
@@ -182,13 +183,15 @@
     <TextView
         android:id="@+id/textView"
         android:layout_width="391dp"
-        android:layout_height="337dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
         android:layout_marginTop="96dp"
+        android:layout_marginBottom="164dp"
         android:text="@string/load_button"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/musicSheetScroll"
-        app:layout_constraintHorizontal_bias="0.473"
-        app:layout_constraintStart_toEndOf="@+id/musicSheetScroll"
+        app:layout_constraintBottom_toTopOf="@+id/ToolbarLayout"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
