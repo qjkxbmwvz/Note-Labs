@@ -3,12 +3,23 @@ package com.example.musicsheet;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.hardware.camera2.params.ColorSpaceTransform;
+import android.media.Image;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +29,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.util.HashMap;
 
@@ -32,6 +44,17 @@ public class MusicSheet extends AppCompatActivity {
     Bitmap bitmap;
     Canvas canvas;
     Paint linePaint, fillPaint;
+
+    boolean zooming;
+    boolean initPoint;
+    PointF position;
+    Matrix matrix;
+    BitmapShader bmShader;
+    Paint paint = new Paint(Color.BLACK);
+    Paint bmPaint;
+    Paint outlinePaint;
+    Bitmap screenState;
+    Canvas zoomLoc;
 
     int[][] staffPositions = new int[horizontal][vertical];
 
@@ -57,6 +80,7 @@ public class MusicSheet extends AppCompatActivity {
     Fraction timeSignature;
     HashMap<ImageView, Measure> measures;
     NoteType selectedNoteType;
+
 
     @SuppressLint({"ClickableViewAccessibility", "NewApi"})
     @Override
@@ -104,6 +128,14 @@ public class MusicSheet extends AppCompatActivity {
         score = new Score(player);
         timeSignature = new Fraction(4, 4);
 
+        final ToggleButton zoomButton = (ToggleButton) findViewById(R.id.tempZoomButton);
+        ImageSpan imageSpan = new ImageSpan(this, android.R.drawable.ic_menu_add);
+        SpannableString content = new SpannableString("X");
+        content.setSpan(imageSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        zoomButton.setText(content);
+        zoomButton.setTextOn(content);
+        zoomButton.setTextOff(content);
+
         final int measureLength = 192 * timeSignature.num / timeSignature.den;
 
         int count = 0;
@@ -136,6 +168,16 @@ public class MusicSheet extends AppCompatActivity {
 
                         //textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
+                        //TODO: fix/optimize zoom
+                        zoomInit();  //takes position of last drawStaff
+                        position.x = (int)event.getX(); //same as imageX, imageY
+                        position.y = (int)event.getY();
+
+                        //int scrollHeight = scrollView.getChildAt(0).getHeight();  //screen
+                        //int scrollWidth = scrollView.getChildAt(0).getWidth();
+
+                        zoomLoc = new Canvas(bitmap); //screenState
+
                         switch(event.getAction()){
                         case MotionEvent.ACTION_DOWN: {
                             byte[] midiEvent = new byte[3];
@@ -146,6 +188,13 @@ public class MusicSheet extends AppCompatActivity {
 
                             // Send the MIDI event to the synthesizer.
                             player.directWrite(midiEvent);
+
+                            if(zoomButton.isChecked()){
+                                initPoint = true;
+                                zooming = true;
+                                zoomDraw(zoomLoc);
+                                scrollView.invalidate();
+                            }
                         }
                             break;
                         case MotionEvent.ACTION_MOVE:
@@ -161,6 +210,13 @@ public class MusicSheet extends AppCompatActivity {
 
                                 // Send the MIDI event to the synthesizer.
                                 player.directWrite(midiEvent);
+
+                                if(zoomButton.isChecked()){
+                                    initPoint = true;
+                                    zooming = true;
+                                    zoomDraw(zoomLoc);
+                                    scrollView.invalidate();
+                                }
                             }
 
                             //textView.setText("imageX: " + imageX + " imageY: " + imageY);
@@ -190,6 +246,14 @@ public class MusicSheet extends AppCompatActivity {
                             score.addNote(m.staff, (m.number * 192 + imageX), duration,
                                     posToPitch.get(imageY), (byte) 127);
                             drawNote((ImageView)v, imageX, imageY, selectedNoteType);
+
+                            if(zoomButton.isChecked()){
+                                zooming = false;
+                                //ZoomDraw(canvas);
+                                canvas.drawColor(Color.WHITE);
+                                canvas.drawBitmap(screenState, matrix, bmPaint);
+                                scrollView.invalidate();
+                            }
                         }
                             break;
                         }
@@ -263,6 +327,114 @@ public class MusicSheet extends AppCompatActivity {
         iv.setImageBitmap(previousBitmap);
     }
 
+    public void DrawNote(ImageView iv, int x, int y){
+        //drawOval(float left, float top, float right, float bottom, Paint paint)
+        canvas.drawCircle (x, y, 5, linePaint);
+        iv.setImageBitmap(bitmap);
+    }
+
+    //readies necessary dependencies for zoom
+    //takes last drawStaff for canvas, fix?
+    public void zoomInit(){
+        //bitmap = Bitmap.createBitmap(206, 130, Bitmap.Config.ARGB_8888);
+        //canvas = new Canvas(bitmap);
+
+        position = new PointF();
+        //position.x = e.getX();
+        //position.y = e.getY();
+
+        matrix = new Matrix();
+        screenState = Bitmap.createBitmap(getScreen(scrollView));
+        bmShader = new BitmapShader(screenState, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        bmPaint = new Paint();
+        bmPaint.setShader(bmShader);
+        outlinePaint = new Paint(Color.BLACK);
+        outlinePaint.setStyle(Paint.Style.STROKE);
+
+    }
+
+    //too much drawing?
+    //idea was to keep backup of working bitmap
+    //refresh after MotionEvent
+    //need to redraw staves as well as zoom, if zooming
+    public void zoomRefresh(){
+        screenState = Bitmap.createBitmap(getScreen(scrollView));
+        bmShader = new BitmapShader(screenState, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        bmPaint.setShader(bmShader);
+    }
+
+    //draws enlarged bitmap in circular shape
+    //needs to update as moving position
+    public void zoomDraw(@NonNull Canvas canvas){
+
+        if(zooming) {
+            matrix.reset();
+            matrix.postScale(2f, 2f, position.x, position.y);
+            bmPaint.getShader().setLocalMatrix(matrix);
+            RectF src = new RectF(position.x - 50, position.y - 50, position.x + 50, position.y + 50);
+            RectF dst = new RectF(0, 0, 100, 100);
+            matrix.setRectToRect(src, dst, Matrix.ScaleToFit.CENTER);
+            matrix.postScale(2f, 2f);
+            bmPaint.getShader().setLocalMatrix(matrix);
+
+            //canvas.
+            canvas.drawCircle(103, 50, 100, bmPaint);
+            canvas.drawCircle(position.x, position.y, 100, bmPaint);
+            canvas.drawCircle(position.x - 250, position.y - 250, 10, outlinePaint);
+        }
+        if(initPoint)
+            canvas.drawCircle(position.x, position.y, 10, paint);
+    }
+
+    /*
+    public void zoomSet(ImageView iv){
+        float dipW = 157f;
+        Resources r = getResources();
+        float pxW = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dipW,
+                r.getDisplayMetrics()
+        );
+
+        float dipH = 150f;
+        float pxH = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dipH,
+                r.getDisplayMetrics()
+        );
+
+        screenState = Bitmap.createBitmap((int)dipW, (int)dipH, Bitmap.Config.ARGB_8888); //working variabes 206, 130
+        zoomLoc = new Canvas(screenState);
+        imageview2.setImageBitmap(screenState);
+    }
+    */
+
+    //gets current screen as bitmap
+    public Bitmap getScreen(View view){
+        view.setDrawingCacheEnabled(true);
+        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+        view.buildDrawingCache();
+
+        if(view.getDrawingCache() == null)
+            return null;
+
+        Bitmap screenshot = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        view.destroyDrawingCache();
+        return screenshot;
+    }
+
+    //generates toggle button with custom image
+   /* public void setToggle(){
+        ToggleButton zoomButton = (ToggleButton) findViewById(R.id.tempZoomButton);
+        ImageSpan imageSpan = new ImageSpan(this, android.R.drawable.ic_menu_add);
+        SpannableString content = new SpannableString("X");
+        content.setSpan(imageSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        zoomButton.setText(content);
+        zoomButton.setTextOn(content);
+        zoomButton.setTextOff(content);
+    }
+*/
     @Override
     protected void onResume() {
         super.onResume();
@@ -321,7 +493,8 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    private void goToInstrumentPanel(){
+
+    /*private void goToInstrumentPanel(){
         ImageButton btnInstr = (ImageButton)findViewById(R.id.addInstrumentButton);
         btnInstr.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -330,7 +503,7 @@ public class MusicSheet extends AppCompatActivity {
             }
         });
     }
-
+*/
     private void goToNotePanel(){
         ImageButton btnNote = (ImageButton)findViewById(R.id.noteButton);
         btnNote.setOnClickListener(new View.OnClickListener() {
