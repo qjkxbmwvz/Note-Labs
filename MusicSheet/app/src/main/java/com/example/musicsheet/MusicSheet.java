@@ -34,7 +34,7 @@ import android.widget.ToggleButton;
 import java.util.HashMap;
 
 public class MusicSheet extends AppCompatActivity {
-    enum NoteType { WHOLE, HALF, QUARTER };
+    enum NoteType { WHOLE, HALF, QUARTER }
 
     HashMap<Integer, Byte> posToPitch;
     final int horizontal = 4;
@@ -161,12 +161,12 @@ public class MusicSheet extends AppCompatActivity {
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
 
+                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
+
                         imageX = snapToTime((imageX - horizontalStart), measureLength,
                                             (horizontalMax - horizontalStart),
                                             score.getMeasure(m.staff, m.number, timeSignature));
                         imageY = snapToHeight(imageY, verticalMax, verticalStart, verticalOffset);
-
-                        //textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
                         //TODO: fix/optimize zoom
                         zoomInit();  //takes position of last drawStaff
