@@ -70,8 +70,10 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
         while (tpIt.hasNext()) {
             TimePosition tp = tpIt.next();
             int time = tp.getTime();
-            if (time < startTime)
+            if (time < startTime) {
+                prevTime = time;
                 continue;
+            }
 
             if (time > prevTime) {
                 try {
@@ -90,6 +92,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
                 neIt.next().play();
         }
         running = false;
+        startTime = 0;
     }
 
     @Override
