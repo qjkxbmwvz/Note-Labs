@@ -180,79 +180,79 @@ public class MusicSheet extends AppCompatActivity {
 
                         switch(event.getAction()){
                         case MotionEvent.ACTION_DOWN: {
-                            byte[] midiEvent = new byte[3];
-
-                            midiEvent[0] = (byte) (0x90 | 0);
-                            midiEvent[1] = posToPitch.get(imageY);
-                            midiEvent[2] = 127;
-
-                            // Send the MIDI event to the synthesizer.
-                            player.directWrite(midiEvent);
-
                             if(zoomButton.isChecked()){
                                 initPoint = true;
                                 zooming = true;
                                 zoomDraw(zoomLoc);
                                 scrollView.invalidate();
+                            } else {
+                                byte[] midiEvent = new byte[3];
+
+                                midiEvent[0] = (byte) (0x90 | 0);
+                                midiEvent[1] = posToPitch.get(imageY);
+                                midiEvent[2] = 127;
+
+                                // Send the MIDI event to the synthesizer.
+                                player.directWrite(midiEvent);
                             }
                         }
                             break;
                         case MotionEvent.ACTION_MOVE:
                             if (lastTouchPointY != imageY) {
-                                byte[] midiEvent = new byte[6];
-
-                                midiEvent[0] = (byte) (0x80 | 0);
-                                midiEvent[1] = posToPitch.get(lastTouchPointY);
-                                midiEvent[2] = 127;
-                                midiEvent[3] = (byte) (0x90 | 0);
-                                midiEvent[4] = posToPitch.get(imageY);
-                                midiEvent[5] = 127;
-
-                                // Send the MIDI event to the synthesizer.
-                                player.directWrite(midiEvent);
-
                                 if(zoomButton.isChecked()){
                                     initPoint = true;
                                     zooming = true;
                                     zoomDraw(zoomLoc);
                                     scrollView.invalidate();
+                                } else {
+                                    byte[] midiEvent = new byte[6];
+
+                                    midiEvent[0] = (byte) (0x80 | 0);
+                                    midiEvent[1] = posToPitch.get(lastTouchPointY);
+                                    midiEvent[2] = 127;
+                                    midiEvent[3] = (byte) (0x90 | 0);
+                                    midiEvent[4] = posToPitch.get(imageY);
+                                    midiEvent[5] = 127;
+
+                                    // Send the MIDI event to the synthesizer.
+                                    player.directWrite(midiEvent);
                                 }
                             }
 
                             //textView.setText("imageX: " + imageX + " imageY: " + imageY);
                             break;
                         case MotionEvent.ACTION_UP: {
-                            byte[] midiEvent = new byte[3];
-
-                            midiEvent[0] = (byte) (0x80 | 0);
-                            midiEvent[1] = posToPitch.get(imageY);
-                            midiEvent[2] = 127;
-
-                            // Send the MIDI event to the synthesizer.
-                            player.directWrite(midiEvent);
-
-                            int duration;
-                            switch (selectedNoteType) {
-                            case WHOLE:
-                                duration = 192;
-                                break;
-                            case HALF:
-                                duration =  96;
-                                break;
-                            default:
-                                duration =  48;
-                            }
-
-                            score.addNote(m.staff, (m.number * 192 + imageX), duration,
-                                    posToPitch.get(imageY), (byte) 127);
-                            drawNote((ImageView)v, imageX, imageY, selectedNoteType);
-
                             if(zoomButton.isChecked()){
                                 zooming = false;
-                                //ZoomDraw(canvas);
+                                //zoomDraw(zoomLoc);
                                 canvas.drawColor(Color.WHITE);
                                 canvas.drawBitmap(screenState, matrix, bmPaint);
                                 scrollView.invalidate();
+                            } else {
+                                byte[] midiEvent = new byte[3];
+
+                                midiEvent[0] = (byte) (0x80 | 0);
+                                midiEvent[1] = posToPitch.get(imageY);
+                                midiEvent[2] = 127;
+
+                                // Send the MIDI event to the synthesizer.
+                                player.directWrite(midiEvent);
+
+                                int duration;
+                                switch (selectedNoteType) {
+                                    case WHOLE:
+                                        duration = 192;
+                                        break;
+                                    case HALF:
+                                        duration = 96;
+                                        break;
+                                    default:
+                                        duration = 48;
+                                }
+
+                                score.addNote(m.staff, (m.number * 192 + imageX), duration,
+                                        posToPitch.get(imageY), (byte) 127);
+                                drawNote((ImageView) v, imageX, imageY, selectedNoteType);
                             }
                         }
                             break;
