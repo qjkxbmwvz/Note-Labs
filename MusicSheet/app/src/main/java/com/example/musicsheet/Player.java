@@ -39,20 +39,20 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
 
                 for (Note n : nl) {
                     switch (n.getNoteType()) {
-                        case MELODIC:
-                        case PERCUSSIVE:
-                            if (!times.containsKey(t))
-                                times.put(t, new TimePosition(t));
-                            if (!times.containsKey(t + n.getDuration()))
-                                times.put(t + n.getDuration(),
-                                          new TimePosition(t + n.getDuration()));
-                            times.get(t).addNote(
-                                    new NoteEvent(midiDriver, NoteEvent.EventType.START, i, n));
-                            times.get(t + n.getDuration()).addNote(
-                                    new NoteEvent(midiDriver, NoteEvent.EventType.STOP, i, n));
-                            break;
-                        case REST:
-                            break;
+                    case MELODIC:
+                    case PERCUSSIVE:
+                        if (!times.containsKey(t))
+                            times.put(t, new TimePosition(t));
+                        if (!times.containsKey(t + n.getDuration()))
+                            times.put(t + n.getDuration(),
+                                      new TimePosition(t + n.getDuration()));
+                        times.get(t).addNote(
+                                new NoteEvent(midiDriver, NoteEvent.EventType.START, i, n));
+                        times.get(t + n.getDuration()).addNote(
+                                new NoteEvent(midiDriver, NoteEvent.EventType.STOP, i, n));
+                        break;
+                    case REST:
+                        break;
                     }
                 }
             }

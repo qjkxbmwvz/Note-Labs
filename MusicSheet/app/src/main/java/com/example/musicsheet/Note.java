@@ -1,6 +1,6 @@
 package com.example.musicsheet;
 
-public class Note {
+class Note {
     enum NoteType { MELODIC, PERCUSSIVE, REST }
 
     private NoteType noteType;
@@ -9,16 +9,16 @@ public class Note {
     private byte velocity;
 
     Note(NoteType noteType, int duration, byte pitch, byte velocity) {
-        this.noteType  = noteType;
-        this.duration   = duration;
-        this.pitch      = pitch;
-        this.velocity   = velocity;
+        this.noteType = noteType;
+        this.duration = duration;
+        this.pitch    = pitch;
+        this.velocity = velocity;
     }
 
-    public NoteType getNoteType() { return noteType; }
+    NoteType getNoteType() { return noteType; }
 
-    public int getDuration() { return duration; }
+    int getDuration() { return duration; }
 
-    public byte getPitch()    { return pitch; }
-    public byte getVelocity() { return velocity; }
+    byte getPitch()    { return pitch; }
+    byte getVelocity() { return velocity; }
 }

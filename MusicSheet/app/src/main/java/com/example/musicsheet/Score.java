@@ -22,7 +22,7 @@ class Score {
     private Thread playerThread;
 
     Score(Player player) {
-        tempo = 120;
+        tempo = 60;
         startTime = 0;
         measureCount = 0;
         tracks = new Track[1];
@@ -58,7 +58,7 @@ class Score {
             Iterator<Integer> it = times.iterator();
 
             for (int i = 0; i < ret.length; ++i)
-                ret[i] = it.next();
+                ret[i] = it.next() - measureNum * 192 * timeSignature.num / timeSignature.den;
 
             return ret;
         }

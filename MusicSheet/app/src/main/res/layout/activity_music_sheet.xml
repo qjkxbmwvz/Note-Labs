@@ -117,7 +117,7 @@
     <LinearLayout
         android:id="@+id/ToolbarLayout"
         android:layout_width="411dp"
-        android:layout_height="150dp"
+        android:layout_height="100dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -176,6 +176,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
+            android:onClick="cycleNoteType"
             app:srcCompat="@drawable/ic_note_quarter" />
 
     </LinearLayout>

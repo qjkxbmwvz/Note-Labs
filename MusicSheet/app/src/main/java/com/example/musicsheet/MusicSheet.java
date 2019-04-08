@@ -1,30 +1,17 @@
 package com.example.musicsheet;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
-import android.media.Image;
 import android.os.Bundle;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Gallery;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -35,6 +22,8 @@ import android.widget.TextView;
 import java.util.HashMap;
 
 public class MusicSheet extends AppCompatActivity {
+    enum NoteType { WHOLE, HALF, QUARTER };
+
     HashMap<Integer, Byte> posToPitch;
     final int horizontal = 4;
     final int vertical = 9;
@@ -42,7 +31,7 @@ public class MusicSheet extends AppCompatActivity {
     //Drawing Variables
     Bitmap bitmap;
     Canvas canvas;
-    Paint linePaint;
+    Paint linePaint, fillPaint;
 
     int[][] staffPositions = new int[horizontal][vertical];
 
@@ -54,7 +43,7 @@ public class MusicSheet extends AppCompatActivity {
 
 
     int horizontalStart = 60;
-    int horizontalMax = 720;
+    int horizontalMax = 542;
     int horizontalOffset = (horizontalMax-horizontalStart)/staffPositions.length-1; //hard-coded: splits bar into 4
 
     int verticalStart = 19;
@@ -66,11 +55,15 @@ public class MusicSheet extends AppCompatActivity {
     private Player player = new Player();
     Score score;
     Fraction timeSignature;
+    HashMap<ImageView, Measure> measures;
+    NoteType selectedNoteType;
 
     @SuppressLint({"ClickableViewAccessibility", "NewApi"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         posToPitch = new HashMap<>();
+        measures   = new HashMap<>();
+        selectedNoteType = NoteType.QUARTER;
         posToPitch.put( 19, (byte)83);
         posToPitch.put( 40, (byte)81);
         posToPitch.put( 61, (byte)79);
@@ -88,6 +81,19 @@ public class MusicSheet extends AppCompatActivity {
         posToPitch.put(303, (byte)59);
         posToPitch.put(324, (byte)67);
 
+        //create the paint variables used by the canvas
+        linePaint = new Paint();
+        linePaint.setColor(Color.BLACK);
+        linePaint.setAntiAlias(true);
+        linePaint.setStyle(Paint.Style.STROKE);
+        linePaint.setStrokeWidth(2);
+
+        fillPaint = new Paint();
+        fillPaint.setColor(Color.BLACK);
+        fillPaint.setAntiAlias(true);
+        fillPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        fillPaint.setStrokeWidth(2);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_sheet);
 
@@ -97,9 +103,10 @@ public class MusicSheet extends AppCompatActivity {
 
         score = new Score(player);
         timeSignature = new Fraction(4, 4);
-        score.addMeasure(timeSignature);
 
         final int measureLength = 192 * timeSignature.num / timeSignature.den;
+
+        int count = 0;
 
         for(int i = 0; i < table.getChildCount(); i++){
             //for each row
@@ -107,27 +114,27 @@ public class MusicSheet extends AppCompatActivity {
             for(int j = 0; j < row.getChildCount(); j++){
                 //each imageView in row
                 imageView = (ImageView)row.getChildAt(j);
-                DrawStaff(imageView);
+                drawStaff(imageView);
+                score.addMeasure(timeSignature);
+
+                measures.put(imageView, new Measure(0, count));
+
+                ++count;
 
                 //create onTouchListener for each ImageView
                 imageView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
+                        Measure m = measures.get(v);
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
 
-                        imageX = snapToTime(imageX, measureLength, horizontalMax,
-                                            score.getMeasure(0, 0, timeSignature));
+                        imageX = snapToTime((imageX - horizontalStart), measureLength,
+                                            (horizontalMax - horizontalStart),
+                                            score.getMeasure(m.staff, m.number, timeSignature));
                         imageY = snapToHeight(imageY, verticalMax, verticalStart, verticalOffset);
 
-                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
-
                         //textView.setText("imageX: " + imageX + " imageY: " + imageY);
-
-                        /*if(lastTouchPointX != imageX || lastTouchPointY != imageY)
-                            textView.setText("imageX: " + imageX + " imageY: " + imageY);
-
-                        lastTouchPointX = imageX;*/
 
                         switch(event.getAction()){
                         case MotionEvent.ACTION_DOWN: {
@@ -158,7 +165,7 @@ public class MusicSheet extends AppCompatActivity {
 
                             //textView.setText("imageX: " + imageX + " imageY: " + imageY);
                             break;
-                        case MotionEvent.ACTION_UP:
+                        case MotionEvent.ACTION_UP: {
                             byte[] midiEvent = new byte[3];
 
                             midiEvent[0] = (byte) (0x80 | 0);
@@ -167,10 +174,23 @@ public class MusicSheet extends AppCompatActivity {
 
                             // Send the MIDI event to the synthesizer.
                             player.directWrite(midiEvent);
-                            // TODO: get measure number (0-indexed) and add it multiplied by 192 to timePosition
-                            score.addNote(0, imageX, 48, posToPitch.get(imageY), (byte)127);
-                            // TODO: add image of note on position imageX, imageY on staff
-                            DrawNote((ImageView)v, imageX, imageY);
+
+                            int duration;
+                            switch (selectedNoteType) {
+                            case WHOLE:
+                                duration = 192;
+                                break;
+                            case HALF:
+                                duration =  96;
+                                break;
+                            default:
+                                duration =  48;
+                            }
+
+                            score.addNote(m.staff, (m.number * 192 + imageX), duration,
+                                    posToPitch.get(imageY), (byte) 127);
+                            drawNote((ImageView)v, imageX, imageY, selectedNoteType);
+                        }
                             break;
                         }
                         lastTouchPointY = imageY;
@@ -190,10 +210,7 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-
-
-    public void DrawStaff(ImageView iv){
-
+    public void drawStaff(ImageView iv){
         //takes predetermined width and height dimensions from ImageViews and converts to pixels
         float dipW = 206f;
         Resources r = getResources();
@@ -214,102 +231,35 @@ public class MusicSheet extends AppCompatActivity {
         bitmap = Bitmap.createBitmap((int)dipW, (int)dipH, Bitmap.Config.ARGB_8888); //working variabes 206, 130
         canvas = new Canvas(bitmap);
 
-        //create the paint variable used by the canvas
-        linePaint = new Paint();
-        linePaint.setColor(Color.BLACK);
-        linePaint.setAntiAlias(true);
-        linePaint.setStyle(Paint.Style.STROKE);
-        linePaint.setStrokeWidth(2);
-
         //use drawLine to draw the lines from a start point x,y to an end point x,y
         float startPointY = 32;
         for(int i = 0; i < 5; i++){//5 lines printed
-            canvas.drawLine(0, startPointY, horizontalMax, startPointY, linePaint);
+            canvas.drawLine((0), startPointY, horizontalMax, startPointY, linePaint);
             startPointY += 16;
         }
 
         //draw vertical lines
-        canvas.drawLine(2, 32, 2, startPointY - 16, linePaint);
+        canvas.drawLine(  2, 32,   2, startPointY - 16, linePaint);
         canvas.drawLine(207, 32, 207, startPointY - 16, linePaint);
 
         //update imageViews bitmap
         imageView.setImageBitmap(bitmap);
     }
 
-
     //Draws note on a given X and Y coordinate
     //Currently, it takes the old staff bar image coordinates and manually converts them to xy coordinates that
     //align with the new bitmap staff bars
-    public void DrawNote(ImageView iv, int x, int y){
-
+    public void drawNote(ImageView iv, int x, int y, NoteType nt) {
         Bitmap previousBitmap = ((BitmapDrawable)iv.getDrawable()).getBitmap();
         Canvas newCan = new Canvas(previousBitmap);
 
-        int xActual = 0;
-        int offset = 25;//pushes all x-coordinate notes forward by offset amount
-        int yActual = 8;
-        //take actual imageX/imageY position and transalte each value to match drawn-on staff
-        switch(x){
-            case 0:
-                xActual = 0 + offset;
-                break;
-            case 48:
-                xActual = 50 + offset;
-                break;
-            case 96:
-                xActual = 100 + offset;
-                break;
-            case 144:
-                xActual = 150 + offset;
-                break;
-            default:
-                break;
-        }
-
-        switch(y){
-            case 19:
-                yActual = 0;
-                break;
-            case 40:
-                yActual = 8;
-                break;
-            case 61:
-                yActual = 8*2;
-                break;
-            case 82:
-                yActual = 8*3;
-                break;
-            case 103:
-                yActual = 8*4;
-                break;
-            case 124:
-                yActual = 8*5;
-                break;
-            case 145:
-                yActual = 8*6;
-                break;
-            case 166:
-                yActual = 8*7;
-                break;
-            case 187:
-                yActual = 8*8;
-                break;
-            case 208:
-                yActual = 8*9;
-                break;
-            case 229:
-                yActual = 8*10;
-                break;
-            case 250:
-                yActual = 8*11;
-                break;
-            case 271:
-                yActual = 8*12;
-                break;
-            default:
-                break;
-        }
-        newCan.drawCircle (xActual,yActual, 5, linePaint);
+        int xActual = x * 50 / 48 + 25;
+        int yActual = (y - 19) * 8 / 21 + 8;
+        newCan.drawCircle(xActual, yActual, (5),
+                          (nt == NoteType.WHOLE || nt == NoteType.HALF) ? linePaint : fillPaint);
+        if (nt != NoteType.WHOLE)
+            newCan.drawLine((xActual + 5), yActual, (xActual + 5),
+                            (yActual + (y < 166 ? 56 : -56)), linePaint);
         iv.setImageBitmap(previousBitmap);
     }
 
@@ -329,17 +279,17 @@ public class MusicSheet extends AppCompatActivity {
     //returns nearest point relative to where the user touched
     private int snapToTime(int touchPoint, int fromWidth, int toWidth, int[] points){
         int prevPoint;
-        int nextPoint = 0;
+        int nextPoint = points[0] * toWidth / fromWidth;
 
         //if not in range, snap to nearest edge
         if (touchPoint <= points[0])
             return points[0];
-        else if(touchPoint >= points[points.length - 1])
+        else if(touchPoint >= points[points.length - 1] * toWidth / fromWidth)
             return points[points.length - 1];
         else {
-            for(int i = 0; i < points.length - 1; i++) {
-                prevPoint = points[i]     * toWidth / fromWidth;
-                nextPoint = points[i + 1] * toWidth / fromWidth;
+            for(int i = 1; i < points.length ; i++) {
+                prevPoint = nextPoint;
+                nextPoint = points[i] * toWidth / fromWidth;
 
                 //find specific range
                 if(touchPoint >= prevPoint && touchPoint <= nextPoint){
@@ -348,12 +298,12 @@ public class MusicSheet extends AppCompatActivity {
                     int rightDistance = nextPoint  - touchPoint;
 
                     if(leftDistance < rightDistance)
-                        return prevPoint;
+                        return points[i - 1];
                     else
-                        return nextPoint;
+                        return points[i];
                 }//end range check
             }//end for
-            return nextPoint;
+            return points[points.length - 1];
         }
     }
 
@@ -402,6 +352,20 @@ public class MusicSheet extends AppCompatActivity {
 
     public void undo(View view){
         //remove last note added
+    }
+
+    public void cycleNoteType(View view) {
+        switch (selectedNoteType) {
+        case WHOLE:
+            selectedNoteType = NoteType.HALF;
+            break;
+        case HALF:
+            selectedNoteType = NoteType.QUARTER;
+            break;
+        case QUARTER:
+            selectedNoteType = NoteType.WHOLE;
+            break;
+        }
     }
 
     //END BUTTONS---
