@@ -71,7 +71,7 @@ public class MusicSheet extends AppCompatActivity {
 
     int verticalStart = 19;
     int verticalOffset = 21; //hard-coded: eye-balled the distance between each bar lol
-    int verticalMax = 324;
+    int verticalMax = 334;
 
     int lastTouchPointX = 0, lastTouchPointY = 0;
 
@@ -101,9 +101,9 @@ public class MusicSheet extends AppCompatActivity {
         posToPitch.put(229, (byte)65);
         posToPitch.put(250, (byte)64);
         posToPitch.put(271, (byte)62);
-        posToPitch.put(282, (byte)60);
-        posToPitch.put(303, (byte)59);
-        posToPitch.put(324, (byte)67);
+        posToPitch.put(292, (byte)60);
+        posToPitch.put(313, (byte)59);
+        posToPitch.put(334, (byte)57);
 
         //create the paint variables used by the canvas
         linePaint = new Paint();
@@ -161,7 +161,7 @@ public class MusicSheet extends AppCompatActivity {
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
 
-                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
+                        //textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
                         imageX = snapToTime((imageX - horizontalStart), measureLength,
                                             (horizontalMax - horizontalStart),

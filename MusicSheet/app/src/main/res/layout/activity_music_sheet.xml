@@ -154,7 +154,7 @@
             android:onClick="restart"
             app:srcCompat="@android:drawable/ic_media_previous" />
 
-        <ImageButton
+        <!--<ImageButton
             android:id="@+id/undoButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
@@ -168,18 +168,18 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
-            app:srcCompat="@android:drawable/ic_menu_add" />
+            app:srcCompat="@android:drawable/ic_menu_add" />-->
 
         <ToggleButton
             android:id="@+id/tempZoomButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="ToggleButton" />
 
         <ImageButton
             android:id="@+id/noteButton"
-            android:layout_width="68dp"
+            android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
@@ -196,7 +196,7 @@
         android:layout_marginLeft="32dp"
         android:layout_marginTop="96dp"
         android:layout_marginBottom="164dp"
-        android:text="@string/load_button"
+        android:text=""
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/ToolbarLayout"
         app:layout_constraintStart_toStartOf="parent"
