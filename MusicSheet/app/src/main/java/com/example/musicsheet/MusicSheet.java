@@ -238,7 +238,11 @@ public class MusicSheet extends AppCompatActivity {
                                 // Send the MIDI event to the synthesizer.
                                 player.directWrite(midiEvent);
 
+                                NoteType actualNoteType = selectedNoteType;
+                                int gottenDur = score.durationAtTime(m.staff,
+                                                                     (m.number * 192 + imageX));
                                 int duration;
+
                                 switch (selectedNoteType) {
                                     case WHOLE:
                                         duration = 192;
@@ -250,9 +254,23 @@ public class MusicSheet extends AppCompatActivity {
                                         duration = 48;
                                 }
 
-                                score.addNote(m.staff, (m.number * 192 + imageX), duration,
-                                        posToPitch.get(imageY), (byte) 127);
-                                drawNote((ImageView) v, imageX, imageY, selectedNoteType);
+                                if (gottenDur != 0 && gottenDur != duration)
+                                    switch (gottenDur) {
+                                        case 192:
+                                            actualNoteType = NoteType.WHOLE;
+                                            break;
+                                        case 96:
+                                            actualNoteType = NoteType.HALF;
+                                            break;
+                                        default:
+                                            actualNoteType = NoteType.QUARTER;
+                                    }
+
+                                score.addNote(m.staff, (m.number * 192 + imageX),
+                                              gottenDur == 0 ? duration : gottenDur,
+                                              posToPitch.get(imageY), (byte) 127);
+
+                                drawNote((ImageView) v, imageX, imageY, actualNoteType);
                             }
                         }
                             break;

@@ -49,6 +49,13 @@ class Score {
         ++measureCount;
     }
 
+    int durationAtTime(int track, int timePosition) {
+        if (tracks[track].checkNote(timePosition).getFirst().getNoteType() != Note.NoteType.REST)
+            return tracks[track].checkNote(timePosition).getFirst().getDuration();
+        else
+            return 0;
+    }
+
     int[] getMeasure(int track, int measureNum, Fraction timeSignature) {
         if (measureNum >= measureCount)
             throw new IndexOutOfBoundsException();

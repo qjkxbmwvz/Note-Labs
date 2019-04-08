@@ -46,6 +46,13 @@ class Track {
             notes.get(time).add(new Note(Note.NoteType.REST, 0, (byte)0, (byte)0));
     }
 
+    LinkedList<Note> checkNote(int time) {
+        if (notes.containsKey(time))
+            return notes.get(time);
+        else
+            return null;
+    }
+
     TreeSet<Integer> getMeasure(int measureNum, Fraction timeSignature) {
         int startPoint = measureNum * 192 * timeSignature.num / timeSignature.den;
         int endPoint   = startPoint + 192 * timeSignature.num / timeSignature.den;
