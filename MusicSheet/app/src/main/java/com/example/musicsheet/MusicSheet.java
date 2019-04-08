@@ -16,10 +16,12 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Gallery;
@@ -107,21 +109,20 @@ public class MusicSheet extends AppCompatActivity {
                 imageView = (ImageView)row.getChildAt(j);
                 DrawStaff(imageView);
 
-
                 //create onTouchListener for each ImageView
                 imageView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         int imageX = (int)event.getX();
                         int imageY = (int)event.getY();
-                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
-                        DrawNote(imageView, imageX, imageY);
 
                         imageX = snapToTime(imageX, measureLength, horizontalMax,
                                             score.getMeasure(0, 0, timeSignature));
                         imageY = snapToHeight(imageY, verticalMax, verticalStart, verticalOffset);
 
+                        textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
+                        //textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
                         /*if(lastTouchPointX != imageX || lastTouchPointY != imageY)
                             textView.setText("imageX: " + imageX + " imageY: " + imageY);
@@ -169,7 +170,7 @@ public class MusicSheet extends AppCompatActivity {
                             // TODO: get measure number (0-indexed) and add it multiplied by 192 to timePosition
                             score.addNote(0, imageX, 48, posToPitch.get(imageY), (byte)127);
                             // TODO: add image of note on position imageX, imageY on staff
-
+                            DrawNote((ImageView)v, imageX, imageY);
                             break;
                         }
                         lastTouchPointY = imageY;
@@ -189,10 +190,28 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
+
+
     public void DrawStaff(ImageView iv){
 
-        //create bitmap and link to canvas (bitmap is a grid/matrix of pixels, canvas lets you change the pixels)
-        bitmap = Bitmap.createBitmap(206, 130, Bitmap.Config.ARGB_8888); //working variabes 206, 130
+        //takes predetermined width and height dimensions from ImageViews and converts to pixels
+        float dipW = 206f;
+        Resources r = getResources();
+        float pxW = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dipW,
+                r.getDisplayMetrics()
+        );
+
+        float dipH = 130f;
+        float pxH = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dipH,
+                r.getDisplayMetrics()
+        );
+
+        //pretty sure it doesnt work tho haha
+        bitmap = Bitmap.createBitmap((int)dipW, (int)dipH, Bitmap.Config.ARGB_8888); //working variabes 206, 130
         canvas = new Canvas(bitmap);
 
         //create the paint variable used by the canvas
@@ -217,10 +236,81 @@ public class MusicSheet extends AppCompatActivity {
         imageView.setImageBitmap(bitmap);
     }
 
+
+    //Draws note on a given X and Y coordinate
+    //Currently, it takes the old staff bar image coordinates and manually converts them to xy coordinates that
+    //align with the new bitmap staff bars
     public void DrawNote(ImageView iv, int x, int y){
-        //drawOval(float left, float top, float right, float bottom, Paint paint)
-        canvas.drawCircle (x, y, 5, linePaint);
-        iv.setImageBitmap(bitmap);
+
+        Bitmap previousBitmap = ((BitmapDrawable)iv.getDrawable()).getBitmap();
+        Canvas newCan = new Canvas(previousBitmap);
+
+        int xActual = 0;
+        int offset = 25;//pushes all x-coordinate notes forward by offset amount
+        int yActual = 8;
+        //take actual imageX/imageY position and transalte each value to match drawn-on staff
+        switch(x){
+            case 0:
+                xActual = 0 + offset;
+                break;
+            case 48:
+                xActual = 50 + offset;
+                break;
+            case 96:
+                xActual = 100 + offset;
+                break;
+            case 144:
+                xActual = 150 + offset;
+                break;
+            default:
+                break;
+        }
+
+        switch(y){
+            case 19:
+                yActual = 0;
+                break;
+            case 40:
+                yActual = 8;
+                break;
+            case 61:
+                yActual = 8*2;
+                break;
+            case 82:
+                yActual = 8*3;
+                break;
+            case 103:
+                yActual = 8*4;
+                break;
+            case 124:
+                yActual = 8*5;
+                break;
+            case 145:
+                yActual = 8*6;
+                break;
+            case 166:
+                yActual = 8*7;
+                break;
+            case 187:
+                yActual = 8*8;
+                break;
+            case 208:
+                yActual = 8*9;
+                break;
+            case 229:
+                yActual = 8*10;
+                break;
+            case 250:
+                yActual = 8*11;
+                break;
+            case 271:
+                yActual = 8*12;
+                break;
+            default:
+                break;
+        }
+        newCan.drawCircle (xActual,yActual, 5, linePaint);
+        iv.setImageBitmap(previousBitmap);
     }
 
     @Override
