@@ -8,7 +8,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeSet;
@@ -56,16 +56,19 @@ class Score {
             return 0;
     }
 
-    int[] getMeasure(int track, int measureNum, Fraction timeSignature) {
+    ArrayList<Pair<Integer, LinkedList<Note>>> getMeasure(int track, int measureNum, Fraction timeSignature) {
         if (measureNum >= measureCount)
             throw new IndexOutOfBoundsException();
         else {
-            TreeSet<Integer> times = tracks[track].getMeasure(measureNum, timeSignature);
-            int[] ret = new int[times.size()];
-            Iterator<Integer> it = times.iterator();
+            TreeSet<Pair<Integer, LinkedList<Note>>> times
+                    = tracks[track].getMeasure(measureNum, timeSignature);
+            ArrayList<Pair<Integer, LinkedList<Note>>> ret = new ArrayList<>();
 
-            for (int i = 0; i < ret.length; ++i)
-                ret[i] = it.next() - measureNum * 192 * timeSignature.num / timeSignature.den;
+            for (Pair<Integer, LinkedList<Note>> p : times) {
+                ret.add(new Pair<>(
+                        p.first - measureNum * 192 * timeSignature.num / timeSignature.den,
+                        p.second));
+            }
 
             return ret;
         }
@@ -91,9 +94,12 @@ class Score {
 
     void resetPlayPos() { startTime = 0; }
 
-    void save() {
+    void save(String filename) {
         try {
-            File out = new File(Environment.getExternalStorageDirectory() + "/test.nl");
+            if (!filename.endsWith(".nl"))
+                filename += ".nl";
+
+            File out = new File((Environment.getExternalStorageDirectory() + "/" + filename));
             DataOutputStream os = new DataOutputStream(new FileOutputStream(out, false));
 
             os.writeInt(tempo);
@@ -122,11 +128,13 @@ class Score {
         } catch (Exception ignored) {}
     }
 
-    void load() {
+    void load(String filename) {
         try {
-            File in = new File(Environment.getExternalStorageDirectory() + "/test.nl");
+            File in = new File((Environment.getExternalStorageDirectory() + "/" + filename));
             DataInputStream is = new DataInputStream(new FileInputStream(in));
             byte[] event = new byte[2];
+
+            int maxTime = 0;
 
             tempo = is.readInt();
             byte il = is.readByte();
@@ -145,6 +153,8 @@ class Score {
                     Note.NoteType noteType = Note.NoteType.values()[is.readInt()];
 
                     int duration = is.readInt();
+                    if (time + duration > maxTime)
+                        maxTime = time + duration;
 
                     byte pitch    = is.readByte();
                     byte velocity = is.readByte();
@@ -152,6 +162,9 @@ class Score {
                 }
             }
             is.close();
+            measureCount = maxTime / 192;
+            if (maxTime % 192 != 0)
+                ++measureCount;
         } catch (Exception ignored) {}
     }
 }

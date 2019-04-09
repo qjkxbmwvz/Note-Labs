@@ -2,8 +2,7 @@ package com.example.musicsheet;
 
 import android.util.Pair;
 
-import java.security.InvalidKeyException;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
@@ -53,14 +52,19 @@ class Track {
             return null;
     }
 
-    TreeSet<Integer> getMeasure(int measureNum, Fraction timeSignature) {
+    TreeSet<Pair<Integer, LinkedList<Note>>> getMeasure(int measureNum, Fraction timeSignature) {
         int startPoint = measureNum * 192 * timeSignature.num / timeSignature.den;
         int endPoint   = startPoint + 192 * timeSignature.num / timeSignature.den;
-        TreeSet<Integer> ret = new TreeSet<>();
+        TreeSet<Pair<Integer, LinkedList<Note>>> ret
+                = new TreeSet<>(new Comparator<Pair<Integer, LinkedList<Note>>>() {
+            @Override
+            public int compare(Pair<Integer, LinkedList<Note>> a,
+                               Pair<Integer, LinkedList<Note>> b) { return a.first - b.first; }
+        });
 
         for (int key : notes.keySet())
             if (key >= startPoint && key < endPoint)
-                ret.add(key);
+                ret.add(new Pair<>(key, notes.get(key)));
             else if (key >= endPoint)
                 break;
 

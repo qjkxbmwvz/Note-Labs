@@ -186,6 +186,14 @@
             android:onClick="cycleNoteType"
             app:srcCompat="@drawable/ic_note_quarter" />
 
+        <ImageButton
+            android:id="@+id/saveButton"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/todo"
+            android:onClick="save" />
+
     </LinearLayout>
 
     <TextView

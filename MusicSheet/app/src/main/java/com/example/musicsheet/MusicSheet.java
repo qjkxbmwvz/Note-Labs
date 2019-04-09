@@ -1,6 +1,8 @@
 package com.example.musicsheet;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -12,17 +14,20 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.hardware.camera2.params.ColorSpaceTransform;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
+import android.util.Pair;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -31,7 +36,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class MusicSheet extends AppCompatActivity {
     enum NoteType { WHOLE, HALF, QUARTER }
@@ -67,7 +74,6 @@ public class MusicSheet extends AppCompatActivity {
 
     int horizontalStart = 60;
     int horizontalMax = 542;
-    int horizontalOffset = (horizontalMax-horizontalStart)/staffPositions.length-1; //hard-coded: splits bar into 4
 
     int verticalStart = 19;
     int verticalOffset = 21; //hard-coded: eye-balled the distance between each bar lol
@@ -80,7 +86,6 @@ public class MusicSheet extends AppCompatActivity {
     Fraction timeSignature;
     HashMap<ImageView, Measure> measures;
     NoteType selectedNoteType;
-
 
     @SuppressLint({"ClickableViewAccessibility", "NewApi"})
     @Override
@@ -105,6 +110,24 @@ public class MusicSheet extends AppCompatActivity {
         posToPitch.put(313, (byte)59);
         posToPitch.put(334, (byte)57);
 
+        HashMap<Byte, Integer> pitchToPos = new HashMap<>();
+        pitchToPos.put((byte)83,  19);
+        pitchToPos.put((byte)81,  40);
+        pitchToPos.put((byte)79,  61);
+        pitchToPos.put((byte)77,  82);
+        pitchToPos.put((byte)76, 103);
+        pitchToPos.put((byte)74, 124);
+        pitchToPos.put((byte)72, 145);
+        pitchToPos.put((byte)71, 166);
+        pitchToPos.put((byte)69, 187);
+        pitchToPos.put((byte)67, 208);
+        pitchToPos.put((byte)65, 229);
+        pitchToPos.put((byte)64, 250);
+        pitchToPos.put((byte)62, 271);
+        pitchToPos.put((byte)60, 292);
+        pitchToPos.put((byte)59, 313);
+        pitchToPos.put((byte)57, 334);
+
         //create the paint variables used by the canvas
         linePaint = new Paint();
         linePaint.setColor(Color.BLACK);
@@ -126,6 +149,15 @@ public class MusicSheet extends AppCompatActivity {
         table = findViewById(R.id.staffs);
 
         score = new Score(player);
+        boolean newScore = true;
+
+        Bundle extras = getIntent().getExtras();
+
+        if (extras != null) {
+            score.load(extras.getString("filename"));
+            newScore = false;
+        }
+
         timeSignature = new Fraction(4, 4);
 
         final ToggleButton zoomButton = (ToggleButton) findViewById(R.id.tempZoomButton);
@@ -147,7 +179,30 @@ public class MusicSheet extends AppCompatActivity {
                 //each imageView in row
                 imageView = (ImageView)row.getChildAt(j);
                 drawStaff(imageView);
-                score.addMeasure(timeSignature);
+                if (newScore)
+                    score.addMeasure(timeSignature);
+                else {
+                    ArrayList<Pair<Integer, LinkedList<Note>>> measure
+                            = score.getMeasure(0,  count, timeSignature);
+                    for (Pair<Integer, LinkedList<Note>> p : measure) {
+                        NoteType noteType;
+
+                        switch (p.second.getFirst().getDuration()) {
+                            case 192:
+                                noteType = NoteType.WHOLE;
+                                break;
+                            case 96:
+                                noteType = NoteType.HALF;
+                                break;
+                            default:
+                                noteType = NoteType.QUARTER;
+                        }
+
+                        for (Note n : p.second) {
+                            drawNote(imageView, p.first, pitchToPos.get(n.getPitch()), noteType);
+                        }
+                    }
+                }
 
                 measures.put(imageView, new Measure(0, count));
 
@@ -157,134 +212,137 @@ public class MusicSheet extends AppCompatActivity {
                 imageView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-                        Measure m = measures.get(v);
-                        int imageX = (int)event.getX();
-                        int imageY = (int)event.getY();
-
-                        //textView.setText("imageX: " + imageX + " imageY: " + imageY);
-
-                        imageX = snapToTime((imageX - horizontalStart), measureLength,
-                                            (horizontalMax - horizontalStart),
-                                            score.getMeasure(m.staff, m.number, timeSignature));
-                        imageY = snapToHeight(imageY, verticalMax, verticalStart, verticalOffset);
-
-                        //TODO: fix/optimize zoom
-                        zoomInit();  //takes position of last drawStaff
-                        position.x = (int)event.getX(); //same as imageX, imageY
-                        position.y = (int)event.getY();
-
-                        //int scrollHeight = scrollView.getChildAt(0).getHeight();  //screen
-                        //int scrollWidth = scrollView.getChildAt(0).getWidth();
-
-                        zoomLoc = new Canvas(bitmap); //screenState
-
-                        switch(event.getAction()){
-                        case MotionEvent.ACTION_DOWN: {
-                            if(zoomButton.isChecked()){
-                                initPoint = true;
-                                zooming = true;
-                                zoomDraw(zoomLoc);
-                                scrollView.invalidate();
-                            } else {
-                                byte[] midiEvent = new byte[3];
-
-                                midiEvent[0] = (byte) (0x90 | 0);
-                                midiEvent[1] = posToPitch.get(imageY);
-                                midiEvent[2] = 127;
-
-                                // Send the MIDI event to the synthesizer.
-                                player.directWrite(midiEvent);
-                            }
-                        }
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            if (lastTouchPointY != imageY) {
-                                if(zoomButton.isChecked()){
-                                    initPoint = true;
-                                    zooming = true;
-                                    zoomDraw(zoomLoc);
-                                    scrollView.invalidate();
-                                } else {
-                                    byte[] midiEvent = new byte[6];
-
-                                    midiEvent[0] = (byte) (0x80 | 0);
-                                    midiEvent[1] = posToPitch.get(lastTouchPointY);
-                                    midiEvent[2] = 127;
-                                    midiEvent[3] = (byte) (0x90 | 0);
-                                    midiEvent[4] = posToPitch.get(imageY);
-                                    midiEvent[5] = 127;
-
-                                    // Send the MIDI event to the synthesizer.
-                                    player.directWrite(midiEvent);
-                                }
-                            }
+                        if (!player.running) {
+                            Measure m = measures.get(v);
+                            int imageX = (int) event.getX();
+                            int imageY = (int) event.getY();
 
                             //textView.setText("imageX: " + imageX + " imageY: " + imageY);
-                            break;
-                        case MotionEvent.ACTION_UP: {
-                            if(zoomButton.isChecked()){
-                                zooming = false;
-                                //zoomDraw(zoomLoc);
-                                canvas.drawColor(Color.WHITE);
-                                canvas.drawBitmap(screenState, matrix, bmPaint);
-                                scrollView.invalidate();
-                            } else {
-                                byte[] midiEvent = new byte[3];
 
-                                midiEvent[0] = (byte) (0x80 | 0);
-                                midiEvent[1] = posToPitch.get(imageY);
-                                midiEvent[2] = 127;
+                            imageX = snapToTime((imageX - horizontalStart), measureLength,
+                                                (horizontalMax - horizontalStart),
+                                                score.getMeasure(m.staff, m.number, timeSignature));
+                            imageY = snapToHeight(imageY, verticalMax,
+                                                  verticalStart, verticalOffset);
 
-                                // Send the MIDI event to the synthesizer.
-                                player.directWrite(midiEvent);
+                            //TODO: fix/optimize zoom
+                            zoomInit();  //takes position of last drawStaff
+                            position.x = (int) event.getX(); //same as imageX, imageY
+                            position.y = (int) event.getY();
 
-                                NoteType actualNoteType = selectedNoteType;
-                                int gottenDur = score.durationAtTime(m.staff,
-                                                                     (m.number * 192 + imageX));
-                                int duration;
+                            //int scrollHeight = scrollView.getChildAt(0).getHeight();  //screen
+                            //int scrollWidth = scrollView.getChildAt(0).getWidth();
 
-                                switch (selectedNoteType) {
-                                    case WHOLE:
-                                        duration = 192;
-                                        break;
-                                    case HALF:
-                                        duration = 96;
-                                        break;
-                                    default:
-                                        duration = 48;
+                            zoomLoc = new Canvas(bitmap); //screenState
+
+                            switch (event.getAction()) {
+                                case MotionEvent.ACTION_DOWN: {
+                                    if (zoomButton.isChecked()) {
+                                        initPoint = true;
+                                        zooming = true;
+                                        zoomDraw(zoomLoc);
+                                        scrollView.invalidate();
+                                    } else {
+                                        byte[] midiEvent = new byte[3];
+
+                                        midiEvent[0] = (byte) (0x90 | 0);
+                                        midiEvent[1] = posToPitch.get(imageY);
+                                        midiEvent[2] = 127;
+
+                                        // Send the MIDI event to the synthesizer.
+                                        player.directWrite(midiEvent);
+                                    }
                                 }
+                                break;
+                                case MotionEvent.ACTION_MOVE:
+                                    if (lastTouchPointY != imageY) {
+                                        if (zoomButton.isChecked()) {
+                                            initPoint = true;
+                                            zooming = true;
+                                            zoomDraw(zoomLoc);
+                                            scrollView.invalidate();
+                                        } else {
+                                            byte[] midiEvent = new byte[6];
 
-                                if (gottenDur != 0 && gottenDur != duration)
-                                    switch (gottenDur) {
-                                        case 192:
-                                            actualNoteType = NoteType.WHOLE;
-                                            break;
-                                        case 96:
-                                            actualNoteType = NoteType.HALF;
-                                            break;
-                                        default:
-                                            actualNoteType = NoteType.QUARTER;
+                                            midiEvent[0] = (byte) (0x80 | 0);
+                                            midiEvent[1] = posToPitch.get(lastTouchPointY);
+                                            midiEvent[2] = 127;
+                                            midiEvent[3] = (byte) (0x90 | 0);
+                                            midiEvent[4] = posToPitch.get(imageY);
+                                            midiEvent[5] = 127;
+
+                                            // Send the MIDI event to the synthesizer.
+                                            player.directWrite(midiEvent);
+                                        }
                                     }
 
-                                score.addNote(m.staff, (m.number * 192 + imageX),
-                                              gottenDur == 0 ? duration : gottenDur,
-                                              posToPitch.get(imageY), (byte) 127);
+                                    //textView.setText("imageX: " + imageX + " imageY: " + imageY);
+                                    break;
+                                case MotionEvent.ACTION_UP: {
+                                    if (zoomButton.isChecked()) {
+                                        zooming = false;
+                                        //zoomDraw(zoomLoc);
+                                        canvas.drawColor(Color.WHITE);
+                                        canvas.drawBitmap(screenState, matrix, bmPaint);
+                                        scrollView.invalidate();
+                                    } else {
+                                        byte[] midiEvent = new byte[3];
 
-                                drawNote((ImageView) v, imageX, imageY, actualNoteType);
+                                        midiEvent[0] = (byte) (0x80 | 0);
+                                        midiEvent[1] = posToPitch.get(imageY);
+                                        midiEvent[2] = 127;
+
+                                        // Send the MIDI event to the synthesizer.
+                                        player.directWrite(midiEvent);
+
+                                        NoteType actualNoteType = selectedNoteType;
+                                        int gottenDur = score.durationAtTime(m.staff,
+                                                (m.number * 192 + imageX));
+                                        int duration;
+
+                                        switch (selectedNoteType) {
+                                            case WHOLE:
+                                                duration = 192;
+                                                break;
+                                            case HALF:
+                                                duration = 96;
+                                                break;
+                                            default:
+                                                duration = 48;
+                                        }
+
+                                        if (gottenDur != 0 && gottenDur != duration)
+                                            switch (gottenDur) {
+                                                case 192:
+                                                    actualNoteType = NoteType.WHOLE;
+                                                    break;
+                                                case 96:
+                                                    actualNoteType = NoteType.HALF;
+                                                    break;
+                                                default:
+                                                    actualNoteType = NoteType.QUARTER;
+                                            }
+
+                                        score.addNote(m.staff, (m.number * 192 + imageX),
+                                                      gottenDur == 0 ? duration : gottenDur,
+                                                      posToPitch.get(imageY), (byte) 127);
+
+                                        drawNote((ImageView) v, imageX, imageY, actualNoteType);
+                                    }
+                                }
+                                break;
                             }
-                        }
-                            break;
-                        }
-                        lastTouchPointY = imageY;
+                            lastTouchPointY = imageY;
 
-                        //textView.setText("imageX: " + imageX + " imageY: " + imageY);
+                            //textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
                        /* if(imageX < 0)
                             textView.setText("Touch: " + (int)event.getX());
                         else
                             textView.setText("imageX: " + imageX + " imageY: " + imageY + " " + v.toString());*/
 
-                        //textView.setText("sX:"+ scrollX + "sY:" + scrollY + " iX:" + imageX + "iY:" + imageY + " lX:" + localX + "lY:" + localY);
+                            //textView.setText("sX:"+ scrollX + "sY:" + scrollY + " iX:" + imageX + "iY:" + imageY + " lX:" + localX + "lY:" + localY);
+                        }
                         return true;
                     }
                 });
@@ -340,15 +398,9 @@ public class MusicSheet extends AppCompatActivity {
         newCan.drawCircle(xActual, yActual, (5),
                           (nt == NoteType.WHOLE || nt == NoteType.HALF) ? linePaint : fillPaint);
         if (nt != NoteType.WHOLE)
-            newCan.drawLine((xActual + 5), yActual, (xActual + 5),
+            newCan.drawLine((xActual + (y < 166 ? -5 : 5)), yActual, (xActual + (y < 166 ? -5 : 5)),
                             (yActual + (y < 166 ? 56 : -56)), linePaint);
         iv.setImageBitmap(previousBitmap);
-    }
-
-    public void DrawNote(ImageView iv, int x, int y){
-        //drawOval(float left, float top, float right, float bottom, Paint paint)
-        canvas.drawCircle (x, y, 5, linePaint);
-        iv.setImageBitmap(bitmap);
     }
 
     //readies necessary dependencies for zoom
@@ -384,7 +436,6 @@ public class MusicSheet extends AppCompatActivity {
     //draws enlarged bitmap in circular shape
     //needs to update as moving position
     public void zoomDraw(@NonNull Canvas canvas){
-
         if(zooming) {
             matrix.reset();
             matrix.postScale(2f, 2f, position.x, position.y);
@@ -467,19 +518,20 @@ public class MusicSheet extends AppCompatActivity {
 
 
     //returns nearest point relative to where the user touched
-    private int snapToTime(int touchPoint, int fromWidth, int toWidth, int[] points){
+    private int snapToTime(int touchPoint, int fromWidth, int toWidth,
+                           ArrayList<Pair<Integer, LinkedList<Note>>> points){
         int prevPoint;
-        int nextPoint = points[0] * toWidth / fromWidth;
+        int nextPoint = points.get(0).first * toWidth / fromWidth;
 
         //if not in range, snap to nearest edge
-        if (touchPoint <= points[0])
-            return points[0];
-        else if(touchPoint >= points[points.length - 1] * toWidth / fromWidth)
-            return points[points.length - 1];
+        if (touchPoint <= points.get(0).first)
+            return points.get(0).first;
+        else if(touchPoint >= points.get(points.size() - 1).first * toWidth / fromWidth)
+            return points.get(points.size() - 1).first;
         else {
-            for(int i = 1; i < points.length ; i++) {
+            for(int i = 1; i < points.size() ; i++) {
                 prevPoint = nextPoint;
-                nextPoint = points[i] * toWidth / fromWidth;
+                nextPoint = points.get(i).first * toWidth / fromWidth;
 
                 //find specific range
                 if(touchPoint >= prevPoint && touchPoint <= nextPoint){
@@ -488,12 +540,12 @@ public class MusicSheet extends AppCompatActivity {
                     int rightDistance = nextPoint  - touchPoint;
 
                     if(leftDistance < rightDistance)
-                        return points[i - 1];
+                        return points.get(i - 1).first;
                     else
-                        return points[i];
+                        return points.get(i).first;
                 }//end range check
             }//end for
-            return points[points.length - 1];
+            return points.get(points.size() - 1).first;
         }
     }
 
@@ -559,6 +611,37 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
+    public void save(View view) {
+        ActivityCompat.requestPermissions(MusicSheet.this, new String[] {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        }, 100);
+
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptView = li.inflate(R.layout.save_prompt, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        alertDialogBuilder.setView(promptView);
+
+        final EditText userInput = (EditText)promptView.findViewById(R.id.editTextDialogUserInput);
+
+        alertDialogBuilder.setCancelable(false).setPositiveButton(("OK"),
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                score.save(userInput.getText().toString());
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        alertDialog.show();
+    }
+
     //END BUTTONS---
 
 /*    //@Override
@@ -603,13 +686,6 @@ public class MusicSheet extends AppCompatActivity {
             }
         });
     }*/
-
-/*btnNew.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ProjectsPage.class));
-            }
-        });*/
 
         /*TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
         TableRow row = (TableRow)tblLayout.getChildAt(0); // Here get row id depending on number of row

@@ -1,7 +1,6 @@
 package com.example.musicsheet;
 
 import android.util.Log;
-import android.util.Pair;
 
 import org.billthefarmer.mididriver.MidiDriver;
 
