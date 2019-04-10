@@ -2,6 +2,7 @@ package com.example.musicsheet;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -27,6 +28,7 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -62,9 +64,7 @@ public class MusicSheet extends AppCompatActivity {
 
     ScrollView scrollView;
     TableLayout table;
-    ImageView imageView;
     TextView textView;
-    TableRow row;
 
 
     int horizontalStart = 60;
@@ -163,17 +163,44 @@ public class MusicSheet extends AppCompatActivity {
         zoomButton.setTextOn(content);
         zoomButton.setTextOff(content);
 
+        final ToggleButton dotButton = findViewById(R.id.dotButton);
+
         final int measureLength = 192 * timeSignature.num / timeSignature.den;
 
         int count = 0;
 
-        for(int i = 0; i < table.getChildCount(); i++){
+        Context context = getApplicationContext();
+
+        int height = 4;
+        boolean odd = false;
+
+        if (!newScore) {
+            height = score.getMeasureCount() / 2;
+            odd = score.getMeasureCount() % 2 != 0;
+        }
+
+        for(int i = 0; i < (odd ? height + 1 : height); i++) {
             //for each row
-            row = (TableRow)table.getChildAt(i);
-            for(int j = 0; j < row.getChildCount(); j++){
+            TableRow tr = new TableRow(context);
+
+            tr.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT));
+
+            for(int j = 0; j < (odd && i == height ? 1 : 2); j++) {
                 //each imageView in row
-                imageView = (ImageView)row.getChildAt(j);
-                drawStaff(imageView);
+                ImageView iv = new ImageView(context);
+
+                TableRow.LayoutParams lp = new TableRow.LayoutParams();
+
+                iv.setLayoutParams(lp);
+
+                iv.getLayoutParams().height
+                        = (int)(130 * context.getResources().getDisplayMetrics().density);
+                iv.getLayoutParams().width
+                        = (int)(206 * context.getResources().getDisplayMetrics().density);
+                iv.setScaleType(ImageView.ScaleType.FIT_XY);
+
+                drawStaff(iv);
+
                 if (newScore)
                     score.addMeasure(timeSignature);
                 else {
@@ -210,23 +237,23 @@ public class MusicSheet extends AppCompatActivity {
                                     noteDur = NoteDur.EIGHTH;
                             }
 
-                            for (Note n : p.second) {
-                                drawNote(imageView, p.first, pitchToPos.get(n.getPitch()),
-                                        n.getNoteType(), noteDur, dotted);
-                            }
+                            for (Note n : p.second)
+                                drawNote(iv, p.first, pitchToPos.get(n.getPitch()),
+                                        n.getNoteType(), noteDur, dotted, false);
                         }
                     }
                 }
 
-                measures.put(imageView, new Measure(0, count));
+                measures.put(iv, new Measure(0, count));
 
                 ++count;
 
                 //create onTouchListener for each ImageView
-                imageView.setOnTouchListener(new View.OnTouchListener() {
+                iv.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         if (!player.running) {
+                            boolean dotting = dotButton.isChecked();
                             @SuppressWarnings("SuspiciousMethodCalls") Measure m = measures.get(v);
                             int imageX = (int) event.getX();
                             int imageY = (int) event.getY();
@@ -314,7 +341,7 @@ public class MusicSheet extends AppCompatActivity {
                                         int gottenDur = score.durationAtTime(m.staff,
                                                 (m.number * 192 + imageX));
                                         int duration;
-                                        boolean shouldBeDotted = false;
+                                        boolean shouldBeDotted = dotting;
 
                                         switch (selectedNoteDur) {
                                             case WHOLE:
@@ -326,6 +353,9 @@ public class MusicSheet extends AppCompatActivity {
                                             default:
                                                 duration = 48;
                                         }
+
+                                        if (dotting)
+                                            duration += duration >> 1;
 
                                         if (gottenDur != 0 && gottenDur != duration)
                                             switch (gottenDur) {
@@ -359,7 +389,8 @@ public class MusicSheet extends AppCompatActivity {
                                                       posToPitch.get(imageY), (byte) 127);
 
                                         drawNote((ImageView) v, imageX, imageY,
-                                                 Note.NoteType.MELODIC, actualNoteDur, shouldBeDotted);
+                                                 Note.NoteType.MELODIC, actualNoteDur,
+                                                 shouldBeDotted, false);
                                     }
                                 }
                                 break;
@@ -378,7 +409,9 @@ public class MusicSheet extends AppCompatActivity {
                         return true;
                     }
                 });
+                tr.addView(iv);
             }
+            table.addView(tr);
         }
     }
 
@@ -415,7 +448,7 @@ public class MusicSheet extends AppCompatActivity {
     //Currently, it takes the old staff bar image coordinates and manually converts them to xy coordinates that
     //align with the new bitmap staff bars
     public void drawNote(ImageView iv, int x, int y, Note.NoteType nt,
-                         NoteDur dur, boolean dotted) {
+                         NoteDur dur, boolean dotted, boolean positionFilled) {
         Bitmap previousBitmap = ((BitmapDrawable) iv.getDrawable()).getBitmap();
         Canvas newCan = new Canvas(previousBitmap);
         int xActual = x * 50 / 48 + 25;
@@ -429,7 +462,7 @@ public class MusicSheet extends AppCompatActivity {
                 newCan.drawLine((xActual + (y < 166 ? -5 : 5)), yActual, (xActual + (y < 166 ? -5 : 5)),
                         (yActual + (y < 166 ? 56 : -56)), linePaint);
             if (dotted)
-                newCan.drawCircle(xActual + 7, yActual, (1), fillPaint);
+                newCan.drawCircle(xActual + 9, yActual, (1), fillPaint);
             break;
         default:
         }
@@ -639,8 +672,10 @@ public class MusicSheet extends AppCompatActivity {
             selectedNoteDur = NoteDur.QUARTER;
             break;
         case QUARTER:
-            selectedNoteDur = NoteDur.WHOLE;
+            selectedNoteDur = NoteDur.EIGHTH;
             break;
+        case EIGHTH:
+            selectedNoteDur = NoteDur.WHOLE;
         }
     }
 

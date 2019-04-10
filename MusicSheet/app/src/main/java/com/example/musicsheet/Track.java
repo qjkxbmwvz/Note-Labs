@@ -49,6 +49,14 @@ class Track {
                                                                  (0), (byte)0, (byte)0));
     }
 
+    Note getNote(int time, byte pitch) {
+        if (notes.containsKey(time))
+            for (Note n : Objects.requireNonNull(notes.get(time)))
+                if (n.getPitch() == pitch)
+                    return n;
+        return null;
+    }
+
     LinkedList<Note> checkNote(int time) {
         if (notes.containsKey(time))
             return notes.get(time);

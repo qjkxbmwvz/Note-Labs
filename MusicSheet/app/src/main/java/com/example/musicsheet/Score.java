@@ -30,6 +30,10 @@ class Score {
         this.player = player;
     }
 
+    int getTempo() { return tempo; }
+
+    void setTempo(int tempo) { this.tempo = tempo; }
+
     //velocity 127: good volume
     void addNote(int track, int timePosition, int duration, byte pitch, byte velocity) {
         tracks[track].addNote(timePosition, new Note(Note.NoteType.MELODIC,
@@ -37,6 +41,10 @@ class Score {
         tracks[track].addNote(timePosition + duration, new Note(Note.NoteType.REST,
                                                                       0, (byte)0,
                                                                       (byte)0));
+    }
+
+    void deleteNote(int track, int timePosition, byte pitch) {
+        tracks[track].removeNote(timePosition, tracks[track].getNote(timePosition, pitch));
     }
 
     void addMeasure(Fraction timeSignature) {
