@@ -49,6 +49,8 @@ class Score {
         ++measureCount;
     }
 
+    int getMeasureCount() { return measureCount; }
+
     int durationAtTime(int track, int timePosition) {
         if (tracks[track].checkNote(timePosition).getFirst().getNoteType() != Note.NoteType.REST)
             return tracks[track].checkNote(timePosition).getFirst().getDuration();

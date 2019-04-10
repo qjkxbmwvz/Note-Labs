@@ -177,41 +177,43 @@ public class MusicSheet extends AppCompatActivity {
                 if (newScore)
                     score.addMeasure(timeSignature);
                 else {
-                    ArrayList<Pair<Integer, LinkedList<Note>>> measure
-                            = score.getMeasure(0,  count, timeSignature);
-                    for (Pair<Integer, LinkedList<Note>> p : measure) {
-                        NoteDur noteDur;
-                        boolean dotted = false;
+                    if (count < score.getMeasureCount()) {
+                        ArrayList<Pair<Integer, LinkedList<Note>>> measure
+                                = score.getMeasure(0,  count, timeSignature);
+                        for (Pair<Integer, LinkedList<Note>> p : measure) {
+                            NoteDur noteDur;
+                            boolean dotted = false;
 
-                        switch (p.second.getFirst().getDuration()) {
-                            case 192:
-                                noteDur = NoteDur.WHOLE;
-                                break;
-                            case 148:
-                                noteDur = NoteDur.HALF;
-                                dotted  = true;
-                                break;
-                            case  96:
-                                noteDur = NoteDur.HALF;
-                                break;
-                            case  72:
-                                noteDur = NoteDur.QUARTER;
-                                dotted  = true;
-                                break;
-                            case  48:
-                                noteDur = NoteDur.QUARTER;
-                                break;
-                            case  36:
-                                noteDur = NoteDur.EIGHTH;
-                                dotted  = true;
-                                break;
-                            default:
-                                noteDur = NoteDur.EIGHTH;
-                        }
+                            switch (p.second.getFirst().getDuration()) {
+                                case 192:
+                                    noteDur = NoteDur.WHOLE;
+                                    break;
+                                case 148:
+                                    noteDur = NoteDur.HALF;
+                                    dotted = true;
+                                    break;
+                                case 96:
+                                    noteDur = NoteDur.HALF;
+                                    break;
+                                case 72:
+                                    noteDur = NoteDur.QUARTER;
+                                    dotted = true;
+                                    break;
+                                case 48:
+                                    noteDur = NoteDur.QUARTER;
+                                    break;
+                                case 36:
+                                    noteDur = NoteDur.EIGHTH;
+                                    dotted = true;
+                                    break;
+                                default:
+                                    noteDur = NoteDur.EIGHTH;
+                            }
 
-                        for (Note n : p.second) {
-                            drawNote(imageView, p.first, pitchToPos.get(n.getPitch()),
-                                     n.getNoteType(), noteDur, dotted);
+                            for (Note n : p.second) {
+                                drawNote(imageView, p.first, pitchToPos.get(n.getPitch()),
+                                        n.getNoteType(), noteDur, dotted);
+                            }
                         }
                     }
                 }
