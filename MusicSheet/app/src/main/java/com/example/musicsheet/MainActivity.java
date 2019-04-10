@@ -12,12 +12,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void openNew(View view){
+    public void openNew(View view) {
         Intent intent = new Intent(this, MusicSheet.class);
         startActivity(intent);
     }
 
-    public void openExisting(View view){
+    public void openExisting(View view) {
         Intent intent = new Intent(this, FileList.class);
         startActivity(intent);
     }

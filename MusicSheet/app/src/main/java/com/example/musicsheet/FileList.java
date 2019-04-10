@@ -1,10 +1,10 @@
 package com.example.musicsheet;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -19,12 +19,15 @@ import java.util.ArrayList;
 public class FileList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ActivityCompat.requestPermissions(this, new String[] {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+        }, 100);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_list);
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ListView projectList = (ListView)findViewById(R.id.projects);
+        ListView projectList = findViewById(R.id.projects);
         ArrayList<String> projectNames = new ArrayList<>();
         File dir = new File(Environment.getExternalStorageDirectory() + "/");
 

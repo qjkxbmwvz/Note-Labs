@@ -23,6 +23,8 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.Pair;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -41,11 +43,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class MusicSheet extends AppCompatActivity {
-    enum NoteType { WHOLE, HALF, QUARTER }
+    enum NoteDur { WHOLE, HALF, QUARTER }
 
-    HashMap<Integer, Byte> posToPitch;
-    final int horizontal = 4;
-    final int vertical = 9;
+    SparseArray<Byte> posToPitch;
 
     //Drawing Variables
     Bitmap bitmap;
@@ -62,8 +62,6 @@ public class MusicSheet extends AppCompatActivity {
     Paint outlinePaint;
     Bitmap screenState;
     Canvas zoomLoc;
-
-    int[][] staffPositions = new int[horizontal][vertical];
 
     ScrollView scrollView;
     TableLayout table;
@@ -85,14 +83,14 @@ public class MusicSheet extends AppCompatActivity {
     Score score;
     Fraction timeSignature;
     HashMap<ImageView, Measure> measures;
-    NoteType selectedNoteType;
+    NoteDur selectedNoteDur;
 
     @SuppressLint({"ClickableViewAccessibility", "NewApi"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        posToPitch = new HashMap<>();
+        posToPitch = new SparseArray<>();
         measures   = new HashMap<>();
-        selectedNoteType = NoteType.QUARTER;
+        selectedNoteDur = NoteDur.QUARTER;
         posToPitch.put( 19, (byte)83);
         posToPitch.put( 40, (byte)81);
         posToPitch.put( 61, (byte)79);
@@ -110,23 +108,23 @@ public class MusicSheet extends AppCompatActivity {
         posToPitch.put(313, (byte)59);
         posToPitch.put(334, (byte)57);
 
-        HashMap<Byte, Integer> pitchToPos = new HashMap<>();
-        pitchToPos.put((byte)83,  19);
-        pitchToPos.put((byte)81,  40);
-        pitchToPos.put((byte)79,  61);
-        pitchToPos.put((byte)77,  82);
-        pitchToPos.put((byte)76, 103);
-        pitchToPos.put((byte)74, 124);
-        pitchToPos.put((byte)72, 145);
-        pitchToPos.put((byte)71, 166);
-        pitchToPos.put((byte)69, 187);
-        pitchToPos.put((byte)67, 208);
-        pitchToPos.put((byte)65, 229);
-        pitchToPos.put((byte)64, 250);
-        pitchToPos.put((byte)62, 271);
-        pitchToPos.put((byte)60, 292);
-        pitchToPos.put((byte)59, 313);
-        pitchToPos.put((byte)57, 334);
+        SparseIntArray pitchToPos = new SparseIntArray();
+        pitchToPos.put(83,  19);
+        pitchToPos.put(81,  40);
+        pitchToPos.put(79,  61);
+        pitchToPos.put(77,  82);
+        pitchToPos.put(76, 103);
+        pitchToPos.put(74, 124);
+        pitchToPos.put(72, 145);
+        pitchToPos.put(71, 166);
+        pitchToPos.put(69, 187);
+        pitchToPos.put(67, 208);
+        pitchToPos.put(65, 229);
+        pitchToPos.put(64, 250);
+        pitchToPos.put(62, 271);
+        pitchToPos.put(60, 292);
+        pitchToPos.put(59, 313);
+        pitchToPos.put(57, 334);
 
         //create the paint variables used by the canvas
         linePaint = new Paint();
@@ -160,7 +158,7 @@ public class MusicSheet extends AppCompatActivity {
 
         timeSignature = new Fraction(4, 4);
 
-        final ToggleButton zoomButton = (ToggleButton) findViewById(R.id.tempZoomButton);
+        final ToggleButton zoomButton = findViewById(R.id.tempZoomButton);
         ImageSpan imageSpan = new ImageSpan(this, android.R.drawable.ic_menu_add);
         SpannableString content = new SpannableString("X");
         content.setSpan(imageSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -185,21 +183,22 @@ public class MusicSheet extends AppCompatActivity {
                     ArrayList<Pair<Integer, LinkedList<Note>>> measure
                             = score.getMeasure(0,  count, timeSignature);
                     for (Pair<Integer, LinkedList<Note>> p : measure) {
-                        NoteType noteType;
+                        NoteDur noteDur;
 
                         switch (p.second.getFirst().getDuration()) {
                             case 192:
-                                noteType = NoteType.WHOLE;
+                                noteDur = NoteDur.WHOLE;
                                 break;
                             case 96:
-                                noteType = NoteType.HALF;
+                                noteDur = NoteDur.HALF;
                                 break;
                             default:
-                                noteType = NoteType.QUARTER;
+                                noteDur = NoteDur.QUARTER;
                         }
 
                         for (Note n : p.second) {
-                            drawNote(imageView, p.first, pitchToPos.get(n.getPitch()), noteType);
+                            drawNote(imageView, p.first, pitchToPos.get(n.getPitch()),
+                                     n.getNoteType(), noteDur);
                         }
                     }
                 }
@@ -245,7 +244,7 @@ public class MusicSheet extends AppCompatActivity {
                                     } else {
                                         byte[] midiEvent = new byte[3];
 
-                                        midiEvent[0] = (byte) (0x90 | 0);
+                                        midiEvent[0] = (byte) (0x90 | m.staff);
                                         midiEvent[1] = posToPitch.get(imageY);
                                         midiEvent[2] = 127;
 
@@ -264,10 +263,10 @@ public class MusicSheet extends AppCompatActivity {
                                         } else {
                                             byte[] midiEvent = new byte[6];
 
-                                            midiEvent[0] = (byte) (0x80 | 0);
+                                            midiEvent[0] = (byte) (0x80 | m.staff);
                                             midiEvent[1] = posToPitch.get(lastTouchPointY);
                                             midiEvent[2] = 127;
-                                            midiEvent[3] = (byte) (0x90 | 0);
+                                            midiEvent[3] = (byte) (0x90 | m.staff);
                                             midiEvent[4] = posToPitch.get(imageY);
                                             midiEvent[5] = 127;
 
@@ -288,19 +287,19 @@ public class MusicSheet extends AppCompatActivity {
                                     } else {
                                         byte[] midiEvent = new byte[3];
 
-                                        midiEvent[0] = (byte) (0x80 | 0);
+                                        midiEvent[0] = (byte) (0x80 | m.staff);
                                         midiEvent[1] = posToPitch.get(imageY);
                                         midiEvent[2] = 127;
 
                                         // Send the MIDI event to the synthesizer.
                                         player.directWrite(midiEvent);
 
-                                        NoteType actualNoteType = selectedNoteType;
+                                        NoteDur actualNoteDur = selectedNoteDur;
                                         int gottenDur = score.durationAtTime(m.staff,
                                                 (m.number * 192 + imageX));
                                         int duration;
 
-                                        switch (selectedNoteType) {
+                                        switch (selectedNoteDur) {
                                             case WHOLE:
                                                 duration = 192;
                                                 break;
@@ -314,20 +313,21 @@ public class MusicSheet extends AppCompatActivity {
                                         if (gottenDur != 0 && gottenDur != duration)
                                             switch (gottenDur) {
                                                 case 192:
-                                                    actualNoteType = NoteType.WHOLE;
+                                                    actualNoteDur = NoteDur.WHOLE;
                                                     break;
                                                 case 96:
-                                                    actualNoteType = NoteType.HALF;
+                                                    actualNoteDur = NoteDur.HALF;
                                                     break;
                                                 default:
-                                                    actualNoteType = NoteType.QUARTER;
+                                                    actualNoteDur = NoteDur.QUARTER;
                                             }
 
                                         score.addNote(m.staff, (m.number * 192 + imageX),
                                                       gottenDur == 0 ? duration : gottenDur,
                                                       posToPitch.get(imageY), (byte) 127);
 
-                                        drawNote((ImageView) v, imageX, imageY, actualNoteType);
+                                        drawNote((ImageView) v, imageX, imageY,
+                                                 Note.NoteType.MELODIC, actualNoteDur);
                                     }
                                 }
                                 break;
@@ -353,19 +353,12 @@ public class MusicSheet extends AppCompatActivity {
     public void drawStaff(ImageView iv){
         //takes predetermined width and height dimensions from ImageViews and converts to pixels
         float dipW = 206f;
-        Resources r = getResources();
-        float pxW = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dipW,
-                r.getDisplayMetrics()
-        );
-
+//        Resources r = getResources();
+//        float pxW = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+//                                              dipW, r.getDisplayMetrics());
         float dipH = 130f;
-        float pxH = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dipH,
-                r.getDisplayMetrics()
-        );
+//        float pxH = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+//                                              dipH, r.getDisplayMetrics());
 
         //pretty sure it doesnt work tho haha
         bitmap = Bitmap.createBitmap((int)dipW, (int)dipH, Bitmap.Config.ARGB_8888); //working variabes 206, 130
@@ -383,23 +376,28 @@ public class MusicSheet extends AppCompatActivity {
         canvas.drawLine(207, 32, 207, startPointY - 16, linePaint);
 
         //update imageViews bitmap
-        imageView.setImageBitmap(bitmap);
+        iv.setImageBitmap(bitmap);
     }
 
     //Draws note on a given X and Y coordinate
     //Currently, it takes the old staff bar image coordinates and manually converts them to xy coordinates that
     //align with the new bitmap staff bars
-    public void drawNote(ImageView iv, int x, int y, NoteType nt) {
-        Bitmap previousBitmap = ((BitmapDrawable)iv.getDrawable()).getBitmap();
+    public void drawNote(ImageView iv, int x, int y, Note.NoteType nt, NoteDur dur) {
+        Bitmap previousBitmap = ((BitmapDrawable) iv.getDrawable()).getBitmap();
         Canvas newCan = new Canvas(previousBitmap);
-
         int xActual = x * 50 / 48 + 25;
         int yActual = (y - 19) * 8 / 21 + 8;
-        newCan.drawCircle(xActual, yActual, (5),
-                          (nt == NoteType.WHOLE || nt == NoteType.HALF) ? linePaint : fillPaint);
-        if (nt != NoteType.WHOLE)
-            newCan.drawLine((xActual + (y < 166 ? -5 : 5)), yActual, (xActual + (y < 166 ? -5 : 5)),
-                            (yActual + (y < 166 ? 56 : -56)), linePaint);
+
+        switch (nt) {
+        case MELODIC:
+            newCan.drawCircle(xActual, yActual, (5),
+                    (dur == NoteDur.WHOLE || dur == NoteDur.HALF) ? linePaint : fillPaint);
+            if (dur != NoteDur.WHOLE)
+                newCan.drawLine((xActual + (y < 166 ? -5 : 5)), yActual, (xActual + (y < 166 ? -5 : 5)),
+                        (yActual + (y < 166 ? 56 : -56)), linePaint);
+            break;
+        default:
+        }
         iv.setImageBitmap(previousBitmap);
     }
 
@@ -574,7 +572,7 @@ public class MusicSheet extends AppCompatActivity {
         });
     }
 */
-    private void goToNotePanel(){
+    /*private void goToNotePanel(){
         ImageButton btnNote = (ImageButton)findViewById(R.id.noteButton);
         btnNote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -582,7 +580,7 @@ public class MusicSheet extends AppCompatActivity {
                 //startActivity(new Intent(MusicSheet.this, NotePanel.class));
             }
         });
-    }
+    }*/
 
 
     //BUTTONS---
@@ -598,15 +596,15 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void cycleNoteType(View view) {
-        switch (selectedNoteType) {
+        switch (selectedNoteDur) {
         case WHOLE:
-            selectedNoteType = NoteType.HALF;
+            selectedNoteDur = NoteDur.HALF;
             break;
         case HALF:
-            selectedNoteType = NoteType.QUARTER;
+            selectedNoteDur = NoteDur.QUARTER;
             break;
         case QUARTER:
-            selectedNoteType = NoteType.WHOLE;
+            selectedNoteDur = NoteDur.WHOLE;
             break;
         }
     }
@@ -622,7 +620,7 @@ public class MusicSheet extends AppCompatActivity {
 
         alertDialogBuilder.setView(promptView);
 
-        final EditText userInput = (EditText)promptView.findViewById(R.id.editTextDialogUserInput);
+        final EditText userInput = promptView.findViewById(R.id.editTextDialogUserInput);
 
         alertDialogBuilder.setCancelable(false).setPositiveButton(("OK"),
                 new DialogInterface.OnClickListener() {
