@@ -3,7 +3,6 @@ package com.example.musicsheet;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -25,12 +24,10 @@ import android.text.style.ImageSpan;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -43,7 +40,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class MusicSheet extends AppCompatActivity {
-    enum NoteDur { WHOLE, HALF, QUARTER }
+    enum NoteDur { WHOLE, HALF, QUARTER, EIGHTH }
 
     SparseArray<Byte> posToPitch;
 
@@ -77,7 +74,7 @@ public class MusicSheet extends AppCompatActivity {
     int verticalOffset = 21; //hard-coded: eye-balled the distance between each bar lol
     int verticalMax = 334;
 
-    int lastTouchPointX = 0, lastTouchPointY = 0;
+    int /*lastTouchPointX = 0, */lastTouchPointY = 0;
 
     private Player player = new Player();
     Score score;
@@ -184,21 +181,37 @@ public class MusicSheet extends AppCompatActivity {
                             = score.getMeasure(0,  count, timeSignature);
                     for (Pair<Integer, LinkedList<Note>> p : measure) {
                         NoteDur noteDur;
+                        boolean dotted = false;
 
                         switch (p.second.getFirst().getDuration()) {
                             case 192:
                                 noteDur = NoteDur.WHOLE;
                                 break;
-                            case 96:
+                            case 148:
+                                noteDur = NoteDur.HALF;
+                                dotted  = true;
+                                break;
+                            case  96:
                                 noteDur = NoteDur.HALF;
                                 break;
-                            default:
+                            case  72:
                                 noteDur = NoteDur.QUARTER;
+                                dotted  = true;
+                                break;
+                            case  48:
+                                noteDur = NoteDur.QUARTER;
+                                break;
+                            case  36:
+                                noteDur = NoteDur.EIGHTH;
+                                dotted  = true;
+                                break;
+                            default:
+                                noteDur = NoteDur.EIGHTH;
                         }
 
                         for (Note n : p.second) {
                             drawNote(imageView, p.first, pitchToPos.get(n.getPitch()),
-                                     n.getNoteType(), noteDur);
+                                     n.getNoteType(), noteDur, dotted);
                         }
                     }
                 }
@@ -212,12 +225,13 @@ public class MusicSheet extends AppCompatActivity {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         if (!player.running) {
-                            Measure m = measures.get(v);
+                            @SuppressWarnings("SuspiciousMethodCalls") Measure m = measures.get(v);
                             int imageX = (int) event.getX();
                             int imageY = (int) event.getY();
 
                             //textView.setText("imageX: " + imageX + " imageY: " + imageY);
 
+                            assert m != null;
                             imageX = snapToTime((imageX - horizontalStart), measureLength,
                                                 (horizontalMax - horizontalStart),
                                                 score.getMeasure(m.staff, m.number, timeSignature));
@@ -298,6 +312,7 @@ public class MusicSheet extends AppCompatActivity {
                                         int gottenDur = score.durationAtTime(m.staff,
                                                 (m.number * 192 + imageX));
                                         int duration;
+                                        boolean shouldBeDotted = false;
 
                                         switch (selectedNoteDur) {
                                             case WHOLE:
@@ -315,11 +330,26 @@ public class MusicSheet extends AppCompatActivity {
                                                 case 192:
                                                     actualNoteDur = NoteDur.WHOLE;
                                                     break;
-                                                case 96:
+                                                case 148:
+                                                    actualNoteDur = NoteDur.HALF;
+                                                    shouldBeDotted  = true;
+                                                    break;
+                                                case  96:
                                                     actualNoteDur = NoteDur.HALF;
                                                     break;
-                                                default:
+                                                case  72:
                                                     actualNoteDur = NoteDur.QUARTER;
+                                                    shouldBeDotted  = true;
+                                                    break;
+                                                case  48:
+                                                    actualNoteDur = NoteDur.QUARTER;
+                                                    break;
+                                                case  36:
+                                                    actualNoteDur = NoteDur.EIGHTH;
+                                                    shouldBeDotted  = true;
+                                                    break;
+                                                default:
+                                                    actualNoteDur = NoteDur.EIGHTH;
                                             }
 
                                         score.addNote(m.staff, (m.number * 192 + imageX),
@@ -327,7 +357,7 @@ public class MusicSheet extends AppCompatActivity {
                                                       posToPitch.get(imageY), (byte) 127);
 
                                         drawNote((ImageView) v, imageX, imageY,
-                                                 Note.NoteType.MELODIC, actualNoteDur);
+                                                 Note.NoteType.MELODIC, actualNoteDur, shouldBeDotted);
                                     }
                                 }
                                 break;
@@ -382,7 +412,8 @@ public class MusicSheet extends AppCompatActivity {
     //Draws note on a given X and Y coordinate
     //Currently, it takes the old staff bar image coordinates and manually converts them to xy coordinates that
     //align with the new bitmap staff bars
-    public void drawNote(ImageView iv, int x, int y, Note.NoteType nt, NoteDur dur) {
+    public void drawNote(ImageView iv, int x, int y, Note.NoteType nt,
+                         NoteDur dur, boolean dotted) {
         Bitmap previousBitmap = ((BitmapDrawable) iv.getDrawable()).getBitmap();
         Canvas newCan = new Canvas(previousBitmap);
         int xActual = x * 50 / 48 + 25;
@@ -395,6 +426,8 @@ public class MusicSheet extends AppCompatActivity {
             if (dur != NoteDur.WHOLE)
                 newCan.drawLine((xActual + (y < 166 ? -5 : 5)), yActual, (xActual + (y < 166 ? -5 : 5)),
                         (yActual + (y < 166 ? 56 : -56)), linePaint);
+            if (dotted)
+                newCan.drawCircle(xActual + 7, yActual, (1), fillPaint);
             break;
         default:
         }
@@ -425,11 +458,11 @@ public class MusicSheet extends AppCompatActivity {
     //idea was to keep backup of working bitmap
     //refresh after MotionEvent
     //need to redraw staves as well as zoom, if zooming
-    public void zoomRefresh(){
+    /*public void zoomRefresh(){
         screenState = Bitmap.createBitmap(getScreen(scrollView));
         bmShader = new BitmapShader(screenState, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
         bmPaint.setShader(bmShader);
-    }
+    }*/
 
     //draws enlarged bitmap in circular shape
     //needs to update as moving position
@@ -615,7 +648,7 @@ public class MusicSheet extends AppCompatActivity {
         }, 100);
 
         LayoutInflater li = LayoutInflater.from(this);
-        View promptView = li.inflate(R.layout.save_prompt, null);
+        @SuppressLint("InflateParams") View promptView = li.inflate(R.layout.save_prompt, (null));
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
         alertDialogBuilder.setView(promptView);

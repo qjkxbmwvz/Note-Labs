@@ -5,6 +5,7 @@ import android.util.Pair;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -30,19 +31,22 @@ class Track {
     void addNote(int time, Note note) {
         if (!notes.containsKey(time))
             notes.put(time, new LinkedList<Note>());
-        if (notes.get(time).size() == 0 || note.getNoteType() != Note.NoteType.REST) {
-            if (notes.get(time).size() == 1
-             && notes.get(time).getFirst().getNoteType() == Note.NoteType.REST)
-                notes.get(time).remove(0);
-            notes.get(time).add(note);
+        if (Objects.requireNonNull(notes.get(time)).size() == 0
+                                || note.getNoteType() != Note.NoteType.REST) {
+            if (Objects.requireNonNull(notes.get(time)).size() == 1
+             && Objects.requireNonNull(notes.get(time)).getFirst().getNoteType()
+                                    == Note.NoteType.REST)
+                Objects.requireNonNull(notes.get(time)).remove(0);
+            Objects.requireNonNull(notes.get(time)).add(note);
         }
     }
 
     void removeNote(int time, Note note) {
         if (notes.containsKey(time))
-            notes.get(time).remove(note);
-        if (notes.get(time).size() == 0)
-            notes.get(time).add(new Note(Note.NoteType.REST, 0, (byte)0, (byte)0));
+            Objects.requireNonNull(notes.get(time)).remove(note);
+        if (Objects.requireNonNull(notes.get(time)).size() == 0)
+            Objects.requireNonNull(notes.get(time)).add(new Note(Note.NoteType.REST,
+                                                                 (0), (byte)0, (byte)0));
     }
 
     LinkedList<Note> checkNote(int time) {

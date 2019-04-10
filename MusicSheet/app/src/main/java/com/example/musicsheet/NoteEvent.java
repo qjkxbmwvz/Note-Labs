@@ -2,7 +2,7 @@ package com.example.musicsheet;
 
 import org.billthefarmer.mididriver.MidiDriver;
 
-public class NoteEvent {
+class NoteEvent {
     enum EventType { START, STOP }
 
     private MidiDriver midiDriver;
@@ -11,14 +11,6 @@ public class NoteEvent {
     private byte pitch;
     private byte velocity;
 
-    NoteEvent(MidiDriver midiDriver, EventType eventType, byte channel, byte pitch, byte velocity) {
-        this.midiDriver = midiDriver;
-        this.eventType  = eventType;
-        this.channel    = channel;
-        this.pitch      = pitch;
-        this.velocity   = velocity;
-    }
-
     NoteEvent(MidiDriver midiDriver, EventType eventType, byte channel, Note note) {
         this.midiDriver = midiDriver;
         this.eventType  = eventType;
@@ -26,12 +18,6 @@ public class NoteEvent {
         this.pitch      = note.getPitch();
         this.velocity   = note.getVelocity();
     }
-
-    public EventType getEventType() { return eventType; }
-
-    public byte getChannel()  { return channel; }
-    public byte getPitch()    { return pitch; }
-    public byte getVelocity() { return velocity; }
 
     void play() {
         byte command = 0;

@@ -12,8 +12,6 @@ class TimePosition {
         noteEvents = new LinkedList<>();
     }
 
-    void setTime(int time) { this.time = time; }
-
     int getTime() { return time; }
 
     Iterator<NoteEvent> getNoteEventIterator() { return noteEvents.iterator(); }

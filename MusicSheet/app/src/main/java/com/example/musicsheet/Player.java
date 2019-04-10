@@ -6,6 +6,7 @@ import org.billthefarmer.mididriver.MidiDriver;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.TreeMap;
 
 public class Player implements Runnable, MidiDriver.OnMidiStartListener {
@@ -45,9 +46,9 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
                         if (!times.containsKey(t + n.getDuration()))
                             times.put(t + n.getDuration(),
                                       new TimePosition(t + n.getDuration()));
-                        times.get(t).addNote(
+                        Objects.requireNonNull(times.get(t)).addNote(
                                 new NoteEvent(midiDriver, NoteEvent.EventType.START, i, n));
-                        times.get(t + n.getDuration()).addNote(
+                        Objects.requireNonNull(times.get(t + n.getDuration())).addNote(
                                 new NoteEvent(midiDriver, NoteEvent.EventType.STOP, i, n));
                         break;
                     case REST:
