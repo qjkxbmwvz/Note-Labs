@@ -15,7 +15,7 @@ class NoteEvent {
         this.midiDriver = midiDriver;
         this.eventType  = eventType;
         this.channel    = channel;
-        this.pitch      = note.getPitch();
+        this.pitch      = (byte)(note.getPitch() + note.getAccidental());
         this.velocity   = note.getVelocity();
     }
 

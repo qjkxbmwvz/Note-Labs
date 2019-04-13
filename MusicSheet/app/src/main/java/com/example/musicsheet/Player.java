@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.billthefarmer.mididriver.MidiDriver;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -23,15 +24,15 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
         instruments = new byte[16];
     }
 
-    void prepare(int tempo, int startTime, Track[] tracks) {
+    void prepare(int tempo, int startTime, ArrayList<Track> tracks) {
         this.tempo = tempo;
         this.startTime = startTime;
         times = new TreeMap<>();
 
-        for (byte i = 0; i < tracks.length; ++i) {
-            Iterator<Integer> tIt = tracks[i].getTimeIterator();
-            Iterator<LinkedList<Note>> nIt = tracks[i].getNoteIterator();
-            instruments[i] = tracks[i].getInstrument();
+        for (byte i = 0; i < tracks.size(); ++i) {
+            Iterator<Integer> tIt = tracks.get(i).getTimeIterator();
+            Iterator<LinkedList<Note>> nIt = tracks.get(i).getNoteIterator();
+            instruments[i] = tracks.get(i).getInstrument();
 
             while (tIt.hasNext()) {
                 int t = tIt.next();

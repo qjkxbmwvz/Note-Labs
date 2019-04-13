@@ -17,7 +17,7 @@ class Score {
     private int tempo;
     private int startTime;
     private int measureCount;
-    private Track[] tracks;
+    private ArrayList<Track> tracks;
     private Player player;
     private Thread playerThread;
 
@@ -25,8 +25,8 @@ class Score {
         tempo = 60;
         startTime = 0;
         measureCount = 0;
-        tracks = new Track[1];
-        tracks[0] = new Track((byte)0);
+        tracks = new ArrayList<>();
+        tracks.add(new Track((byte)0, Track.Clef.TREBLE));
         this.player = player;
     }
 
@@ -34,49 +34,70 @@ class Score {
 
     void setTempo(int tempo) { this.tempo = tempo; }
 
+    int getTrackCount() { return tracks.size(); }
+
+    void setTrackClef(int track, Track.Clef clef) {
+        tracks.get(track).setClef(clef);
+    }
+
+    Track.Clef getTrackClef(int track) { return tracks.get(track).getClef(); }
+
+    int addTrack(Track track) {
+        if (tracks.size() < 16) {
+            tracks.add(track);
+            return tracks.size();
+        } else
+            return -1;
+    }
+
     //velocity 127: good volume
-    void addNote(int track, int timePosition, int duration, byte pitch, byte velocity) {
-        tracks[track].addNote(timePosition, new Note(Note.NoteType.MELODIC,
-                                                     duration, pitch, velocity));
-        tracks[track].addNote(timePosition + duration, new Note(Note.NoteType.REST,
-                                                                      0, (byte)0,
-                                                                      (byte)0));
+    void addNote(int track, int timePosition, Note note) {
+        tracks.get(track).addNote(timePosition, note);
+        tracks.get(track).addNote((timePosition + note.getDuration()),
+                                  new Note(Note.NoteType.REST, (0),
+                                           (byte)0, (byte)0, (byte)0));
     }
 
     void deleteNote(int track, int timePosition, byte pitch) {
-        tracks[track].removeNote(timePosition, tracks[track].getNote(timePosition, pitch));
+        tracks.get(track).removeNote(timePosition,
+                                     tracks.get(track).getNote(timePosition,
+                                                               pitch));
     }
 
     void addMeasure(Fraction timeSignature) {
         int measureSize = 192 * timeSignature.num / timeSignature.den;
 
         for (Track track : tracks)
-            track.addNote(measureCount * measureSize, new Note(Note.NoteType.REST,
-                                                                     measureSize,
-                                                                     (byte)0, (byte)0));
+            track.addNote((measureCount * measureSize),
+                          new Note(Note.NoteType.REST, measureSize,
+                                   (byte)0, (byte)0, (byte)0));
         ++measureCount;
     }
 
     int getMeasureCount() { return measureCount; }
 
     int durationAtTime(int track, int timePosition) {
-        if (tracks[track].checkNote(timePosition).getFirst().getNoteType() != Note.NoteType.REST)
-            return tracks[track].checkNote(timePosition).getFirst().getDuration();
+        if (tracks.get(track).checkNote(timePosition).getFirst().getNoteType()
+         != Note.NoteType.REST)
+            return tracks.get(track).checkNote(timePosition)
+                    .getFirst().getDuration();
         else
             return 0;
     }
 
-    ArrayList<Pair<Integer, LinkedList<Note>>> getMeasure(int track, int measureNum, Fraction timeSignature) {
+    ArrayList<Pair<Integer, LinkedList<Note>>> getMeasure(
+            int track, int measureNum, Fraction timeSignature) {
         if (measureNum >= measureCount)
             throw new IndexOutOfBoundsException();
         else {
             TreeSet<Pair<Integer, LinkedList<Note>>> times
-                    = tracks[track].getMeasure(measureNum, timeSignature);
+                    = tracks.get(track).getMeasure(measureNum, timeSignature);
             ArrayList<Pair<Integer, LinkedList<Note>>> ret = new ArrayList<>();
 
             for (Pair<Integer, LinkedList<Note>> p : times) {
                 ret.add(new Pair<>(
-                        p.first - measureNum * 192 * timeSignature.num / timeSignature.den,
+                        p.first - measureNum * 192 * timeSignature.num
+                                                   / timeSignature.den,
                         p.second));
             }
 
@@ -109,26 +130,33 @@ class Score {
             if (!filename.endsWith(".nl"))
                 filename += ".nl";
 
-            File out = new File((Environment.getExternalStorageDirectory() + "/" + filename));
-            DataOutputStream os = new DataOutputStream(new FileOutputStream(out, false));
+            File out = new File((Environment.getExternalStorageDirectory()
+                              + "/" + filename));
+            DataOutputStream os = new DataOutputStream(
+                    new FileOutputStream(out, (false)));
 
             os.writeInt(tempo);
-            os.writeByte((byte)tracks.length);
+            os.writeByte((byte)tracks.size());
             for (Track track : tracks) {
+                os.writeInt(track.getClef().ordinal());
                 os.writeByte(track.getInstrument());
                 os.writeInt(track.getTrackLength());
                 Iterator<Integer> tIt = track.getTimeIterator();
                 Iterator<LinkedList<Note>> nIt = track.getNoteIterator();
+
                 while (tIt.hasNext()) {
                     int t = tIt.next();
                     LinkedList<Note> nl = nIt.next();
 
+                    os.writeInt(t);
+                    os.writeInt(nl.size());
+
                     for (Note n : nl) {
-                        os.writeInt(t);
                         os.writeInt(n.getNoteType().ordinal());
                         os.writeInt(n.getDuration());
 
                         os.writeByte(n.getPitch());
+                        os.writeByte(n.getAccidental());
                         os.writeByte(n.getVelocity());
                     }
                 }
@@ -140,7 +168,8 @@ class Score {
 
     void load(String filename) {
         try {
-            File in = new File((Environment.getExternalStorageDirectory() + "/" + filename));
+            File in = new File((Environment.getExternalStorageDirectory()
+                              + "/" + filename));
             DataInputStream is = new DataInputStream(new FileInputStream(in));
             byte[] event = new byte[2];
 
@@ -148,11 +177,12 @@ class Score {
 
             tempo = is.readInt();
             byte il = is.readByte();
-            tracks = new Track[il];
+            tracks = new ArrayList<>(il);
             for (int i = 0; i < il; ++i) {
-                tracks[i] = new Track(is.readByte());
-                event[0] = (byte) (0xC0 | i);  // 0xC0 = program change, 0x0X = channel X
-                event[1] = tracks[i].getInstrument();
+                Track.Clef clef = Track.Clef.values()[is.readInt()];
+                tracks.add(new Track(is.readByte(), clef));
+                event[0] = (byte)(0xC0 | i);  // 0xC0 = program change, 0x0X = channel X
+                event[1] = tracks.get(i).getInstrument();
                 player.directWrite(event);
 
                 int tl = is.readInt();
@@ -160,15 +190,24 @@ class Score {
                 for (int j = 0; j < tl; ++j) {
                     int time = is.readInt();
 
-                    Note.NoteType noteType = Note.NoteType.values()[is.readInt()];
+                    int notesAtTime = is.readInt();
 
-                    int duration = is.readInt();
-                    if (time + duration > maxTime)
-                        maxTime = time + duration;
+                    for (int k = 0; k < notesAtTime; ++k) {
 
-                    byte pitch    = is.readByte();
-                    byte velocity = is.readByte();
-                    tracks[i].addNote(time, new Note(noteType, duration, pitch, velocity));
+                        Note.NoteType noteType
+                                = Note.NoteType.values()[is.readInt()];
+
+                        int duration = is.readInt();
+                        if (time + duration > maxTime)
+                            maxTime = time + duration;
+
+                        byte pitch = is.readByte();
+                        byte accidental = is.readByte();
+                        byte velocity = is.readByte();
+                        tracks.get(i).addNote(time, new Note(noteType, duration,
+                                                             pitch, accidental,
+                                                             velocity));
+                    }
                 }
             }
             is.close();

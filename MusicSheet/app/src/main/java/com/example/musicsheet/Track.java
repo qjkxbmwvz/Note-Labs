@@ -10,13 +10,21 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 class Track {
+    enum Clef { TREBLE, ALTO, BASS, PERCUSSION };
+
+    private Clef clef;
     private byte instrument;
     private TreeMap<Integer, LinkedList<Note>> notes;
 
-    Track(byte instrument) {
+    Track(byte instrument, Clef clef) {
+        this.clef = clef;
         this.instrument = instrument;
         notes = new TreeMap<>();
     }
+
+    void setClef(Clef clef) { this.clef = clef; }
+
+    Clef getClef() { return clef; }
 
     void setInstrument(byte instrument) { this.instrument = instrument; }
 
@@ -24,7 +32,9 @@ class Track {
 
     Iterator<Integer> getTimeIterator() { return notes.keySet().iterator(); }
 
-    Iterator<LinkedList<Note>> getNoteIterator() { return notes.values().iterator(); }
+    Iterator<LinkedList<Note>> getNoteIterator() {
+        return notes.values().iterator();
+    }
 
     int getTrackLength() { return notes.size(); }
 
@@ -45,8 +55,9 @@ class Track {
         if (notes.containsKey(time))
             Objects.requireNonNull(notes.get(time)).remove(note);
         if (Objects.requireNonNull(notes.get(time)).size() == 0)
-            Objects.requireNonNull(notes.get(time)).add(new Note(Note.NoteType.REST,
-                                                                 (0), (byte)0, (byte)0));
+            Objects.requireNonNull(notes.get(time)).add(
+                    new Note(Note.NoteType.REST, (0),
+                             (byte)0, (byte)0, (byte)0));
     }
 
     Note getNote(int time, byte pitch) {
@@ -64,14 +75,20 @@ class Track {
             return null;
     }
 
-    TreeSet<Pair<Integer, LinkedList<Note>>> getMeasure(int measureNum, Fraction timeSignature) {
-        int startPoint = measureNum * 192 * timeSignature.num / timeSignature.den;
-        int endPoint   = startPoint + 192 * timeSignature.num / timeSignature.den;
+    TreeSet<Pair<Integer, LinkedList<Note>>> getMeasure(
+            int measureNum, Fraction timeSignature) {
+        int startPoint = measureNum * 192 * timeSignature.num
+                                          / timeSignature.den;
+        int endPoint   = startPoint + 192 * timeSignature.num
+                                          / timeSignature.den;
         TreeSet<Pair<Integer, LinkedList<Note>>> ret
-                = new TreeSet<>(new Comparator<Pair<Integer, LinkedList<Note>>>() {
+                = new TreeSet<>(new Comparator<Pair<Integer,
+                                               LinkedList<Note>>>() {
             @Override
             public int compare(Pair<Integer, LinkedList<Note>> a,
-                               Pair<Integer, LinkedList<Note>> b) { return a.first - b.first; }
+                               Pair<Integer, LinkedList<Note>> b) {
+                return a.first - b.first;
+            }
         });
 
         for (int key : notes.keySet())
