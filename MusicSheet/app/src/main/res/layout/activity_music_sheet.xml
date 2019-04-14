@@ -185,7 +185,8 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             android:onClick="cycleAccidental"
-            app:srcCompat="@drawable/ic_note_quarter"/>
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/quarternote" />
 
         <ImageButton
             android:id="@+id/noteButton"
@@ -194,7 +195,8 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             android:onClick="cycleNoteType"
-            app:srcCompat="@drawable/ic_note_quarter"/>
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/quarternote"/>
 
         <ToggleButton
             android:id="@+id/dotButton"
@@ -216,7 +218,9 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
-            android:onClick="save" />
+            android:onClick="save"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/saveicon"/>
 
     </LinearLayout>
 

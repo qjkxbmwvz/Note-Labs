@@ -14,6 +14,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -28,8 +29,10 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -503,13 +506,17 @@ public class MusicSheet extends AppCompatActivity {
                                 }
                                 break;
                                 case MotionEvent.ACTION_MOVE:
-                                    if (lastTouchPointY != imageY) {
-                                        if (zoomButton.isChecked()) {
+                                    if (lastTouchPointY != imageY)
+                                    {
+                                        if (zoomButton.isChecked())
+                                        {
                                             initPoint = true;
                                             zooming = true;
                                             zoomDraw(zoomLoc);
                                             scrollView.invalidate();
-                                        } else {
+                                        }
+                                        else
+                                            {
                                             byte[] midiEvent = new byte[6];
                                             byte lP = posToPitch.get(
                                                     lastTouchPointY);
@@ -555,15 +562,19 @@ public class MusicSheet extends AppCompatActivity {
 
                                     //textView.setText("imageX: " + imageX + " imageY: " + imageY);
                                     break;
-                                case MotionEvent.ACTION_UP: {
-                                    if (zoomButton.isChecked()) {
+                                case MotionEvent.ACTION_UP:
+                                    {
+                                    if (zoomButton.isChecked())
+                                    {
                                         zooming = false;
                                         //zoomDraw(zoomLoc);
                                         canvas.drawColor(Color.WHITE);
                                         canvas.drawBitmap(screenState,
                                                           matrix, bmPaint);
                                         scrollView.invalidate();
-                                    } else {
+                                    }
+                                    else
+                                        {
                                         byte[] midiEvent = new byte[3];
                                         byte p  = posToPitch.get(imageY);
 
@@ -727,16 +738,20 @@ public class MusicSheet extends AppCompatActivity {
     //Currently, it takes the old staff bar image coordinates and manually converts them to xy coordinates that
     //align with the new bitmap staff bars
     public void drawNote(ImageView iv, int x, int y, Note.NoteType nt,
-                         NoteDur dur, boolean dotted, boolean positionFilled) {
+                         NoteDur dur, boolean dotted, boolean positionFilled)
+    {
         Bitmap previousBitmap = ((BitmapDrawable) iv.getDrawable()).getBitmap();
         Canvas newCan = new Canvas(previousBitmap);
         int xActual = x * 50 / 48 + 25;
         int yActual = (y - 19) * 8 / 21 + 8;
 
-        switch (nt) {
+        switch (nt)
+        {
         case MELODIC:
             newCan.drawCircle(xActual, yActual, (5),
                     (dur == NoteDur.WHOLE || dur == NoteDur.HALF) ? linePaint : fillPaint);
+
+
             if (dur != NoteDur.WHOLE)
                 newCan.drawLine((xActual + (y < 166 ? -5 : 5)), yActual, (xActual + (y < 166 ? -5 : 5)),
                         (yActual + (y < 166 ? 56 : -56)), linePaint);
@@ -942,26 +957,52 @@ public class MusicSheet extends AppCompatActivity {
         //remove last note added
     }
 
-    public void cycleNoteType(View view) {
+    public void cycleNoteType(View view)
+    {
+        ImageView image = findViewById(R.id.noteButton);
+
         switch (selectedNoteDur) {
         case WHOLE:
             selectedNoteDur = NoteDur.HALF;
+            image.setImageResource(R.drawable.halfnote);
             break;
         case HALF:
             selectedNoteDur = NoteDur.QUARTER;
+            image.setImageResource(R.drawable.quarternote);
             break;
         case QUARTER:
             selectedNoteDur = NoteDur.EIGHTH;
+            image.setImageResource(R.drawable.eighthnote);
             break;
         case EIGHTH:
             selectedNoteDur = NoteDur.WHOLE;
+            image.setImageResource(R.drawable.wholenote);
         }
     }
 
-    public void cycleAccidental(View view) {
+    public void cycleAccidental(View view)
+    {
+        ImageView image = findViewById(R.id.accidentButton);
+
         ++accidental;
+
         if (accidental == 2)
             accidental = -1;
+
+        switch(accidental)
+        {
+            case 0:
+                image.setImageResource(R.drawable.quarternote);
+                break;
+            case 1:
+                image.setImageResource(R.drawable.sharp);
+                break;
+            case -1:
+                image.setImageResource(R.drawable.flat);
+                break;
+        }
+
+
     }
 
     public void save(View view) {
