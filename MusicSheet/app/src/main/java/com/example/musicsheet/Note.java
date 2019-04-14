@@ -1,5 +1,7 @@
 package com.example.musicsheet;
 
+import android.widget.ImageView;
+
 class Note {
     enum NoteType { MELODIC, PERCUSSIVE, REST }
 
@@ -8,6 +10,7 @@ class Note {
     private byte pitch;
     private byte accidental;
     private byte velocity;
+    private ImageView imageView;
 
     Note(NoteType noteType, int duration, byte pitch, byte accidental, byte velocity) {
         this.noteType   = noteType;
@@ -17,6 +20,8 @@ class Note {
         this.velocity   = velocity;
     }
 
+    void setNoteType(NoteType noteType) { this.noteType = noteType; }
+
     NoteType getNoteType() { return noteType; }
 
     int getDuration() { return duration; }
@@ -24,4 +29,8 @@ class Note {
     byte getPitch()      { return pitch;      }
     byte getAccidental() { return accidental; }
     byte getVelocity()   { return velocity;   }
+
+    void setImageView(ImageView iv) { this.imageView = iv; }
+
+    ImageView getImageView() { return imageView; }
 }
