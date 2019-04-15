@@ -26,6 +26,10 @@ class Note {
 
     int getDuration() { return duration; }
 
+    void setPitch(byte pitch) { this.pitch = pitch; }
+
+    void setAccidental(byte accidental) { this.accidental = accidental; }
+
     byte getPitch()      { return pitch;      }
     byte getAccidental() { return accidental; }
     byte getVelocity()   { return velocity;   }

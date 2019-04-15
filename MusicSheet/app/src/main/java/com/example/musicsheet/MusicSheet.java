@@ -552,125 +552,120 @@ public class MusicSheet extends AppCompatActivity {
 
                             switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN: {
-                                    byte[] midiEvent = new byte[3];
+                                byte[] midiEvent = new byte[3];
 
-                                    midiEvent[0] = (byte) (0x90 | m.staff);
-                                    midiEvent[1] =
-                                            (byte)(p
-                                                 + Objects.requireNonNull(
-                                                           keys.get(key))
-                                                    .get(p % 12)
-                                                 + accidental
-                                                 + clefMods.get(
-                                                           score
-                                                           .getTrackClef(
-                                                                   m.staff))
-                                                   .get(p % 12));
-                                    midiEvent[2] = 127;
+                                byte nominalPitch = (byte)(
+                                        p + Objects.requireNonNull(
+                                                    keys.get(key))
+                                             .get(p % 12)
+                                          + clefMods.get(
+                                                    score.getTrackClef(m.staff))
+                                             .get(p % 12));
 
-                                    tempNote = new Note(resting
-                                                    ? Note.NoteType.REST
-                                                    : Note.NoteType.MELODIC,
-                                            gottenDur == 0 ? duration
-                                                           : gottenDur,
-                                            resting ? (byte)0
-                                                    : (byte)(p
-                                                           + Objects.requireNonNull(
-                                                              keys.get(key))
-                                                              .get(p % 12)
-                                                           + clefMods.get(
-                                                              score
-                                                              .getTrackClef(
-                                                               m.staff))
-                                                              .get(p % 12)),
-                                            accidental, (byte)127);
+                                midiEvent[0] = (byte) (0x90 | m.staff);
+                                midiEvent[1] =
+                                        (byte)(nominalPitch + accidental);
+                                midiEvent[2] = 127;
 
-                                    drawNote(rl, imageX, imageY,
-                                            tempNote,  actualNoteDur,
-                                             shouldBeDotted, (false));
+                                tempNote = new Note(resting
+                                                ? Note.NoteType.REST
+                                                : Note.NoteType.MELODIC,
+                                        gottenDur == 0 ? duration
+                                                       : gottenDur,
+                                        resting ? (byte)0
+                                                : (byte)(p
+                                                       + Objects.requireNonNull(
+                                                          keys.get(key))
+                                                          .get(p % 12)
+                                                       + clefMods.get(
+                                                          score
+                                                          .getTrackClef(
+                                                           m.staff))
+                                                          .get(p % 12)),
+                                        accidental, (byte)127);
 
-                                    // Send the MIDI event to the synthesizer.
-                                    player.directWrite(midiEvent);
+                                drawNote(rl, imageX, imageY,
+                                        tempNote,  actualNoteDur,
+                                         shouldBeDotted, (false));
+
+                                // Send the MIDI event to the synthesizer.
+                                player.directWrite(midiEvent);
                             }
                             break;
                             case MotionEvent.ACTION_MOVE:
                                 if (lastTouchPointY != imageY
                                  || lastTouchPointX != imageX) {
+                                    byte[] midiEvent = new byte[6];
+                                    byte nominalPitch = (byte)(
+                                            p + Objects.requireNonNull(
+                                                    keys.get(key))
+                                                    .get(p % 12)
+                                                    + clefMods.get(
+                                                    score.getTrackClef(m.staff))
+                                                    .get(p % 12));
 
-                                        byte[] midiEvent = new byte[6];
+                                    midiEvent[0]
+                                            = (byte)(0x80 | m.staff);
+                                    midiEvent[1]
+                                            = (byte)(lP
+                                                   + Objects
+                                                     .requireNonNull(
+                                                             keys
+                                                             .get(key))
+                                                              .get(lP % 12)
+                                                   + accidental
+                                                   + clefMods.get(
+                                                             score
+                                                             .getTrackClef
+                                                              (m.staff))
+                                                      .get(p % 12));
+                                    midiEvent[2] = 127;
+                                    midiEvent[3]
+                                            = (byte)(0x90 | m.staff);
+                                    midiEvent[4]
+                                            = (byte)(nominalPitch + accidental);
+                                    midiEvent[5] = 127;
 
-                                        midiEvent[0]
-                                                = (byte)(0x80 | m.staff);
-                                        midiEvent[1]
-                                                = (byte)(lP
-                                                       + Objects
-                                                         .requireNonNull(
-                                                                 keys
-                                                                 .get(key))
-                                                                  .get(lP % 12)
-                                                       + accidental
-                                                       + clefMods.get(
-                                                                 score
-                                                                 .getTrackClef
-                                                                  (m.staff))
-                                                          .get(p % 12));
-                                        midiEvent[2] = 127;
-                                        midiEvent[3]
-                                                = (byte)(0x90 | m.staff);
-                                        midiEvent[4]
-                                                = (byte)(p
-                                                       + Objects
-                                                         .requireNonNull(
-                                                                 keys
-                                                                 .get(key))
-                                                                  .get(p % 12)
-                                                       + accidental
-                                                       + clefMods.get(
-                                                                 score
-                                                                 .getTrackClef
-                                                                  (m.staff))
-                                                          .get(p % 12));
-                                        midiEvent[5] = 127;
+                                    // Send the MIDI event to the synthesizer.
+                                    player.directWrite(midiEvent);
 
-                                        // Send the MIDI event to the synthesizer.
-                                        player.directWrite(midiEvent);
+                                    tempNote.setPitch(nominalPitch);
 
-                                        drawNote(rl, imageX, imageY,
-                                                 tempNote,  actualNoteDur,
-                                                 shouldBeDotted, (false));
+                                    drawNote(rl, imageX, imageY,
+                                             tempNote,  actualNoteDur,
+                                             shouldBeDotted, (false));
                                 }
 
                                 //textView.setText("imageX: " + imageX + " imageY: " + imageY);
                                 break;
                             case MotionEvent.ACTION_UP: {
+                                byte[] midiEvent = new byte[3];
 
-                                    byte[] midiEvent = new byte[3];
+                                midiEvent[0] = (byte) (0x80 | m.staff);
+                                midiEvent[1] =
+                                        (byte)(p
+                                             + Objects.requireNonNull(
+                                                     keys.get(key))
+                                               .get(p % 12)
+                                             + accidental
+                                             + clefMods.get(
+                                                       score
+                                                       .getTrackClef(
+                                                               m.staff))
+                                               .get(p % 12));
+                                midiEvent[2] = 127;
 
-                                    midiEvent[0] = (byte) (0x80 | m.staff);
-                                    midiEvent[1] =
-                                            (byte)(p
-                                                 + Objects.requireNonNull(
-                                                         keys.get(key))
-                                                   .get(p % 12)
-                                                 + accidental
-                                                 + clefMods.get(
-                                                           score
-                                                           .getTrackClef(
-                                                                   m.staff))
-                                                   .get(p % 12));
-                                    midiEvent[2] = 127;
+                                // Send the MIDI event to the synthesizer.
+                                player.directWrite(midiEvent);
 
-                                    // Send the MIDI event to the synthesizer.
-                                    player.directWrite(midiEvent);
+                                score.addNote(
+                                        m.staff,
+                                        (m.number * 192 + imageX), tempNote);
 
-                                    score.addNote(
-                                            m.staff,
-                                            (m.number * 192 + imageX), tempNote);
-
-                                    accidental = 0;
-                                    ImageView accImg
-                                            = findViewById(R.id.accidentButton);
-                                    accImg.setImageResource(R.drawable.natural);
+                                accidental = 0;
+                                ImageView accImg
+                                        = findViewById(R.id.accidentButton);
+                                accImg.setImageResource(R.drawable.natural);
                             }
                                 break;
                             }
