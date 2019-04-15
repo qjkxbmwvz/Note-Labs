@@ -84,7 +84,7 @@ public class MusicSheet extends AppCompatActivity {
     Canvas canvas;
     Paint linePaint, fillPaint;
 
-    boolean zooming;
+    /*boolean zooming;
     boolean initPoint;
     PointF position;
     Matrix matrix;
@@ -93,7 +93,7 @@ public class MusicSheet extends AppCompatActivity {
     Paint bmPaint;
     Paint outlinePaint;
     Bitmap screenState;
-    Canvas zoomLoc;
+    Canvas zoomLoc;*/
 
     ScrollView scrollView;
     TableLayout table;
@@ -324,16 +324,6 @@ public class MusicSheet extends AppCompatActivity {
 
         timeSignature = new Fraction(4, 4);
 
-        final ToggleButton zoomButton = findViewById(R.id.tempZoomButton);
-        ImageSpan imageSpan = new ImageSpan((this),
-                                            android.R.drawable.ic_menu_add);
-        SpannableString content = new SpannableString("X");
-
-        content.setSpan(imageSpan, (0), (1), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        zoomButton.setText(content);
-        zoomButton.setTextOn(content);
-        zoomButton.setTextOff(content);
-
         final ToggleButton editButton = findViewById(R.id.editButton);
         final ToggleButton dotButton  = findViewById(R.id.dotButton);
         final ToggleButton restButton = findViewById(R.id.restButton);
@@ -487,15 +477,11 @@ public class MusicSheet extends AppCompatActivity {
                                                   verticalStart,
                                                   verticalOffset);
 
-                            //TODO: fix/optimize zoom
-                            zoomInit();  //takes position of last drawStaff
-                            position.x = (int)event.getX(); //same as imageX, imageY
-                            position.y = (int)event.getY();
+                            //position.x = (int)event.getX(); //same as imageX, imageY
+                            //position.y = (int)event.getY();
 
                             //int scrollHeight = scrollView.getChildAt(0).getHeight();  //screen
                             //int scrollWidth = scrollView.getChildAt(0).getWidth();
-
-                            zoomLoc = new Canvas(bitmap); //screenState
 
                             NoteDur actualNoteDur = selectedNoteDur;
                             int gottenDur = score.durationAtTime(
@@ -566,12 +552,6 @@ public class MusicSheet extends AppCompatActivity {
 
                             switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN: {
-                                if (zoomButton.isChecked()) {
-                                    initPoint = true;
-                                    zooming = true;
-                                    zoomDraw(zoomLoc);
-                                    scrollView.invalidate();
-                                } else {
                                     byte[] midiEvent = new byte[3];
 
                                     midiEvent[0] = (byte) (0x90 | m.staff);
@@ -611,18 +591,12 @@ public class MusicSheet extends AppCompatActivity {
 
                                     // Send the MIDI event to the synthesizer.
                                     player.directWrite(midiEvent);
-                                }
                             }
                             break;
                             case MotionEvent.ACTION_MOVE:
                                 if (lastTouchPointY != imageY
                                  || lastTouchPointX != imageX) {
-                                    if (zoomButton.isChecked()) {
-                                        initPoint = true;
-                                        zooming = true;
-                                        zoomDraw(zoomLoc);
-                                        scrollView.invalidate();
-                                    } else {
+
                                         byte[] midiEvent = new byte[6];
 
                                         midiEvent[0]
@@ -664,20 +638,12 @@ public class MusicSheet extends AppCompatActivity {
                                         drawNote(rl, imageX, imageY,
                                                  tempNote,  actualNoteDur,
                                                  shouldBeDotted, (false));
-                                    }
                                 }
 
                                 //textView.setText("imageX: " + imageX + " imageY: " + imageY);
                                 break;
                             case MotionEvent.ACTION_UP: {
-                                if (zoomButton.isChecked()) {
-                                    zooming = false;
-                                    //zoomDraw(zoomLoc);
-                                    canvas.drawColor(Color.WHITE);
-                                    canvas.drawBitmap(screenState,
-                                                      matrix, bmPaint);
-                                    scrollView.invalidate();
-                                } else {
+
                                     byte[] midiEvent = new byte[3];
 
                                     midiEvent[0] = (byte) (0x80 | m.staff);
@@ -705,7 +671,6 @@ public class MusicSheet extends AppCompatActivity {
                                     ImageView accImg
                                             = findViewById(R.id.accidentButton);
                                     accImg.setImageResource(R.drawable.natural);
-                                }
                             }
                                 break;
                             }
@@ -834,83 +799,10 @@ public class MusicSheet extends AppCompatActivity {
         iv.setImageBitmap(previousBitmap);*/
     }
 
-    //readies necessary dependencies for zoom
-    //takes last drawStaff for canvas, fix?
-    public void zoomInit(){
-        //bitmap = Bitmap.createBitmap(206, 130, Bitmap.Config.ARGB_8888);
-        //canvas = new Canvas(bitmap);
 
-        position = new PointF();
-        //position.x = e.getX();
-        //position.y = e.getY();
-
-        matrix = new Matrix();
-        screenState = Bitmap.createBitmap(getScreen(scrollView));
-        bmShader = new BitmapShader(screenState, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        bmPaint = new Paint();
-        bmPaint.setShader(bmShader);
-        outlinePaint = new Paint(Color.BLACK);
-        outlinePaint.setStyle(Paint.Style.STROKE);
-
-    }
-
-    //too much drawing?
-    //idea was to keep backup of working bitmap
-    //refresh after MotionEvent
-    //need to redraw staves as well as zoom, if zooming
-    /*public void zoomRefresh(){
-        screenState = Bitmap.createBitmap(getScreen(scrollView));
-        bmShader = new BitmapShader(screenState, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        bmPaint.setShader(bmShader);
-    }*/
-
-    //draws enlarged bitmap in circular shape
-    //needs to update as moving position
-    public void zoomDraw(@NonNull Canvas canvas){
-        if(zooming) {
-            matrix.reset();
-            matrix.postScale(2f, 2f, position.x, position.y);
-            bmPaint.getShader().setLocalMatrix(matrix);
-            RectF src = new RectF(position.x - 50, position.y - 50, position.x + 50, position.y + 50);
-            RectF dst = new RectF(0, 0, 100, 100);
-            matrix.setRectToRect(src, dst, Matrix.ScaleToFit.CENTER);
-            matrix.postScale(2f, 2f);
-            bmPaint.getShader().setLocalMatrix(matrix);
-
-            //canvas.
-            canvas.drawCircle(103, 50, 100, bmPaint);
-            canvas.drawCircle(position.x, position.y, 100, bmPaint);
-            canvas.drawCircle(position.x - 250, position.y - 250, 10, outlinePaint);
-        }
-        if(initPoint)
-            canvas.drawCircle(position.x, position.y, 10, paint);
-    }
-
-    /*
-    public void zoomSet(ImageView iv){
-        float dipW = 157f;
-        Resources r = getResources();
-        float pxW = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dipW,
-                r.getDisplayMetrics()
-        );
-
-        float dipH = 150f;
-        float pxH = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dipH,
-                r.getDisplayMetrics()
-        );
-
-        screenState = Bitmap.createBitmap((int)dipW, (int)dipH, Bitmap.Config.ARGB_8888); //working variabes 206, 130
-        zoomLoc = new Canvas(screenState);
-        imageview2.setImageBitmap(screenState);
-    }
-    */
 
     //gets current screen as bitmap
-    public Bitmap getScreen(View view){
+    /*public Bitmap getScreen(View view){
         view.setDrawingCacheEnabled(true);
         view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
         view.buildDrawingCache();
@@ -922,7 +814,7 @@ public class MusicSheet extends AppCompatActivity {
         view.setDrawingCacheEnabled(false);
         view.destroyDrawingCache();
         return screenshot;
-    }
+    }*/
 
     //generates toggle button with custom image
    /* public void setToggle(){

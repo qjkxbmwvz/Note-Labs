@@ -14,7 +14,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent">
+
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/ToolbarLayout"
@@ -69,14 +71,6 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             app:srcCompat="@android:drawable/ic_menu_add" />-->
-
-        <ToggleButton
-            android:id="@+id/tempZoomButton"
-            android:layout_width="75dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:checked="false"
-            android:text="ToggleButton" />
 
         <ToggleButton
             android:id="@+id/editButton"
