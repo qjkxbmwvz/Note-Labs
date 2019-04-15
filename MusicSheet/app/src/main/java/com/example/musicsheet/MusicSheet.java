@@ -44,10 +44,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
-import pl.polidea.view.ZoomView;
-
 public class MusicSheet extends AppCompatActivity {
     enum NoteDur { WHOLE, HALF, QUARTER, EIGHTH }
+
+    ZoomView zv;
 
     SparseArray<Byte> posToPitch;
     SparseIntArray pitchToPos;
@@ -303,28 +303,10 @@ public class MusicSheet extends AppCompatActivity {
         setContentView(R.layout.activity_music_sheet);
 
         scrollView = findViewById(R.id.musicSheetScroll);
-        ZoomView zv = new ZoomView(this);
+        zv = new ZoomView(this);
         scrollView.addView(zv);
         table = new TableLayout(this);
         table.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-
-
-        ZoomView.ZoomViewListener zvl = new ZoomView.ZoomViewListener() {
-            @Override
-            public void onZoomStarted(float v, float v1, float v2) {
-
-            }
-
-            @Override
-            public void onZooming(float v, float v1, float v2) {
-
-            }
-
-            @Override
-            public void onZoomEnded(float v, float v1, float v2) {
-
-            }
-        };
 
         zv.addView(table);
 
@@ -472,6 +454,7 @@ public class MusicSheet extends AppCompatActivity {
                 iv.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
+                        zv.setIsEnabled(!editButton.isChecked());
                         if (editButton.isChecked() && !player.running) {
                             boolean dotting = dotButton.isChecked();
                             boolean resting = restButton.isChecked();
