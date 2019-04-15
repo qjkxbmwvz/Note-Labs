@@ -679,7 +679,7 @@ public class MusicSheet extends AppCompatActivity {
                                     accidental = 0;
                                     ImageView accImg
                                             = findViewById(R.id.accidentButton);
-                                    accImg.setImageResource(R.drawable.quarternote);
+                                    accImg.setImageResource(R.drawable.natural);
                                 }
                             }
                                 break;
@@ -754,7 +754,25 @@ public class MusicSheet extends AppCompatActivity {
             params.width = 100;
             params.height = 100;
             n.setImageView(noteIv);
-            noteIv.setImageResource(R.drawable.halfnote);
+
+            switch (dur)
+            {
+                case WHOLE:
+                    noteIv.setImageResource(R.drawable.wholenote);
+                    params.height = 65;
+                    params.width = 65;
+                    break;
+                case HALF:
+                    noteIv.setImageResource(R.drawable.halfnote);
+                    break;
+                case QUARTER:
+                    noteIv.setImageResource(R.drawable.quarternote);
+                    break;
+                case EIGHTH:
+                    noteIv.setImageResource(R.drawable.eighthnote);
+
+            }
+
             rl.addView(noteIv, params);
         }
 
@@ -1003,9 +1021,10 @@ public class MusicSheet extends AppCompatActivity {
         if (accidental == 2)
             accidental = -1;
 
-        switch(accidental) {
+        switch(accidental)
+        {
         case 0:
-            image.setImageResource(R.drawable.quarternote);
+            image.setImageResource(R.drawable.natural);
             break;
         case 1:
             image.setImageResource(R.drawable.sharp);

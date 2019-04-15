@@ -186,7 +186,7 @@
             android:contentDescription="@string/todo"
             android:onClick="cycleAccidental"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/quarternote" />
+            app:srcCompat="@drawable/natural" />
 
         <ImageButton
             android:id="@+id/noteButton"

@@ -33,7 +33,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:srcCompat="@mipmap/ic_logo" />
+        app:srcCompat="@drawable/notelablogo" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
