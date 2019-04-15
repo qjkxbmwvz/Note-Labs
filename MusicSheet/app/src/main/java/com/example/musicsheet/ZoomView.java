@@ -146,19 +146,17 @@ public class ZoomView extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(final MotionEvent ev) {
-        if (enabled) {
-            // single touch
-            if (ev.getPointerCount() == 1)
-                processSingleTouchEvent(ev);
+        // single touch
+        if (ev.getPointerCount() == 1)
+            processSingleTouchEvent(ev);
 
-            // // double touch
-            if (ev.getPointerCount() == 2)
-                processDoubleTouchEvent(ev);
+        // // double touch
+        if (ev.getPointerCount() == 2)
+            processDoubleTouchEvent(ev);
 
-            // redraw
-            getRootView().invalidate();
-            invalidate();
-        }
+        // redraw
+        getRootView().invalidate();
+        invalidate();
         return true;
     }
 
@@ -280,27 +278,24 @@ public class ZoomView extends FrameLayout {
         lastd = d;
         final float ld = Math.abs(d - startd);
 
-        Math.atan2(y2 - y1, x2 - x1);
         switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                startd = d;
-                pinching = false;
-                break;
+        case MotionEvent.ACTION_DOWN:
+            startd = d;
+            pinching = false;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            if (pinching || ld > 30.0f) {
+                pinching = true;
+                final float dxk = 0.5f * (dx1 + dx2);
+                final float dyk = 0.5f * (dy1 + dy2);
+                smoothZoomTo(Math.max(1.0f, zoom * d / (d - dd)), zoomX - dxk / zoom, zoomY - dyk / zoom);
+            }
+            break;
 
-            case MotionEvent.ACTION_MOVE:
-                if (pinching || ld > 30.0f) {
-                    pinching = true;
-                    final float dxk = 0.5f * (dx1 + dx2);
-                    final float dyk = 0.5f * (dy1 + dy2);
-                    smoothZoomTo(Math.max(1.0f, zoom * d / (d - dd)), zoomX - dxk / zoom, zoomY - dyk / zoom);
-                }
-
-                break;
-
-            case MotionEvent.ACTION_UP:
-            default:
-                pinching = false;
-                break;
+        case MotionEvent.ACTION_UP:
+        default:
+            pinching = false;
+            break;
         }
 
         ev.setAction(MotionEvent.ACTION_CANCEL);
@@ -322,16 +317,17 @@ public class ZoomView extends FrameLayout {
     @Override
     protected void dispatchDraw(final Canvas canvas) {
         // do zoom
-        zoom = lerp(bias(zoom, smoothZoom, 0.05f), smoothZoom, 0.2f);
-        smoothZoomX = clamp(0.5f * getWidth() / smoothZoom, smoothZoomX, getWidth() - 0.5f * getWidth() / smoothZoom);
-        smoothZoomY = clamp(0.5f * getHeight() / smoothZoom, smoothZoomY, getHeight() - 0.5f * getHeight() / smoothZoom);
+        if (enabled) {
+            zoom = lerp(bias(zoom, smoothZoom, 0.05f), smoothZoom, 0.2f);
+            smoothZoomX = clamp(0.5f * getWidth() / smoothZoom, smoothZoomX, getWidth() - 0.5f * getWidth() / smoothZoom);
+            smoothZoomY = clamp(0.5f * getHeight() / smoothZoom, smoothZoomY, getHeight() - 0.5f * getHeight() / smoothZoom);
 
-        zoomX = lerp(bias(zoomX, smoothZoomX, 0.1f), smoothZoomX, 0.35f);
-        zoomY = lerp(bias(zoomY, smoothZoomY, 0.1f), smoothZoomY, 0.35f);
-        if (zoom != smoothZoom && listener != null) {
-            listener.onZooming(zoom, zoomX, zoomY);
+            zoomX = lerp(bias(zoomX, smoothZoomX, 0.1f), smoothZoomX, 0.35f);
+            zoomY = lerp(bias(zoomY, smoothZoomY, 0.1f), smoothZoomY, 0.35f);
+            if (zoom != smoothZoom && listener != null) {
+                listener.onZooming(zoom, zoomX, zoomY);
+            }
         }
-
         final boolean animating = Math.abs(zoom - smoothZoom) > 0.0000001f
                 || Math.abs(zoomX - smoothZoomX) > 0.0000001f || Math.abs(zoomY - smoothZoomY) > 0.0000001f;
 
