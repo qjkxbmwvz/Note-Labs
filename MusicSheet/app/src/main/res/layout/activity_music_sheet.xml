@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MusicSheet">
 
+
     <ScrollView
         android:id="@+id/musicSheetScroll"
         android:layout_width="match_parent"
@@ -13,98 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TableLayout
-            android:id="@+id/staffs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <!--<TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_height="130dp"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar"/>
-
-                <ImageView
-                    android:layout_height="130dp"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_clef_note"/>
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/staffBar2"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-                <ImageView
-                    android:id="@+id/staffBar3"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/staffBar4"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-                <ImageView
-                    android:id="@+id/staffBar5"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="440dp"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/staffBar6"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-                <ImageView
-                    android:id="@+id/staffBar7"
-                    android:layout_width="206dp"
-                    android:layout_height="130dp"
-                    android:contentDescription="@string/todo"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_staff_bar" />
-
-            </TableRow>-->
-
-        </TableLayout>
-    </ScrollView>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/ToolbarLayout"
@@ -114,9 +24,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.867">
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton
             android:id="@+id/playButton"
@@ -196,21 +104,21 @@
             android:contentDescription="@string/todo"
             android:onClick="cycleNoteType"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/quarternote"/>
+            app:srcCompat="@drawable/quarternote" />
 
         <ToggleButton
             android:id="@+id/dotButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="."/>
+            android:text="." />
 
         <ToggleButton
             android:id="@+id/restButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="."/>
+            android:text="." />
 
         <ImageButton
             android:id="@+id/saveButton"
@@ -220,22 +128,8 @@
             android:contentDescription="@string/todo"
             android:onClick="save"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/saveicon"/>
+            app:srcCompat="@drawable/saveicon" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="391dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
-        android:layout_marginTop="96dp"
-        android:layout_marginBottom="164dp"
-        android:text=""
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/ToolbarLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

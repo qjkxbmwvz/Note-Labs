@@ -31,6 +31,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -43,6 +44,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
+import pl.polidea.view.ZoomView;
+
 public class MusicSheet extends AppCompatActivity {
     enum NoteDur { WHOLE, HALF, QUARTER, EIGHTH }
 
@@ -52,6 +55,7 @@ public class MusicSheet extends AppCompatActivity {
     HashMap<Integer, ArrayList<Integer>> reverseKeys;
     HashMap<Track.Clef, ArrayList<Integer>> clefMods;
     HashMap<Track.Clef, ArrayList<Integer>> reverseClefMods;
+
 
     int key;
     /* key values:
@@ -93,7 +97,7 @@ public class MusicSheet extends AppCompatActivity {
 
     ScrollView scrollView;
     TableLayout table;
-    TextView textView;
+    //TextView textView;
 
 
     int horizontalStart = 60;
@@ -299,8 +303,30 @@ public class MusicSheet extends AppCompatActivity {
         setContentView(R.layout.activity_music_sheet);
 
         scrollView = findViewById(R.id.musicSheetScroll);
-        textView = findViewById(R.id.textView);
-        table = findViewById(R.id.staffs);
+        ZoomView zv = new ZoomView(this);
+        scrollView.addView(zv);
+        table = new TableLayout(this);
+        table.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
+
+        ZoomView.ZoomViewListener zvl = new ZoomView.ZoomViewListener() {
+            @Override
+            public void onZoomStarted(float v, float v1, float v2) {
+
+            }
+
+            @Override
+            public void onZooming(float v, float v1, float v2) {
+
+            }
+
+            @Override
+            public void onZoomEnded(float v, float v1, float v2) {
+
+            }
+        };
+
+        zv.addView(table);
 
         score = new Score(player);
         boolean newScore = true;
@@ -1093,6 +1119,23 @@ public class MusicSheet extends AppCompatActivity {
 
         alertDialog.show();
     }
+
+//    private void SetUpZoom(){
+
+//        ZoomView zoomView;
+
+//        setContentView(R.layout.activity_zoomable);
+
+//        View v = ((LayoutInflater)   getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.zoomableview, null, false);
+//        v.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
+
+//        zoomView = new ZoomView(this);
+//        zoomView.addView(v);
+//
+//        musicSheetScroll = (LinearLayout) findViewById(R.id.musicSheetScroll);
+//        main_container.addView(zoomView);
+
+//    }
 
     //END BUTTONS---
 
