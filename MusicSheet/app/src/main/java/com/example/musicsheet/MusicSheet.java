@@ -598,11 +598,12 @@ public class MusicSheet extends AppCompatActivity {
                                     byte[] midiEvent = new byte[6];
                                     byte nominalPitch = (byte)(
                                             p + Objects.requireNonNull(
-                                                    keys.get(key))
-                                                    .get(p % 12)
-                                                    + clefMods.get(
-                                                    score.getTrackClef(m.staff))
-                                                    .get(p % 12));
+                                                        keys.get(key))
+                                                 .get(p % 12)
+                                              + clefMods.get(
+                                                        score.getTrackClef(
+                                                                m.staff))
+                                                 .get(p % 12));
 
                                     midiEvent[0]
                                             = (byte)(0x80 | m.staff);
