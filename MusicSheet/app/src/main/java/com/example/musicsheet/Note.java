@@ -10,7 +10,7 @@ class Note {
     private byte pitch;
     private byte accidental;
     private byte velocity;
-    private ImageView imageView;
+    private ImageView imageView, accidentalImageView;
 
     Note(NoteType noteType, int duration, byte pitch, byte accidental, byte velocity) {
         this.noteType   = noteType;
@@ -37,4 +37,8 @@ class Note {
     void setImageView(ImageView iv) { this.imageView = iv; }
 
     ImageView getImageView() { return imageView; }
+
+    ImageView getAccidentalImageView() {return accidentalImageView; }
+
+    void setAccidentalImageView(ImageView newImageView) {accidentalImageView = newImageView; }
 }
