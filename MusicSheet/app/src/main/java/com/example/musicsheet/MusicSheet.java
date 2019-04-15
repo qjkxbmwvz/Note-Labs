@@ -751,19 +751,27 @@ public class MusicSheet extends AppCompatActivity {
             int xActual = (x * 125 / 48);
             int yActual = y - 85;
             ImageView noteIv;
+            ImageView accidentalImage;
             RelativeLayout.LayoutParams params;
 
-            if (n.getImageView() == null) {
+            if (n.getImageView() == null)
+            {
                 noteIv = new ImageView(getApplicationContext());
                 params = new RelativeLayout.LayoutParams(xActual, yActual);
                 n.setImageView(noteIv);
                 n.getImageView().setLayoutParams(params);
                 rl.addView(noteIv);
-            } else {
+            }
+            else
+                {
                 noteIv = n.getImageView();
+                accidentalImage = n.getAccidentalImageView();
+
+                if(accidentalImage != null)
+                    rl.removeView(accidentalImage);
+
                 rl.removeView(noteIv);
-                params = (RelativeLayout.LayoutParams)
-                        n.getImageView().getLayoutParams();
+                params = (RelativeLayout.LayoutParams) n.getImageView().getLayoutParams();
                 rl.addView(noteIv);
             }
 
