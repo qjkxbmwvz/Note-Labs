@@ -30,11 +30,11 @@ class Score {
         this.player = player;
     }
 
-    int getTempo() { return tempo; }
+    int getTempo()           { return tempo; }
 
     void setTempo(int tempo) { this.tempo = tempo; }
 
-    int getTrackCount() { return tracks.size(); }
+    int getTrackCount()      { return tracks.size(); }
 
     void setTrackClef(int track, Track.Clef clef) {
         tracks.get(track).setClef(clef);
@@ -78,9 +78,9 @@ class Score {
 
     int durationAtTime(int track, int timePosition) {
         if (tracks.get(track).checkNote(timePosition).getFirst().getNoteType()
-         != Note.NoteType.REST)
+            != Note.NoteType.REST)
             return tracks.get(track).checkNote(timePosition)
-                    .getFirst().getDuration();
+                         .getFirst().getDuration();
         else
             return 0;
     }
@@ -97,7 +97,7 @@ class Score {
             for (Pair<Integer, LinkedList<Note>> p : times) {
                 ret.add(new Pair<>(
                         p.first - measureNum * 192 * timeSignature.num
-                                                   / timeSignature.den,
+                                  / timeSignature.den,
                         p.second));
             }
 
@@ -131,7 +131,7 @@ class Score {
                 filename += ".nl";
 
             File out = new File((Environment.getExternalStorageDirectory()
-                              + "/" + filename));
+                                 + "/" + filename));
             DataOutputStream os = new DataOutputStream(
                     new FileOutputStream(out, (false)));
 
@@ -169,7 +169,7 @@ class Score {
     void load(String filename) {
         try {
             File in = new File((Environment.getExternalStorageDirectory()
-                              + "/" + filename));
+                                + "/" + filename));
             DataInputStream is = new DataInputStream(new FileInputStream(in));
             byte[] event = new byte[2];
 
@@ -181,7 +181,9 @@ class Score {
             for (int i = 0; i < il; ++i) {
                 Track.Clef clef = Track.Clef.values()[is.readInt()];
                 tracks.add(new Track(is.readByte(), clef));
-                event[0] = (byte)(0xC0 | i);  // 0xC0 = program change, 0x0X = channel X
+                event[0] = (byte)(0xC0
+                                  | i);  // 0xC0 = program change, 0x0X =
+                // channel X
                 event[1] = tracks.get(i).getInstrument();
                 player.directWrite(event);
 
