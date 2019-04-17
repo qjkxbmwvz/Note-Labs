@@ -627,11 +627,12 @@ public class MusicSheet extends AppCompatActivity {
                                                (m.number * 192 + imageX),
                                                m.staff, Edit.EditType.ADD));
 
-
+                                    /*
                                     accidental = 0;
                                     ImageView accImg
                                       = findViewById(R.id.accidentButton);
                                     accImg.setImageResource(R.drawable.natural);
+                                    */
                                 }
                                 v.getParent()
                                  .requestDisallowInterceptTouchEvent(false);
@@ -735,7 +736,7 @@ public class MusicSheet extends AppCompatActivity {
                 n.setImageView(noteIv);
                 n.getImageView().setLayoutParams(params);
                 rl.addView(noteIv);
-                
+
             } 
           else 
             {
@@ -782,21 +783,31 @@ public class MusicSheet extends AppCompatActivity {
 
 
 
-            if (n.getAccidental() != 0) {
+            if (n.getAccidental() != 0)
+            {
                 accidentalImage = new ImageView(getApplicationContext());
                 accidentalParams = new RelativeLayout.LayoutParams(xActual,
                                                                    yActual);
                 n.setAccidentalImageView(accidentalImage);
-                n.getAccidentalImageView()
-                 .setLayoutParams(accidentalParams);
+                n.getAccidentalImageView().setLayoutParams(accidentalParams);
                 rl.addView(accidentalImage);
 
                 //TODO: adjust all of this and make it use resources
 
-                accidentalParams.leftMargin = (int)(xActual * adjustment);
-                accidentalParams.topMargin = (int)(yActual * adjustment);
-                accidentalParams.width = (int)(100 * adjustment);
-                accidentalParams.height = (int)(100 * adjustment);
+                accidentalParams.leftMargin = (int)(xActual * adjustment - 30);
+                accidentalParams.topMargin = (int)(yActual * adjustment + 54);
+                accidentalParams.width = (int)(55 * adjustment);
+                accidentalParams.height = (int)(55 * adjustment);
+
+                switch (accidental)
+                {
+                    case -1:
+                        accidentalImage.setImageResource(R.drawable.flat);
+                        break;
+                    case 1:
+                        accidentalImage.setImageResource(R.drawable.sharp);
+                }
+
             }
 
         }
