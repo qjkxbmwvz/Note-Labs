@@ -18,11 +18,14 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -79,6 +82,13 @@ public class MusicSheet extends AppCompatActivity {
 
     boolean newScore;
 
+    private ImageButton playButton;
+    private ImageButton restartButton;
+    private ImageButton undoButton;
+    private ImageButton accidentButton;
+    private ImageButton noteButton;
+    private ImageButton saveButton;
+
     private ToggleButton editButton;
     private ToggleButton dotButton;
     private ToggleButton restButton;
@@ -102,6 +112,13 @@ public class MusicSheet extends AppCompatActivity {
         editButton = findViewById(R.id.editButton);
         dotButton = findViewById(R.id.dotButton);
         restButton = findViewById(R.id.restButton);
+
+        playButton = findViewById(R.id.playButton);
+        restartButton = findViewById(R.id.restartButton);
+        undoButton = findViewById(R.id.undoButton);
+        accidentButton = findViewById(R.id.accidentButton);
+        noteButton = findViewById(R.id.noteButton);
+        saveButton = findViewById(R.id.saveButton);
 
         linePaint = setUpPaint(Color.BLACK, (true), Paint.Style.STROKE);
 
@@ -858,12 +875,28 @@ public class MusicSheet extends AppCompatActivity {
 
     //Buttons
     public void play(View view) {
-        score.play();
+        ImageView image= findViewById(R.id.playButton);
+        //redundant
+        if(!score.getRunningState()){
+            score.play();
+            image.setImageResource(R.drawable.ic_media_pause);
+
+        }
+        else if(score.getRunningState()){
+            score.pause();
+            image.setImageResource(R.drawable.ic_media_play);
+
+        }
+        //revert to play button if ended
+        if(!score.getRunningState()){
+            image.setImageResource(R.drawable.ic_media_play);
+        }
+
     }
 
-    public void pause(View view) {
+    /*public void pause(View view) {
         score.pause();
-    }
+    }*/
 
     public void restart(View view) {
         score.resetPlayPos();
@@ -927,6 +960,41 @@ public class MusicSheet extends AppCompatActivity {
             case -1:
                 image.setImageResource(R.drawable.flat);
         }
+    }
+
+    public void cycleButtons(View view){
+        ToggleButton switchButton = ((ToggleButton)findViewById(R.id.switchButton));
+
+        switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    playButton.setVisibility(View.GONE);
+                    restartButton.setVisibility(View.GONE);
+                    undoButton.setVisibility(View.GONE);
+                    editButton.setVisibility(View.GONE);
+                    saveButton.setVisibility(View.GONE);
+                    accidentButton.setVisibility(View.VISIBLE);
+                    noteButton.setVisibility(View.VISIBLE);
+                    dotButton.setVisibility(View.VISIBLE);
+                    restButton.setVisibility(View.VISIBLE);
+
+                }
+                else{
+                    playButton.setVisibility(View.VISIBLE);
+                    restartButton.setVisibility(View.VISIBLE);
+                    undoButton.setVisibility(View.VISIBLE);
+                    editButton.setVisibility(View.VISIBLE);
+                    saveButton.setVisibility(View.VISIBLE);
+                    accidentButton.setVisibility(View.GONE);
+                    noteButton.setVisibility(View.GONE);
+                    dotButton.setVisibility(View.GONE);
+                    restButton.setVisibility(View.GONE);
+
+                }
+            }
+        });
+
     }
 
     public void save(View view) {
