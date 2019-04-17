@@ -25,6 +25,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class MusicSheet extends AppCompatActivity {
     TableLayout table;
 
     int horizontalStart = 60;
-    int horizontalMax = 542;
+    int horizontalMax = 540;
 
     int verticalStart = 19;
     int verticalOffset = 21;
@@ -107,7 +108,7 @@ public class MusicSheet extends AppCompatActivity {
 
     // This happens to have its rounding errors in all the right places.
     byte posToPitch(int pos) {
-        return (byte)(((334 - pos) / 21 + 27) * 12 / 7 + 11);
+        return (byte)(((verticalMax - pos) / 21 + 27) * 12 / 7 + 11);
     }
 
     // This one hardcodes the values into a data structure because
@@ -370,12 +371,12 @@ public class MusicSheet extends AppCompatActivity {
                 RelativeLayout rl = new RelativeLayout(context);
 
                 rl.setLayoutParams(lp);
-                rl.getLayoutParams().height
-                  = (int)(130 * context.getResources()
-                                       .getDisplayMetrics().density);
-                rl.getLayoutParams().width
-                  = (int)(206 * context.getResources()
-                                       .getDisplayMetrics().density);
+                rl.getLayoutParams().height = (int)(
+                  verticalMax * context.getResources()
+                                       .getDisplayMetrics().density / 2.625);
+                rl.getLayoutParams().width = (int)(
+                  horizontalMax * context.getResources()
+                                         .getDisplayMetrics().density / 2.625);
 
                 ImageView iv = new ImageView(context);
 
@@ -446,6 +447,9 @@ public class MusicSheet extends AppCompatActivity {
                             @SuppressWarnings("SuspiciousMethodCalls")
                             Measure m = Objects
                               .requireNonNull(measures.get(v)).second;
+
+                            TextView debugText = findViewById(R.id.debugText);
+
                             int imageX = (int)(event.getX()
                                                / getApplicationContext()
                                                  .getResources()
@@ -456,6 +460,9 @@ public class MusicSheet extends AppCompatActivity {
                                                  .getResources()
                                                  .getDisplayMetrics().density
                                                * 2.625);
+
+                            debugText
+                              .setText(imageX + ", " + imageY);
 
                             assert m != null;
                             imageX = snapToTime((imageX - horizontalStart),
@@ -633,10 +640,15 @@ public class MusicSheet extends AppCompatActivity {
                                       = findViewById(R.id.accidentButton);
                                     accImg.setImageResource(R.drawable.natural);
                                     */
+                                    v.getParent()
+                                     .requestDisallowInterceptTouchEvent(
+                                       (false));
+                                    break;
                                 }
-                                v.getParent()
-                                 .requestDisallowInterceptTouchEvent(false);
-                                break;
+                                case MotionEvent.ACTION_CANCEL:
+                                    if (tempNote != null)
+                                        tempNote.hide();
+                                    break;
                             }
                             lastTouchPointX = imageX;
                             lastTouchPointY = imageY;
@@ -665,43 +677,36 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void drawStaff(ImageView iv) {
-        //takes predetermined width and height dimensions from ImageViews and
-        // converts to pixels
-        float dipW = 206f;
-//        Resources r = getResources();
-//        float pxW = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-//                                              dipW, r.getDisplayMetrics());
-        float dipH = 130f;
-//        float pxH = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-//                                              dipH, r.getDisplayMetrics());
+        double adjustment =
+          getApplicationContext().getResources().getDisplayMetrics().density
+          / 2.625;
 
-        //pretty sure it doesnt work tho haha
+        float dipW = (float)(horizontalMax * adjustment);
+        float dipH = (float)(verticalMax * adjustment);
+
         bitmap = Bitmap.createBitmap((int)dipW, (int)dipH,
-                                     Bitmap.Config.ARGB_8888); //working
-        // variabes 206, 130
+                                     Bitmap.Config.ARGB_8888);
         canvas = new Canvas(bitmap);
-
-        double adjustment = 1 / getApplicationContext().getResources()
-                                                       .getDisplayMetrics()
-          .density * 2.625;
 
         //use drawLine to draw the lines from a start point x,y to an end
         // point x,y
-        float startPointY = (float)(32 * adjustment);
+        float vDiff = (float)(8.0 / 65.0 * verticalMax);
+
+        float startPointY = 2 * vDiff;
         for (int i = 0; i < 5; i++) { //5 lines printed
-            canvas.drawLine((0), startPointY, horizontalMax, startPointY,
-                            linePaint);
-            startPointY += (float)(16 * adjustment);
+            canvas.drawLine((0), (int)(startPointY * adjustment),
+                            (int)((horizontalMax - 1) * adjustment),
+                            (int)(startPointY * adjustment), linePaint);
+            startPointY += vDiff;
         }
 
         //draw vertical lines
-        canvas.drawLine((int)(2 * adjustment), (int)(32 * adjustment),
-                        (int)(2 * adjustment),
-                        (int)((startPointY - 16) * adjustment),
-                        linePaint);
-        canvas.drawLine((int)(207 * adjustment), (int)(32 * adjustment),
-                        (int)(207 * adjustment),
-                        (int)((startPointY - 16) * adjustment),
+        canvas.drawLine((0), (int)(2 * vDiff * adjustment), (0),
+                        (int)((startPointY - vDiff) * adjustment), linePaint);
+        canvas.drawLine((int)((horizontalMax - 1) * adjustment),
+                        (int)(2 * vDiff * adjustment),
+                        (int)((horizontalMax - 1) * adjustment),
+                        (int)((startPointY - vDiff) * adjustment),
                         linePaint);
 
         //update imageViews bitmap
@@ -716,9 +721,9 @@ public class MusicSheet extends AppCompatActivity {
     public void drawNote(RelativeLayout rl, int x, int y, Note n,
                          NoteDur dur, boolean dotted, boolean positionFilled) {
         if (n.getNoteType() != Note.NoteType.REST) {
-            double adjustment = 1 / getApplicationContext().getResources()
-                                                           .getDisplayMetrics()
-              .density * 2.625;
+            double adjustment =
+              getApplicationContext().getResources().getDisplayMetrics().density
+              / 2.625;
 
             int xActual = (x * 125 / 48);
             int yActual = y - 85;
@@ -729,18 +734,14 @@ public class MusicSheet extends AppCompatActivity {
             RelativeLayout.LayoutParams accidentalParams;
 
 
-            if (n.getImageView() == null)
-            {
+            if (n.getImageView() == null) {
                 noteIv = new ImageView(getApplicationContext());
                 params = new RelativeLayout.LayoutParams(xActual, yActual);
                 n.setImageView(noteIv);
                 n.getImageView().setLayoutParams(params);
                 rl.addView(noteIv);
 
-            } 
-          else 
-            {
-
+            } else {
                 noteIv = n.getImageView();
                 accidentalImage = n.getAccidentalImageView();
 
@@ -749,12 +750,6 @@ public class MusicSheet extends AppCompatActivity {
                 params = (RelativeLayout.LayoutParams)n.getImageView()
                                                        .getLayoutParams();
                 rl.addView(noteIv);
-
-                /*
-                rl.removeView(accidentalImage);
-                paramsAccidental = (RelativeLayout.LayoutParams) n.getImageView().getLayoutParams();
-                rl.addView(accidentalImage);
-                */
             }
 
             params.leftMargin = (int)(xActual * adjustment);
@@ -762,8 +757,7 @@ public class MusicSheet extends AppCompatActivity {
             params.width = (int)(100 * adjustment);
             params.height = (int)(100 * adjustment);
 
-            switch (dur)
-            {
+            switch (dur) {
                 case WHOLE:
                     noteIv.setImageResource(R.drawable.wholenote);
                     params.leftMargin += (int)(20 * adjustment);
@@ -782,9 +776,7 @@ public class MusicSheet extends AppCompatActivity {
             }
 
 
-
-            if (n.getAccidental() != 0)
-            {
+            if (n.getAccidental() != 0) {
                 accidentalImage = new ImageView(getApplicationContext());
                 accidentalParams = new RelativeLayout.LayoutParams(xActual,
                                                                    yActual);
@@ -794,13 +786,14 @@ public class MusicSheet extends AppCompatActivity {
 
                 //TODO: adjust all of this and make it use resources
 
-                accidentalParams.leftMargin = (int)(xActual * adjustment - 30);
-                accidentalParams.topMargin = (int)(yActual * adjustment + 54);
+                accidentalParams.leftMargin = (int)(xActual * adjustment
+                                                    - 30 * adjustment);
+                accidentalParams.topMargin = (int)(yActual * adjustment
+                                                   + 54 * adjustment);
                 accidentalParams.width = (int)(55 * adjustment);
                 accidentalParams.height = (int)(55 * adjustment);
 
-                switch (accidental)
-                {
+                switch (n.getAccidental()) {
                     case -1:
                         accidentalImage.setImageResource(R.drawable.flat);
                         break;
@@ -811,27 +804,6 @@ public class MusicSheet extends AppCompatActivity {
             }
 
         }
-
-        /*Bitmap previousBitmap = ((BitmapDrawable) iv.getDrawable())
-        .getBitmap();
-        Canvas newCan = new Canvas(previousBitmap);
-
-
-        switch (n.getNoteType()) {
-        case MELODIC:
-            newCan.drawCircle(xActual, yActual, (5),
-                    (dur == NoteDur.WHOLE || dur == NoteDur.HALF) ? linePaint
-                                                                  : fillPaint);
-            if (dur != NoteDur.WHOLE)
-                newCan.drawLine((xActual + (y < 166 ? -5 : 5)), yActual,
-                                (xActual + (y < 166 ? -5 : 5)),
-                                (yActual + (y < 166 ? 56 : -56)), linePaint);
-            if (dotted)
-                newCan.drawCircle(xActual + 9, yActual, (1), fillPaint);
-            break;
-        default:
-        }
-        iv.setImageBitmap(previousBitmap);*/
     }
 
     @Override
@@ -909,16 +881,18 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void undo(View view) {
-        Edit lastEdit = editHistory.pop();
+        if (!editHistory.empty()) {
+            Edit lastEdit = editHistory.pop();
 
-        switch (lastEdit.editType) {
-            case ADD:
-                score.removeNote(lastEdit.staff, lastEdit.time,
-                                 lastEdit.note.getPitch());
-                break;
-            case REMOVE:
-                score.addNote(lastEdit.staff, lastEdit.time, lastEdit.note);
-                break;
+            switch (lastEdit.editType) {
+                case ADD:
+                    score.removeNote(lastEdit.staff, lastEdit.time,
+                                     lastEdit.note.getPitch());
+                    break;
+                case REMOVE:
+                    score.addNote(lastEdit.staff, lastEdit.time, lastEdit.note);
+                    break;
+            }
         }
     }
 
