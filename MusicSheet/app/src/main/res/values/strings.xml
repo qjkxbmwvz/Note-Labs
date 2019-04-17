@@ -155,4 +155,10 @@
         <item>"Applause"</item>
         <item>"Gunshot"</item>
     </string-array>
+    <string name="clef_prompt">Select a clef:</string>
+    <string-array name="clefs_array">
+        <item>"Treble Clef"</item>
+        <item>"Alto Clef"</item>
+        <item>"Bass Clef"</item>
+    </string-array>
 </resources>

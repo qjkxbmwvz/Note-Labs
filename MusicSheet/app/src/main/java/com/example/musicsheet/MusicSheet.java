@@ -298,7 +298,7 @@ public class MusicSheet extends AppCompatActivity {
                                 NoteDur actualNoteDur = selectedNoteDur;
                                 int gottenDur = score.durationAtTime(
                                   measure.staff,
-                                  (measure.number * 192 + imageX));
+                                  (measure.number * measureLength + imageX));
                                 int duration;
                                 boolean shouldBeDotted = dotting;
 
@@ -392,22 +392,19 @@ public class MusicSheet extends AppCompatActivity {
                                             || lastTouchPointX != imageX) {
                                             byte[] midiEvent = new byte[6];
                                             byte nominalPitch
-                                              = (byte)(p + Objects
-                                              .requireNonNull(
-                                                keys.get(key))
-                                              .get(p % 12)
-                                                       + Objects
-                                                         .requireNonNull(
-                                                           clefMods.get(
-                                                             score
-                                                               .getTrackClef(
-                                                                 measure.staff)))
-                                                         .get(p
-                                                              % 12));
+                                              = (byte)(
+                                              p
+                                              + Objects
+                                                .requireNonNull(
+                                                  keys.get(key)).get(p % 12)
+                                              + Objects.requireNonNull(
+                                                clefMods.get(
+                                                  score.getTrackClef(
+                                                    measure.staff)))
+                                                       .get(p % 12));
 
                                             midiEvent[0]
-                                              = (byte)(0x80
-                                                       | measure.staff);
+                                              = (byte)(0x80 | measure.staff);
                                             midiEvent[1]
                                               = (byte)(lP + Objects
                                               .requireNonNull(
@@ -418,12 +415,10 @@ public class MusicSheet extends AppCompatActivity {
                                                            clefMods.get(
                                                              score.getTrackClef(
                                                                measure.staff)))
-                                                         .get(p
-                                                              % 12));
+                                                         .get(lP % 12));
                                             midiEvent[2] = 127;
                                             midiEvent[3]
-                                              = (byte)(0x90
-                                                       | measure.staff);
+                                              = (byte)(0x90 | measure.staff);
                                             midiEvent[4]
                                               = (byte)(nominalPitch
                                                        + accidental);
@@ -445,8 +440,8 @@ public class MusicSheet extends AppCompatActivity {
                                     case MotionEvent.ACTION_UP: {
                                         byte[] midiEvent = new byte[3];
 
-                                        midiEvent[0] = (byte)(0x80
-                                                              | measure.staff);
+                                        midiEvent[0]
+                                          = (byte)(0x80 | measure.staff);
                                         midiEvent[1]
                                           = (byte)(p + Objects
                                           .requireNonNull(keys.get(key))
@@ -465,13 +460,14 @@ public class MusicSheet extends AppCompatActivity {
 
                                         score.addNote(
                                           measure.staff,
-                                          (measure.number * 192 + imageX),
+                                          (measure.number * measureLength
+                                           + imageX),
                                           tempNote);
 
                                         editHistory.push(
                                           new Edit(tempNote,
-                                                   (measure.number * 192
-                                                    + imageX),
+                                                   (measure.number
+                                                    * measureLength + imageX),
                                                    measure.staff,
                                                    Edit.EditType.ADD));
 
@@ -532,6 +528,35 @@ public class MusicSheet extends AppCompatActivity {
 
                                     instrumentSpinner.setSelection(
                                       score.getTrackInstrument(measure.staff));
+
+
+                                    Spinner clefSpinner = promptView
+                                      .findViewById(R.id.clef_spinner);
+
+                                    clefSpinner.setSelection(
+                                      score.getTrackInstrument(measure.staff));
+
+                                    clefSpinner.setOnItemSelectedListener(
+                                      new AdapterView.OnItemSelectedListener() {
+                                          @Override
+                                          public void onItemSelected(
+                                            AdapterView<?> parent, View view,
+                                            int position, long id) {
+                                              score.setTrackClef(
+                                                measure.staff,
+                                                Track.Clef
+                                                  .values()[position]);
+                                          }
+
+                                          @Override
+                                          public void onNothingSelected(
+                                            AdapterView<?> parent) {}
+                                      });
+
+                                    clefSpinner.setSelection(
+                                      score.getTrackClef(measure.staff)
+                                           .ordinal());
+
 
                                     alertDialogBuilder.setPositiveButton(
                                       ("Done"),

@@ -20,6 +20,13 @@
         android:prompt="@string/instrument_prompt"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:entries="@array/instruments_array"/>
-
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/clef_spinner"
+        android:spinnerMode="dialog"
+        android:prompt="@string/clef_prompt"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
+        android:entries="@array/clefs_array"/>
 
 </LinearLayout>
