@@ -1074,7 +1074,8 @@ public class MusicSheet extends AppCompatActivity {
               @Override
               public void onCheckedChanged(CompoundButton buttonView,
                                            boolean isChecked) {
-                  if (isChecked) {
+                  if (isChecked)
+                  {
                       playButton.setVisibility(View.GONE);
                       restartButton.setVisibility(View.GONE);
                       undoButton.setVisibility(View.GONE);
@@ -1083,7 +1084,9 @@ public class MusicSheet extends AppCompatActivity {
                       noteButton.setVisibility(View.VISIBLE);
                       dotButton.setVisibility(View.VISIBLE);
                       restButton.setVisibility(View.VISIBLE);
-                  } else {
+                  }
+                  else
+                      {
                       playButton.setVisibility(View.VISIBLE);
                       restartButton.setVisibility(View.VISIBLE);
                       undoButton.setVisibility(View.VISIBLE);
