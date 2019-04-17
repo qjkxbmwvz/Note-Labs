@@ -17,11 +17,13 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
     private int startTime;
     private byte[] instruments;
     boolean running;
+    MusicSheet musicSheet;
 
-    Player() {
+    Player(MusicSheet musicSheet) {
         midiDriver = new MidiDriver();
         midiDriver.setOnMidiStartListener(this);
         instruments = new byte[16];
+        this.musicSheet = musicSheet;
     }
 
     void prepare(int tempo, int startTime, ArrayList<Track> tracks) {
@@ -100,6 +102,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
         }
         running = false;
         startTime = 0;
+        musicSheet.resetPlayButton();
     }
 
     @Override

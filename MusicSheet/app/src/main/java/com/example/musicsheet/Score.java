@@ -115,21 +115,17 @@ class Score {
     }
 
     void play() {
-        if (!player.running) {
-            player.prepare(tempo, startTime, tracks);
-            playerThread = new Thread(player);
-            playerThread.start();
-        }
+        player.prepare(tempo, startTime, tracks);
+        playerThread = new Thread(player);
+        playerThread.start();
     }
 
     void pause() {
-        if (player.running) {
-            playerThread.interrupt();
-            try {
-                playerThread.join();
-                startTime = player.getStartTime();
-            } catch (Exception ignored) {}
-        }
+        playerThread.interrupt();
+        try {
+            playerThread.join();
+            startTime = player.getStartTime();
+        } catch (Exception ignored) {}
     }
 
     void resetPlayPos() { startTime = 0; }

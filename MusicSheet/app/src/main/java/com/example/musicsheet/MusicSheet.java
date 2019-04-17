@@ -38,13 +38,12 @@ import java.util.Objects;
 import java.util.Stack;
 
 public class MusicSheet extends AppCompatActivity {
-
     final float STROKE_WIDTH = 2.0f;
 
     private ZoomView zoomView;
 
     // MIDI objects
-    private Player player = new Player();
+    private Player player = new Player(this);
     private Score score;
     private Fraction timeSignature;
 
@@ -875,31 +874,30 @@ public class MusicSheet extends AppCompatActivity {
 
     //Buttons
     public void play(View view) {
-        ImageView image= findViewById(R.id.playButton);
+        ImageView image = findViewById(R.id.playButton);
         //redundant
-        if(!score.getRunningState()){
+        if(!player.running){
             score.play();
             image.setImageResource(R.drawable.ic_media_pause);
-
-        }
-        else if(score.getRunningState()){
+        } else {
             score.pause();
             image.setImageResource(R.drawable.ic_media_play);
-
         }
-        //revert to play button if ended
-        if(!score.getRunningState()){
-            image.setImageResource(R.drawable.ic_media_play);
-        }
-
     }
 
-    /*public void pause(View view) {
-        score.pause();
-    }*/
+    public void resetPlayButton() {
+        ImageView image = findViewById(R.id.playButton);
+
+        image.setImageResource(R.drawable.ic_media_play);
+    }
 
     public void restart(View view) {
-        score.resetPlayPos();
+        if (!player.running) {
+            score.resetPlayPos();
+            ImageView image = findViewById(R.id.playButton);
+
+            image.setImageResource(R.drawable.ic_media_play);
+        }
     }
 
     public void undo(View view) {
@@ -978,7 +976,6 @@ public class MusicSheet extends AppCompatActivity {
                     noteButton.setVisibility(View.VISIBLE);
                     dotButton.setVisibility(View.VISIBLE);
                     restButton.setVisibility(View.VISIBLE);
-
                 }
                 else{
                     playButton.setVisibility(View.VISIBLE);
@@ -990,7 +987,6 @@ public class MusicSheet extends AppCompatActivity {
                     noteButton.setVisibility(View.GONE);
                     dotButton.setVisibility(View.GONE);
                     restButton.setVisibility(View.GONE);
-
                 }
             }
         });
