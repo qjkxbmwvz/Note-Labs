@@ -20,4 +20,6 @@
         android:prompt="@string/instrument_prompt"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:entries="@array/instruments_array"/>
+
+
 </LinearLayout>
