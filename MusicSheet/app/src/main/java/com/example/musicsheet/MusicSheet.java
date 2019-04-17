@@ -448,8 +448,6 @@ public class MusicSheet extends AppCompatActivity {
                             Measure m = Objects
                               .requireNonNull(measures.get(v)).second;
 
-                            TextView debugText = findViewById(R.id.debugText);
-
                             int imageX = (int)(event.getX()
                                                / getApplicationContext()
                                                  .getResources()
@@ -460,9 +458,6 @@ public class MusicSheet extends AppCompatActivity {
                                                  .getResources()
                                                  .getDisplayMetrics().density
                                                * 2.625);
-
-                            debugText
-                              .setText(imageX + ", " + imageY);
 
                             assert m != null;
                             imageX = snapToTime((imageX - horizontalStart),
@@ -475,6 +470,10 @@ public class MusicSheet extends AppCompatActivity {
                             imageY = snapToHeight(imageY, verticalMax,
                                                   verticalStart,
                                                   verticalOffset);
+
+//                            TextView debugText = findViewById(R.id.debugText);
+//                            debugText
+//                              .setText(imageX + ", " + imageY);
 
                             NoteDur actualNoteDur = selectedNoteDur;
                             int gottenDur = score.durationAtTime(
@@ -718,92 +717,108 @@ public class MusicSheet extends AppCompatActivity {
     // converts them to xy coordinates that
     //align with the new bitmap staff bars
 
+    // TODO: replace positionFilled with a TimePosition for
+    // stem sharing and add an accidental bias for matching
+    // and contrasting with the key and recent notes
     public void drawNote(RelativeLayout rl, int x, int y, Note n,
                          NoteDur dur, boolean dotted, boolean positionFilled) {
-        if (n.getNoteType() != Note.NoteType.REST) {
-            double adjustment =
-              getApplicationContext().getResources().getDisplayMetrics().density
-              / 2.625;
+        double adjustment =
+          getApplicationContext().getResources().getDisplayMetrics().density
+          / 2.625;
 
-            int xActual = (x * 125 / 48);
-            int yActual = y - 85;
-            ImageView noteIv;
-            ImageView accidentalImage;
-            RelativeLayout.LayoutParams params;
+        int xActual = (x * 125 / 48);
+        int yActual = y - 85;
+        ImageView noteIv;
+        ImageView accidentalImage;
+        RelativeLayout.LayoutParams params;
 
-            RelativeLayout.LayoutParams accidentalParams;
+        RelativeLayout.LayoutParams accidentalParams;
 
+        noteIv = n.getImageView();
+        if (noteIv == null) {
+            noteIv = new ImageView(getApplicationContext());
+            params = new RelativeLayout.LayoutParams(xActual, yActual);
+            n.setImageView(noteIv);
+            n.getImageView().setLayoutParams(params);
+        } else {
+            n.hide();
+            params = (RelativeLayout.LayoutParams)noteIv.getLayoutParams();
+        }
+        rl.addView(noteIv);
 
-            if (n.getImageView() == null) {
-                noteIv = new ImageView(getApplicationContext());
-                params = new RelativeLayout.LayoutParams(xActual, yActual);
-                n.setImageView(noteIv);
-                n.getImageView().setLayoutParams(params);
-                rl.addView(noteIv);
+        switch (n.getNoteType()) {
+            case MELODIC:
+                params.leftMargin = (int)(xActual * adjustment);
+                params.topMargin = (int)(yActual * adjustment);
+                params.width = (int)(100 * adjustment);
+                params.height = (int)(100 * adjustment);
 
-            } else {
-                noteIv = n.getImageView();
-                accidentalImage = n.getAccidentalImageView();
-
-                n.hide();
-
-                params = (RelativeLayout.LayoutParams)n.getImageView()
-                                                       .getLayoutParams();
-                rl.addView(noteIv);
-            }
-
-            params.leftMargin = (int)(xActual * adjustment);
-            params.topMargin = (int)(yActual * adjustment);
-            params.width = (int)(100 * adjustment);
-            params.height = (int)(100 * adjustment);
-
-            switch (dur) {
-                case WHOLE:
-                    noteIv.setImageResource(R.drawable.wholenote);
-                    params.leftMargin += (int)(20 * adjustment);
-                    params.topMargin += (int)(67 * adjustment);
-                    params.height = (int)(40 * adjustment);
-                    params.width = (int)(40 * adjustment);
-                    break;
-                case HALF:
-                    noteIv.setImageResource(R.drawable.halfnote);
-                    break;
-                case QUARTER:
-                    noteIv.setImageResource(R.drawable.quarternote);
-                    break;
-                case EIGHTH:
-                    noteIv.setImageResource(R.drawable.eighthnote);
-            }
-
-
-            if (n.getAccidental() != 0) {
-                accidentalImage = new ImageView(getApplicationContext());
-                accidentalParams = new RelativeLayout.LayoutParams(xActual,
-                                                                   yActual);
-                n.setAccidentalImageView(accidentalImage);
-                n.getAccidentalImageView().setLayoutParams(accidentalParams);
-                rl.addView(accidentalImage);
-
-                //TODO: adjust all of this and make it use resources
-
-                accidentalParams.leftMargin = (int)(xActual * adjustment
-                                                    - 30 * adjustment);
-                accidentalParams.topMargin = (int)(yActual * adjustment
-                                                   + 54 * adjustment);
-                accidentalParams.width = (int)(55 * adjustment);
-                accidentalParams.height = (int)(55 * adjustment);
-
-                switch (n.getAccidental()) {
-                    case -1:
-                        accidentalImage.setImageResource(R.drawable.flat);
+                switch (dur) {
+                    case WHOLE:
+                        noteIv.setImageResource(R.drawable.wholenote);
+                        params.leftMargin += (int)(20 * adjustment);
+                        params.topMargin += (int)(67 * adjustment);
+                        params.height = (int)(40 * adjustment);
+                        params.width = (int)(40 * adjustment);
                         break;
-                    case 1:
-                        accidentalImage.setImageResource(R.drawable.sharp);
+                    case HALF:
+                        noteIv.setImageResource(R.drawable.halfnote);
+                        break;
+                    case QUARTER:
+                        noteIv.setImageResource(R.drawable.quarternote);
+                        break;
+                    case EIGHTH:
+                        noteIv.setImageResource(R.drawable.eighthnote);
                 }
 
-            }
 
+                if (n.getAccidental() != 0) {
+                    accidentalImage = n.getAccidentalImageView();
+                    if (accidentalImage == null) {
+                        accidentalImage = new ImageView(
+                          getApplicationContext());
+                        accidentalParams = new RelativeLayout.LayoutParams(
+                          xActual,
+                          yActual);
+                        n.setAccidentalImageView(accidentalImage);
+                        n.getAccidentalImageView()
+                         .setLayoutParams(accidentalParams);
+                    } else {
+                        accidentalParams
+                          = (RelativeLayout.LayoutParams)accidentalImage
+                          .getLayoutParams();
+                    }
+                    rl.addView(accidentalImage);
+
+                    //TODO: adjust all of this and make it use resources
+
+                    accidentalParams.leftMargin = (int)((xActual - 30)
+                                                        * adjustment);
+                    accidentalParams.topMargin = (int)((yActual + 54)
+                                                       * adjustment);
+                    accidentalParams.width = (int)(55 * adjustment);
+                    accidentalParams.height = (int)(55 * adjustment);
+
+                    switch (n.getAccidental()) {
+                        // TODO: adjust by key so that, for
+                        // instance, a +1 accidental on a Bb
+                        // in F Major is rendered as a natural
+                        case -1:
+                            accidentalImage.setImageResource(R.drawable.flat);
+                            break;
+                        case 1:
+                            accidentalImage.setImageResource(R.drawable.sharp);
+                    }
+                }
+                break;
+            case REST:
+                // TODO: add rest rendering
+                yActual = 81; // probably correct
+
+                break;
         }
+        // TODO: add dot rendering for both notes and rests
+        if (dotted) {}
     }
 
     @Override
@@ -897,6 +912,8 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void cycleNoteType(View view) {
+        // TODO: make the rest toggle button display
+        // a rest matching the chosen duration
         ImageView image = findViewById(R.id.noteButton);
 
         switch (selectedNoteDur) {
