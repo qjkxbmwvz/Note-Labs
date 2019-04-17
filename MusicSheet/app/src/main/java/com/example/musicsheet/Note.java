@@ -55,7 +55,7 @@ class Note {
         accidentalImageView = newImageView;
     }
 
-    ImageView getDotImageView()         { return imageView; }
+    ImageView getDotImageView()         { return dotImageView; }
 
     void setDotImageView(ImageView newImageView)              { this.dotImageView = newImageView; }
 

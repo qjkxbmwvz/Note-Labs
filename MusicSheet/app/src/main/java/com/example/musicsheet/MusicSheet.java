@@ -910,7 +910,6 @@ public class MusicSheet extends AppCompatActivity {
                     }
                 }
 
-                /*
                 if(dotted)
                 {
                     dottedImage = n.getDotImageView();
@@ -926,15 +925,15 @@ public class MusicSheet extends AppCompatActivity {
 
                     rl.addView(dottedImage);
 
-                    //TODO: find dot image and set it here
-                    dottedImage.setImageResource(R.drawable.);
-
-                    dottedParams.leftMargin = (int)((xActual + 30) * adjustment);
+                    dottedParams.leftMargin = (int)((xActual + 45) * adjustment);
                     dottedParams.topMargin = (int)((yActual + 54) * adjustment);
-                    dottedParams.width = (int)(55 * adjustment);
-                    dottedParams.height = (int)(55 * adjustment);
+                    dottedParams.width = (int)(45 * adjustment);
+                    dottedParams.height = (int)(45 * adjustment);
+
+                    //TODO: find dot image and set it here
+                    dottedImage.setImageResource(R.drawable.saveicon);
                 }
-                */
+
 
 
                 break;
