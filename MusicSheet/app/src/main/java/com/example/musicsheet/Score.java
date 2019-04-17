@@ -42,6 +42,12 @@ class Score {
 
     void setTrackInstrument(int track, byte instrument) {
         tracks.get(track).setInstrument(instrument);
+
+        byte[] event = new byte[2];
+
+        event[0] = (byte)(0xC0 | track);
+        event[1] = instrument;
+        player.directWrite(event);
     }
 
     byte getTrackInstrument(int track) {
@@ -194,9 +200,7 @@ class Score {
             for (int i = 0; i < il; ++i) {
                 Track.Clef clef = Track.Clef.values()[is.readInt()];
                 tracks.add(new Track(is.readByte(), clef));
-                event[0] = (byte)(0xC0
-                                  | i);  // 0xC0 = program change, 0x0X =
-                // channel X
+                event[0] = (byte)(0xC0 | i);
                 event[1] = tracks.get(i).getInstrument();
                 player.directWrite(event);
 

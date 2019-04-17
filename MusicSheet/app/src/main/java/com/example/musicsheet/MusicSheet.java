@@ -495,52 +495,60 @@ public class MusicSheet extends AppCompatActivity {
                                 lastTouchPointX = imageX;
                                 lastTouchPointY = imageY;
                             } else { // Measure -1 is for clefs and signatures.
-                                Context context = getApplicationContext();
-                                LayoutInflater li
-                                  = LayoutInflater.from(context);
-                                View promptView = li.inflate(
-                                  R.layout.instrument_prompt, (null));
-                                AlertDialog.Builder alertDialogBuilder
-                                  = new AlertDialog.Builder(context);
+                                if (event.getAction()
+                                    == MotionEvent.ACTION_DOWN) {
+                                    LayoutInflater li
+                                      = LayoutInflater.from(MusicSheet.this);
+                                    View promptView = li.inflate(
+                                      R.layout.instrument_prompt, (null));
+                                    AlertDialog.Builder alertDialogBuilder
+                                      = new AlertDialog.Builder(
+                                      (MusicSheet.this));
 
-                                alertDialogBuilder.setView(promptView);
+                                    alertDialogBuilder.setView(promptView);
 
-//                                Spinner instrumentSpinner =
-//
-//                                instrumentSpinner.setSelection(
-//                                  score.getTrackInstrument(measure.staff));
-//
-//                                instrumentSpinner.setOnItemSelectedListener(
-//                                  new AdapterView.OnItemSelectedListener() {
-//                                      @Override
-//                                      public void onItemSelected(
-//                                        AdapterView<?> parent, View view,
-//                                        int position, long id) {
-//                                          score
-//                                            .setTrackInstrument(measure.staff,
-//                                                                (byte)position);
-//                                      }
-//
-//                                      @Override
-//                                      public void onNothingSelected(
-//                                        AdapterView<?> parent) {}
-//                                  });
+                                    Spinner instrumentSpinner = promptView
+                                      .findViewById(R.id.instrument_spinner);
 
-                                alertDialogBuilder.setPositiveButton(
-                                  ("Done"),
-                                  new DialogInterface.OnClickListener() {
-                                      @Override
-                                      public void onClick(
-                                        DialogInterface dialogInterface,
-                                        int i) {
+                                    instrumentSpinner.setSelection(
+                                      score.getTrackInstrument(measure.staff));
 
-                                      }
-                                  });
+                                    instrumentSpinner.setOnItemSelectedListener(
+                                      new AdapterView.OnItemSelectedListener() {
+                                          @Override
+                                          public void onItemSelected(
+                                            AdapterView<?> parent, View view,
+                                            int position, long id) {
+                                              score
+                                                .setTrackInstrument(
+                                                  measure.staff,
+                                                  (byte)position);
+                                          }
 
-                                AlertDialog alertDialog = alertDialogBuilder
-                                  .create();
+                                          @Override
+                                          public void onNothingSelected(
+                                            AdapterView<?> parent) {}
+                                      });
 
-                                alertDialog.show();
+                                    instrumentSpinner.setSelection(
+                                      score.getTrackInstrument(measure.staff));
+
+                                    alertDialogBuilder.setPositiveButton(
+                                      ("Done"),
+                                      new DialogInterface.OnClickListener() {
+                                          @Override
+                                          public void onClick(
+                                            DialogInterface dialogInterface,
+                                            int i) {
+
+                                          }
+                                      });
+
+                                    AlertDialog alertDialog = alertDialogBuilder
+                                      .create();
+
+                                    alertDialog.show();
+                                }
                             }
                         }
                         return true;
