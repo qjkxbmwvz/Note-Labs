@@ -60,7 +60,7 @@ class Note {
         if (imageView != null)
             ((RelativeLayout)imageView.getParent()).removeView(imageView);
         if (accidentalImageView != null)
-            ((RelativeLayout)(accidentalImageView.getParent().getParent()))
+            ((RelativeLayout)accidentalImageView.getParent())
               .removeView(accidentalImageView);
     }
 }

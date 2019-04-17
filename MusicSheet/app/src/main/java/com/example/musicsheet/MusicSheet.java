@@ -18,6 +18,7 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -25,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -184,10 +186,12 @@ public class MusicSheet extends AppCompatActivity {
                 relativeLayout.setLayoutParams(layoutParams);
                 relativeLayout.getLayoutParams().height = (int)(
                   verticalMax * context.getResources()
-                                       .getDisplayMetrics().density / 2.625);
+                                       .getDisplayMetrics().density
+                  / 2.625);
                 relativeLayout.getLayoutParams().width = (int)(
                   horizontalMax * context.getResources()
-                                         .getDisplayMetrics().density / 2.625);
+                                         .getDisplayMetrics().density
+                  / 2.625);
 
                 ImageView imageView = new ImageView(context);
 
@@ -214,7 +218,8 @@ public class MusicSheet extends AppCompatActivity {
                             for (Note n : p.second) {
                                 byte pitch = (byte)(n.getPitch()
                                                     + Objects.requireNonNull(
-                                  reverseKeys.get(key)).get(n.getPitch() % 12));
+                                  reverseKeys.get(key)).get(n.getPitch()
+                                                            % 12));
 
                                 drawNote(relativeLayout, p.first,
                                          pitchToPos.get(
@@ -222,7 +227,8 @@ public class MusicSheet extends AppCompatActivity {
                                            + Objects.requireNonNull(
                                              reverseClefMods
                                                .get(score.getTrackClef(
-                                                 i % trackCount)))
+                                                 i
+                                                 % trackCount)))
                                                     .get(pitch % 12)), n,
                                          noteDur, dotted, (false));
                             }
@@ -256,7 +262,7 @@ public class MusicSheet extends AppCompatActivity {
                             RelativeLayout rl = Objects
                               .requireNonNull(measures.get(v)).first;
                             @SuppressWarnings("SuspiciousMethodCalls")
-                            Measure measure = Objects
+                            final Measure measure = Objects
                               .requireNonNull(measures.get(v)).second;
 
                             int imageX = (int)(event.getX()
@@ -272,7 +278,7 @@ public class MusicSheet extends AppCompatActivity {
 
                             assert measure != null;
 
-                            if (measure.number > 0) { // We start from measure 1
+                            if (measure.number >= 0) {
                                 imageX = snapToTime((imageX - horizontalStart),
                                                     measureLength,
                                                     (horizontalMax
@@ -346,7 +352,8 @@ public class MusicSheet extends AppCompatActivity {
                                         midiEvent[0] = (byte)(0x90
                                                               | measure.staff);
                                         midiEvent[1] =
-                                          (byte)(nominalPitch + accidental);
+                                          (byte)(nominalPitch
+                                                 + accidental);
                                         midiEvent[2] = 127;
 
                                         // Send the MIDI event to the
@@ -360,13 +367,19 @@ public class MusicSheet extends AppCompatActivity {
                                                          : gottenDur,
                                           resting ? (byte)0
                                                   : (byte)(
-                                                    p + Objects.requireNonNull(
-                                                      keys.get(key)).get(p % 12)
-                                                    + Objects.requireNonNull(
-                                                      clefMods.get(
-                                                        score.getTrackClef(
-                                                          measure.staff)))
-                                                             .get(p % 12)),
+                                                    p + Objects
+                                                      .requireNonNull(
+                                                        keys.get(
+                                                          key))
+                                                      .get(p
+                                                           % 12)
+                                                    + Objects
+                                                      .requireNonNull(
+                                                        clefMods.get(
+                                                          score.getTrackClef(
+                                                            measure.staff)))
+                                                      .get(p
+                                                           % 12)),
                                           accidental, (byte)127);
 
                                         drawNote(rl, imageX, imageY,
@@ -380,29 +393,37 @@ public class MusicSheet extends AppCompatActivity {
                                             byte[] midiEvent = new byte[6];
                                             byte nominalPitch
                                               = (byte)(p + Objects
-                                              .requireNonNull(keys.get(key))
+                                              .requireNonNull(
+                                                keys.get(key))
                                               .get(p % 12)
-                                                       + Objects.requireNonNull(
-                                              clefMods.get(score
-                                                             .getTrackClef(
-                                                               measure.staff)))
-                                                                .get(p % 12));
+                                                       + Objects
+                                                         .requireNonNull(
+                                                           clefMods.get(
+                                                             score
+                                                               .getTrackClef(
+                                                                 measure.staff)))
+                                                         .get(p
+                                                              % 12));
 
                                             midiEvent[0]
-                                              = (byte)(0x80 | measure.staff);
+                                              = (byte)(0x80
+                                                       | measure.staff);
                                             midiEvent[1]
                                               = (byte)(lP + Objects
-                                              .requireNonNull(keys.get(key))
+                                              .requireNonNull(
+                                                keys.get(key))
                                               .get(lP % 12) + accidental
                                                        + Objects
                                                          .requireNonNull(
                                                            clefMods.get(
                                                              score.getTrackClef(
                                                                measure.staff)))
-                                                         .get(p % 12));
+                                                         .get(p
+                                                              % 12));
                                             midiEvent[2] = 127;
                                             midiEvent[3]
-                                              = (byte)(0x90 | measure.staff);
+                                              = (byte)(0x90
+                                                       | measure.staff);
                                             midiEvent[4]
                                               = (byte)(nominalPitch
                                                        + accidental);
@@ -454,6 +475,13 @@ public class MusicSheet extends AppCompatActivity {
                                                    measure.staff,
                                                    Edit.EditType.ADD));
 
+                                        accidental = 0;
+                                        ImageView accImg = findViewById(
+                                          R.id.accidentButton);
+
+                                        accImg
+                                          .setImageResource(R.drawable.natural);
+
                                         v.getParent()
                                          .requestDisallowInterceptTouchEvent(
                                            (false));
@@ -466,11 +494,54 @@ public class MusicSheet extends AppCompatActivity {
                                 }
                                 lastTouchPointX = imageX;
                                 lastTouchPointY = imageY;
-                            }
-                        } else { // Measure 0 is for clefs and signatures;
-                                 // Clicking it should let us
-                                 // change staff properties.
+                            } else { // Measure -1 is for clefs and signatures.
+                                Context context = getApplicationContext();
+                                LayoutInflater li
+                                  = LayoutInflater.from(context);
+                                View promptView = li.inflate(
+                                  R.layout.instrument_prompt, (null));
+                                AlertDialog.Builder alertDialogBuilder
+                                  = new AlertDialog.Builder(context);
 
+                                alertDialogBuilder.setView(promptView);
+
+//                                Spinner instrumentSpinner =
+//
+//                                instrumentSpinner.setSelection(
+//                                  score.getTrackInstrument(measure.staff));
+//
+//                                instrumentSpinner.setOnItemSelectedListener(
+//                                  new AdapterView.OnItemSelectedListener() {
+//                                      @Override
+//                                      public void onItemSelected(
+//                                        AdapterView<?> parent, View view,
+//                                        int position, long id) {
+//                                          score
+//                                            .setTrackInstrument(measure.staff,
+//                                                                (byte)position);
+//                                      }
+//
+//                                      @Override
+//                                      public void onNothingSelected(
+//                                        AdapterView<?> parent) {}
+//                                  });
+
+                                alertDialogBuilder.setPositiveButton(
+                                  ("Done"),
+                                  new DialogInterface.OnClickListener() {
+                                      @Override
+                                      public void onClick(
+                                        DialogInterface dialogInterface,
+                                        int i) {
+
+                                      }
+                                  });
+
+                                AlertDialog alertDialog = alertDialogBuilder
+                                  .create();
+
+                                alertDialog.show();
+                            }
                         }
                         return true;
                     }
@@ -673,7 +744,8 @@ public class MusicSheet extends AppCompatActivity {
 
     private void drawStaff(ImageView iv) {
         double adjustment =
-          getApplicationContext().getResources().getDisplayMetrics().density
+          getApplicationContext().getResources()
+                                 .getDisplayMetrics().density
           / 2.625;
 
         float dipW = (float)(horizontalMax * adjustment);
@@ -715,7 +787,8 @@ public class MusicSheet extends AppCompatActivity {
     private void drawNote(RelativeLayout rl, int x, int y, Note n,
                           NoteDur dur, boolean dotted, boolean positionFilled) {
         double adjustment =
-          getApplicationContext().getResources().getDisplayMetrics().density
+          getApplicationContext().getResources()
+                                 .getDisplayMetrics().density
           / 2.625;
 
         int xActual = (x * 125 / 48);
@@ -876,7 +949,7 @@ public class MusicSheet extends AppCompatActivity {
     public void play(View view) {
         ImageView image = findViewById(R.id.playButton);
         //redundant
-        if(!player.running){
+        if (!player.running) {
             score.play();
             image.setImageResource(R.drawable.ic_media_pause);
         } else {
@@ -960,36 +1033,35 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    public void cycleButtons(View view){
-        ToggleButton switchButton = ((ToggleButton)findViewById(R.id.switchButton));
+    public void cycleButtons(View view) {
+        ToggleButton editButton = findViewById(R.id.editButton);
 
-        switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    playButton.setVisibility(View.GONE);
-                    restartButton.setVisibility(View.GONE);
-                    undoButton.setVisibility(View.GONE);
-                    editButton.setVisibility(View.GONE);
-                    saveButton.setVisibility(View.GONE);
-                    accidentButton.setVisibility(View.VISIBLE);
-                    noteButton.setVisibility(View.VISIBLE);
-                    dotButton.setVisibility(View.VISIBLE);
-                    restButton.setVisibility(View.VISIBLE);
-                }
-                else{
-                    playButton.setVisibility(View.VISIBLE);
-                    restartButton.setVisibility(View.VISIBLE);
-                    undoButton.setVisibility(View.VISIBLE);
-                    editButton.setVisibility(View.VISIBLE);
-                    saveButton.setVisibility(View.VISIBLE);
-                    accidentButton.setVisibility(View.GONE);
-                    noteButton.setVisibility(View.GONE);
-                    dotButton.setVisibility(View.GONE);
-                    restButton.setVisibility(View.GONE);
-                }
-            }
-        });
+        editButton.setOnCheckedChangeListener(
+          new CompoundButton.OnCheckedChangeListener() {
+              @Override
+              public void onCheckedChanged(CompoundButton buttonView,
+                                           boolean isChecked) {
+                  if (isChecked) {
+                      playButton.setVisibility(View.GONE);
+                      restartButton.setVisibility(View.GONE);
+                      undoButton.setVisibility(View.GONE);
+                      saveButton.setVisibility(View.GONE);
+                      accidentButton.setVisibility(View.VISIBLE);
+                      noteButton.setVisibility(View.VISIBLE);
+                      dotButton.setVisibility(View.VISIBLE);
+                      restButton.setVisibility(View.VISIBLE);
+                  } else {
+                      playButton.setVisibility(View.VISIBLE);
+                      restartButton.setVisibility(View.VISIBLE);
+                      undoButton.setVisibility(View.VISIBLE);
+                      saveButton.setVisibility(View.VISIBLE);
+                      accidentButton.setVisibility(View.GONE);
+                      noteButton.setVisibility(View.GONE);
+                      dotButton.setVisibility(View.GONE);
+                      restButton.setVisibility(View.GONE);
+                  }
+              }
+          });
 
     }
 
@@ -1015,15 +1087,18 @@ public class MusicSheet extends AppCompatActivity {
                              new DialogInterface.OnClickListener() {
                                  @Override
                                  public void onClick(
-                                   DialogInterface dialogInterface, int i) {
-                                     score.save(userInput.getText().toString());
+                                   DialogInterface dialogInterface,
+                                   int i) {
+                                     score.save(userInput.getText()
+                                                         .toString());
                                  }
                              })
           .setNegativeButton("Cancel",
                              new DialogInterface.OnClickListener() {
                                  @Override
                                  public void onClick(
-                                   DialogInterface dialogInterface, int i) {
+                                   DialogInterface dialogInterface,
+                                   int i) {
                                      dialogInterface.cancel();
                                  }
                              });

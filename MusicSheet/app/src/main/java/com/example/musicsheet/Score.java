@@ -40,6 +40,14 @@ class Score {
         tracks.get(track).setClef(clef);
     }
 
+    void setTrackInstrument(int track, byte instrument) {
+        tracks.get(track).setInstrument(instrument);
+    }
+
+    byte getTrackInstrument(int track) {
+        return tracks.get(track).getInstrument();
+    }
+
     Track.Clef getTrackClef(int track) { return tracks.get(track).getClef(); }
 
     int addTrack(Track track) {

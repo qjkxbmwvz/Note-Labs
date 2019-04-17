@@ -14,12 +14,14 @@
         android:id="@+id/musicSheetScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/ToolbarLayout"
+        android:layout_marginBottom="100dp"
+        android:clipToPadding="false"
+        android:fillViewport="false"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/ToolbarLayout"
@@ -65,15 +67,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
-            app:srcCompat="@android:drawable/ic_menu_add" />-->
-
-        <ToggleButton
-            android:id="@+id/editButton"
-            android:layout_width="75dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:checked="true"
-            android:text="."/>
+            app:srcCompat="@android:drawable/ic_menu_add"/>-->
 
         <ImageButton
             android:id="@+id/accidentButton"
@@ -129,15 +123,13 @@
             android:layout_gravity="right">
 
             <ToggleButton
-                android:id="@+id/switchButton"
+                android:id="@+id/editButton"
                 android:layout_width="75dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:contentDescription="TODO"
                 android:onClick="cycleButtons"
-                android:text="Switch" />
+                android:text="Switch"/>
         </LinearLayout>
-
     </LinearLayout>
-
 </android.support.constraint.ConstraintLayout>
