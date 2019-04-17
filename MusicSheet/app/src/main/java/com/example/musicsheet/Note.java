@@ -1,6 +1,8 @@
 package com.example.musicsheet;
 
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 class Note {
     enum NoteType {MELODIC, PERCUSSIVE, REST}
@@ -51,5 +53,13 @@ class Note {
 
     void setAccidentalImageView(ImageView newImageView) {
         accidentalImageView = newImageView;
+    }
+
+    void hide() {
+        if (imageView != null)
+            ((RelativeLayout)imageView.getParent()).removeView(imageView);
+        if (accidentalImageView != null)
+            ((RelativeLayout)(accidentalImageView.getParent().getParent()))
+              .removeView(accidentalImageView);
     }
 }

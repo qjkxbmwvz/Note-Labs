@@ -59,15 +59,16 @@
             android:onClick="restart"
             app:srcCompat="@android:drawable/ic_media_previous"/>
 
-        <!--<ImageButton
+        <ImageButton
             android:id="@+id/undoButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
-            app:srcCompat="@android:drawable/ic_menu_revert" />
+            android:onClick="undo"
+            app:srcCompat="@android:drawable/ic_menu_revert"/>
 
-        <ImageButton
+        <!--<ImageButton
             android:id="@+id/addInstrumentButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"

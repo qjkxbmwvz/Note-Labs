@@ -25,29 +25,26 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Stack;
 
 public class MusicSheet extends AppCompatActivity {
     enum NoteDur {WHOLE, HALF, QUARTER, EIGHTH}
 
     ZoomView zv;
 
-    int debugCount = 0;
-    TextView debugText;
-
-    SparseArray<Byte> posToPitch;
     SparseIntArray pitchToPos;
     SparseArray<ArrayList<Integer>> keys;
     SparseArray<ArrayList<Integer>> reverseKeys;
     HashMap<Track.Clef, ArrayList<Integer>> clefMods;
     HashMap<Track.Clef, ArrayList<Integer>> reverseClefMods;
 
+    Stack<Edit> editHistory;
 
     int key;
     /* key values:
@@ -89,8 +86,6 @@ public class MusicSheet extends AppCompatActivity {
 
     ScrollView scrollView;
     TableLayout table;
-    //TextView textView;
-
 
     int horizontalStart = 60;
     int horizontalMax = 542;
@@ -105,31 +100,18 @@ public class MusicSheet extends AppCompatActivity {
     private Player player = new Player();
     Score score;
     Fraction timeSignature;
+
     HashMap<ImageView, Pair<RelativeLayout, Measure>> measures;
     NoteDur selectedNoteDur;
     Note tempNote;
 
-    void setUpPosToPitch() {
-        posToPitch = new SparseArray<>();
-
-        posToPitch.put(19, (byte)83);
-        posToPitch.put(40, (byte)81);
-        posToPitch.put(61, (byte)79);
-        posToPitch.put(82, (byte)77);
-        posToPitch.put(103, (byte)76);
-        posToPitch.put(124, (byte)74);
-        posToPitch.put(145, (byte)72);
-        posToPitch.put(166, (byte)71);
-        posToPitch.put(187, (byte)69);
-        posToPitch.put(208, (byte)67);
-        posToPitch.put(229, (byte)65);
-        posToPitch.put(250, (byte)64);
-        posToPitch.put(271, (byte)62);
-        posToPitch.put(292, (byte)60);
-        posToPitch.put(313, (byte)59);
-        posToPitch.put(334, (byte)57);
+    // This happens to have its rounding errors in all the right places.
+    byte posToPitch(int pos) {
+        return (byte)(((334 - pos) / 21 + 27) * 12 / 7 + 11);
     }
 
+    // This one hardcodes the values into a data structure because
+    // the mathematical approach produces the wrong values.
     void setUpPitchToPos() {
         pitchToPos = new SparseIntArray();
         pitchToPos.put(83, 19);
@@ -307,10 +289,11 @@ public class MusicSheet extends AppCompatActivity {
         selectedNoteDur = NoteDur.QUARTER;
         key = 0;
 
-        setUpPosToPitch();
         setUpPitchToPos();
         setUpKeys();
         setUpClefMods();
+
+        editHistory = new Stack<>();
 
         //create the paint variables used by the canvas
         linePaint = new Paint();
@@ -329,10 +312,6 @@ public class MusicSheet extends AppCompatActivity {
         setContentView(R.layout.activity_music_sheet);
 
         scrollView = findViewById(R.id.musicSheetScroll);
-
-        debugText = findViewById(R.id.debugText);
-        debugText.setText("Debug!");
-
         zv = new ZoomView(this);
         scrollView.addView(zv);
         table = new TableLayout(this);
@@ -429,11 +408,9 @@ public class MusicSheet extends AppCompatActivity {
 
                                 drawNote(rl, p.first, pitchToPos.get(
                                   pitch
-                                  + Objects.requireNonNull(reverseClefMods
-                                                             .get(score
-                                                                    .getTrackClef(
-                                                                      i
-                                                                      % trackCount)))
+                                  + Objects.requireNonNull(
+                                    reverseClefMods
+                                      .get(score.getTrackClef(i % trackCount)))
                                            .get(pitch % 12)), n,
                                          noteDur, dotted, (false));
                             }
@@ -485,15 +462,12 @@ public class MusicSheet extends AppCompatActivity {
                                                 measureLength,
                                                 (horizontalMax
                                                  - horizontalStart),
-                                                score.getMeasure(m.staff,
-                                                                 m.number,
-                                                                 timeSignature));
+                                                score.getMeasure(
+                                                  m.staff, m.number,
+                                                  timeSignature));
                             imageY = snapToHeight(imageY, verticalMax,
                                                   verticalStart,
                                                   verticalOffset);
-
-                            if (event.getAction() == MotionEvent.ACTION_CANCEL)
-                                debugText.setText("Fuck!");
 
                             NoteDur actualNoteDur = selectedNoteDur;
                             int gottenDur = score.durationAtTime(
@@ -529,8 +503,8 @@ public class MusicSheet extends AppCompatActivity {
 
                             byte lP = 0;
                             if (lastTouchPointY != 0)
-                                lP = posToPitch.get(lastTouchPointY);
-                            byte p = posToPitch.get(imageY);
+                                lP = posToPitch(lastTouchPointY);
+                            byte p = posToPitch(imageY);
 
                             switch (event.getAction()) {
                                 case MotionEvent.ACTION_DOWN: {
@@ -585,33 +559,25 @@ public class MusicSheet extends AppCompatActivity {
                                 case MotionEvent.ACTION_MOVE:
                                     if (lastTouchPointY != imageY
                                         || lastTouchPointX != imageX) {
-                                        ++debugCount;
                                         byte[] midiEvent = new byte[6];
                                         byte nominalPitch = (byte)(p + Objects
                                           .requireNonNull(keys.get(key))
-                                          .get(p % 12) + Objects
-                                                                     .requireNonNull(
-                                                                       clefMods
-                                                                         .get(
-                                                                           score
-                                                                             .getTrackClef(
-                                                                               m.staff)))
-                                                                     .get(p
-                                                                          % 12));
+                                          .get(p % 12) + Objects.requireNonNull(
+                                          clefMods
+                                            .get(score.getTrackClef(m.staff)))
+                                                                .get(p % 12));
 
                                         midiEvent[0]
                                           = (byte)(0x80 | m.staff);
-                                        midiEvent[1] = (byte)(lP + Objects
+                                        midiEvent[1]
+                                          = (byte)(lP + Objects
                                           .requireNonNull(keys.get(key))
-                                          .get(lP % 12) + accidental
-                                                              + Objects
-                                                                .requireNonNull(
-                                                                  clefMods.get(
-                                                                    score
-                                                                      .getTrackClef(
-                                                                        m.staff)))
-                                                                .get(p
-                                                                     % 12));
+                                          .get(lP % 12) + accidental + Objects
+                                                     .requireNonNull(
+                                                       clefMods.get(
+                                                         score.getTrackClef(
+                                                           m.staff)))
+                                                     .get(p % 12));
                                         midiEvent[2] = 127;
                                         midiEvent[3]
                                           = (byte)(0x90 | m.staff);
@@ -655,6 +621,11 @@ public class MusicSheet extends AppCompatActivity {
                                       m.staff,
                                       (m.number * 192 + imageX),
                                       tempNote);
+
+                                    editHistory.push(
+                                      new Edit(tempNote,
+                                               (m.number * 192 + imageX),
+                                               m.staff, Edit.EditType.ADD));
 
                                     accidental = 0;
                                     ImageView accImg
@@ -762,10 +733,8 @@ public class MusicSheet extends AppCompatActivity {
                 noteIv = n.getImageView();
                 accidentalImage = n.getAccidentalImageView();
 
-                if (accidentalImage != null)
-                    rl.removeView(accidentalImage);
+                n.hide();
 
-                rl.removeView(noteIv);
                 params = (RelativeLayout.LayoutParams)n.getImageView()
                                                        .getLayoutParams();
                 rl.addView(noteIv);
@@ -835,35 +804,6 @@ public class MusicSheet extends AppCompatActivity {
         iv.setImageBitmap(previousBitmap);*/
     }
 
-
-    //gets current screen as bitmap
-    /*public Bitmap getScreen(View view){
-        view.setDrawingCacheEnabled(true);
-        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-        view.buildDrawingCache();
-
-        if(view.getDrawingCache() == null)
-            return null;
-
-        Bitmap screenshot = Bitmap.createBitmap(view.getDrawingCache());
-        view.setDrawingCacheEnabled(false);
-        view.destroyDrawingCache();
-        return screenshot;
-    }*/
-
-    //generates toggle button with custom image
-   /* public void setToggle(){
-        ToggleButton zoomButton = (ToggleButton) findViewById(R.id
-        .tempZoomButton);
-        ImageSpan imageSpan = new ImageSpan(this, android.R.drawable
-        .ic_menu_add);
-        SpannableString content = new SpannableString("X");
-        content.setSpan(imageSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        zoomButton.setText(content);
-        zoomButton.setTextOn(content);
-        zoomButton.setTextOff(content);
-    }
-*/
     @Override
     protected void onResume() {
         super.onResume();
@@ -924,30 +864,6 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-
-    /*private void goToInstrumentPanel(){
-        ImageButton btnInstr = (ImageButton)findViewById(R.id
-        .addInstrumentButton);
-        btnInstr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //startActivity(new Intent(MusicSheet.this, InstrumentPanel
-                .class));
-            }
-        });
-    }
-*/
-    /*private void goToNotePanel(){
-        ImageButton btnNote = (ImageButton)findViewById(R.id.noteButton);
-        btnNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //startActivity(new Intent(MusicSheet.this, NotePanel.class));
-            }
-        });
-    }*/
-
-
     //BUTTONS---
 
     public void play(View view) {
@@ -963,7 +879,17 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void undo(View view) {
-        //remove last note added
+        Edit lastEdit = editHistory.pop();
+
+        switch (lastEdit.editType) {
+            case ADD:
+                score.removeNote(lastEdit.staff, lastEdit.time,
+                                 lastEdit.note.getPitch());
+                break;
+            case REMOVE:
+                score.addNote(lastEdit.staff, lastEdit.time, lastEdit.note);
+                break;
+        }
     }
 
     public void cycleNoteType(View view) {
@@ -1025,126 +951,27 @@ public class MusicSheet extends AppCompatActivity {
         final EditText userInput = promptView.findViewById(
           R.id.editTextDialogUserInput);
 
-        alertDialogBuilder.setCancelable(false).setPositiveButton(("OK"),
-                                                                  new DialogInterface.OnClickListener() {
-                                                                      @Override
-                                                                      public void onClick(
-                                                                        DialogInterface dialogInterface,
-                                                                        int i) {
-                                                                          score
-                                                                            .save(
-                                                                              userInput
-                                                                                .getText()
-                                                                                .toString());
-                                                                      }
-                                                                  })
-                          .setNegativeButton("Cancel",
-                                             new DialogInterface.OnClickListener() {
-                                                 @Override
-                                                 public void onClick(
-                                                   DialogInterface dialogInterface,
-                                                   int i) {
-                                                     dialogInterface.cancel();
-                                                 }
-                                             });
+        alertDialogBuilder
+          .setCancelable(false)
+          .setPositiveButton(("OK"),
+                             new DialogInterface.OnClickListener() {
+                                 @Override
+                                 public void onClick(
+                                   DialogInterface dialogInterface, int i) {
+                                     score.save(userInput.getText().toString());
+                                 }
+                             })
+          .setNegativeButton("Cancel",
+                             new DialogInterface.OnClickListener() {
+                                 @Override
+                                 public void onClick(
+                                   DialogInterface dialogInterface, int i) {
+                                     dialogInterface.cancel();
+                                 }
+                             });
 
         AlertDialog alertDialog = alertDialogBuilder.create();
 
         alertDialog.show();
     }
-
-//    private void SetUpZoom(){
-
-//        ZoomView zoomView;
-
-//        setContentView(R.layout.activity_zoomable);
-
-//        View v = ((LayoutInflater)   getSystemService(Context
-// .LAYOUT_INFLATER_SERVICE)).inflate(R.layout.zoomableview, null, false);
-//        v.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout
-// .LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
-
-//        zoomView = new ZoomView(this);
-//        zoomView.addView(v);
-//
-//        musicSheetScroll = (LinearLayout) findViewById(R.id.musicSheetScroll);
-//        main_container.addView(zoomView);
-
-//    }
-
-    //END BUTTONS---
-
-/*    //@Override
-    public boolean onTouch(View v, MotionEvent event) {
-        int x = (int)event.getX();
-        int y = (int)event.getY();
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                textView.setText("X: " + x + " Y: " + y);
-            case MotionEvent.ACTION_MOVE:
-            case MotionEvent.ACTION_UP:
-        }
-        return false;
-
-         switch (event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        break;
-                }
-
-                    scrollView.setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                //set a listener for the imageViews
-                v.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        imageName = v.toString();
-                        return false;
-                    }
-                });
-
-                //set a onTouchListener for each imageView
-                textView.setText("x:" + event.getX() + "v:" + imageName);
-
-                return false;
-            }
-        });
-    }*/
-
-        /*TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
-        TableRow row = (TableRow)tblLayout.getChildAt(0); // Here get row id
-        depending on number of row
-        Button button = (Button)row.getChildAt(XXX); // get child index on
-        particular row
-        String buttonText = button.getText().toString();*/
-
-
-    //run this code for each view you click on
-
-
-
-
-        /*goToInstrumentPanel();
-        goToNotePanel();*/
-        /*if (score == null) {
-            ActivityCompat.requestPermissions(MusicSheet.this, new String[] {
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            }, 100);
-            if (score == null) {
-                score = new Score(player);
-                if (ContextCompat.checkSelfPermission(MusicSheet.this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_GRANTED)
-                    score.load();
-            }
-            score.play();
-        }*/
-
 }
