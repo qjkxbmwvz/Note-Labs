@@ -12,7 +12,7 @@ class Note {
     private byte pitch;
     private byte accidental;
     private byte velocity;
-    private ImageView imageView, accidentalImageView;
+    private ImageView imageView, accidentalImageView, dotImageView;
 
     Note(NoteType noteType, int duration, byte pitch, byte accidental,
          byte velocity) {
@@ -51,16 +51,20 @@ class Note {
 
     ImageView getAccidentalImageView() {return accidentalImageView; }
 
-
     void setAccidentalImageView(ImageView newImageView) {
         accidentalImageView = newImageView;
     }
+
+    ImageView getDotImageView()         { return imageView; }
+
+    void setDotImageView(ImageView newImageView)              { this.dotImageView = newImageView; }
 
     void hide() {
         if (imageView != null)
             ((RelativeLayout)imageView.getParent()).removeView(imageView);
         if (accidentalImageView != null)
-            ((RelativeLayout)accidentalImageView.getParent())
-              .removeView(accidentalImageView);
+            ((RelativeLayout)accidentalImageView.getParent()).removeView(accidentalImageView);
+        if (dotImageView != null)
+            ((RelativeLayout)dotImageView.getParent()).removeView(dotImageView);
     }
 }
