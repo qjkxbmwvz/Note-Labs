@@ -40,5 +40,5 @@ class Note {
 
     ImageView getAccidentalImageView() {return accidentalImageView; }
 
-    void setAccidentalImageView(ImageView newImageView) {accidentalImageView = newImageView; }
+    void setAccidentalImageView(ImageView newImageView) { this.accidentalImageView = newImageView; }
 }

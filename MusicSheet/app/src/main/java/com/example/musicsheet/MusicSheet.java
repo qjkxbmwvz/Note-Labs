@@ -67,7 +67,7 @@ public class MusicSheet extends AppCompatActivity {
      * +7: C# Major / a# minor
      * +8: G# Major / e# minor
      */
-    byte accidental;
+    byte accidental = 0; // set default accidental to be "natural"
 
     //Drawing Variables
     Bitmap bitmap;
@@ -667,10 +667,9 @@ public class MusicSheet extends AppCompatActivity {
                                             (m.number * 192 + imageX),
                                             tempNote);
 
-                                    accidental = 0;
-                                    ImageView accImg
-                                            = findViewById(R.id.accidentButton);
-                                    accImg.setImageResource(R.drawable.natural);
+                                    //accidental = 0;
+                                    //ImageView accImg = findViewById(R.id.accidentButton);
+                                    //accImg.setImageResource(R.drawable.natural);
                                 }
                                 break;
                             }
@@ -742,17 +741,17 @@ public class MusicSheet extends AppCompatActivity {
     //Currently, it takes the old staff bar image coordinates and manually
     // converts them to xy coordinates that
     //align with the new bitmap staff bars
-    public void drawNote(RelativeLayout rl, int x, int y, Note n,
-                         NoteDur dur, boolean dotted, boolean positionFilled) {
-        if (n.getNoteType() != Note.NoteType.REST) {
-            double adjustment = 1 / getApplicationContext().getResources()
-                                                           .getDisplayMetrics().density
-                                * 2.625;
+    public void drawNote(RelativeLayout rl, int x, int y, Note n, NoteDur dur, boolean dotted, boolean positionFilled)
+    {
+        if (n.getNoteType() != Note.NoteType.REST)
+        {
+            double adjustment = 1 / getApplicationContext().getResources().getDisplayMetrics().density * 2.625;
             int xActual = (x * 125 / 48);
             int yActual = y - 85;
             ImageView noteIv;
             ImageView accidentalImage;
             RelativeLayout.LayoutParams params;
+            RelativeLayout.LayoutParams paramsAccidental;
 
             if (n.getImageView() == null)
             {
@@ -761,6 +760,17 @@ public class MusicSheet extends AppCompatActivity {
                 n.setImageView(noteIv);
                 n.getImageView().setLayoutParams(params);
                 rl.addView(noteIv);
+
+                /*
+                //if(accidental != 0) // as long as accidental is not "natural", create flat or sharp
+                //{
+                    accidentalImage = new ImageView(getApplicationContext());
+                    paramsAccidental = new RelativeLayout.LayoutParams(xActual, yActual);
+                    n.setAccidentalImageView(accidentalImage);
+                    n.getImageView().setLayoutParams(paramsAccidental);
+                    rl.addView(accidentalImage);
+                //}
+                */
             }
             else
                 {
@@ -773,6 +783,12 @@ public class MusicSheet extends AppCompatActivity {
                 rl.removeView(noteIv);
                 params = (RelativeLayout.LayoutParams) n.getImageView().getLayoutParams();
                 rl.addView(noteIv);
+
+                /*
+                rl.removeView(accidentalImage);
+                paramsAccidental = (RelativeLayout.LayoutParams) n.getImageView().getLayoutParams();
+                rl.addView(accidentalImage);
+                */
             }
 
             params.leftMargin = (int)(xActual * adjustment);
@@ -780,7 +796,8 @@ public class MusicSheet extends AppCompatActivity {
             params.width = (int)(100 * adjustment);
             params.height = (int)(100 * adjustment);
 
-            switch (dur) {
+            switch (dur)
+            {
                 case WHOLE:
                     noteIv.setImageResource(R.drawable.wholenote);
                     params.leftMargin += (int)(20 * adjustment);
@@ -797,6 +814,19 @@ public class MusicSheet extends AppCompatActivity {
                 case EIGHTH:
                     noteIv.setImageResource(R.drawable.eighthnote);
             }
+
+            /*
+            switch (accidental)
+            {
+                case -1:
+                    accidentalImage.setImageResource(R.drawable.flat);
+                    break;
+                case 1:
+                    accidentalImage.setImageResource(R.drawable.sharp);
+
+            }
+            */
+
         }
 
         /*Bitmap previousBitmap = ((BitmapDrawable) iv.getDrawable())
@@ -985,7 +1015,6 @@ public class MusicSheet extends AppCompatActivity {
                 break;
             case -1:
                 image.setImageResource(R.drawable.flat);
-                break;
         }
     }
 
