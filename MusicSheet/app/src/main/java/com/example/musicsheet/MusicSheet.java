@@ -102,7 +102,7 @@ public class MusicSheet extends AppCompatActivity {
         setContentView(R.layout.activity_music_sheet);
 
         Context context = getApplicationContext();
-        TableLayout tableLayout = new TableLayout(context);
+        final TableLayout tableLayout = new TableLayout(context);
         ScrollView scrollView = findViewById(R.id.musicSheetScroll);
 
         score = new Score(player);
@@ -574,6 +574,11 @@ public class MusicSheet extends AppCompatActivity {
 
                                     alertDialog.show();
                                 }
+                                TableRow tableRow = new TableRow(MusicSheet.this);
+
+                                tableRow.setLayoutParams(new TableRow.LayoutParams(
+                                  TableRow.LayoutParams.MATCH_PARENT));
+                                tableLayout.addView(tableRow, 1);
                             }
                         }
                         return true;

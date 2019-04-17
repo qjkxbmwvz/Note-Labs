@@ -1,6 +1,7 @@
 package com.example.musicsheet;
 
 import android.util.Pair;
+import android.widget.ImageView;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -15,6 +16,9 @@ class Track {
     private Clef clef;
     private byte instrument;
     private TreeMap<Integer, LinkedList<Note>> notes;
+
+    private ImageView clefImage, numImage, denImage;
+    private ImageView[] keySigImage;
 
     Track(byte instrument, Clef clef) {
         this.clef = clef;
