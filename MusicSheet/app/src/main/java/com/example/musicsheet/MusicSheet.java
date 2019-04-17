@@ -34,259 +34,82 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Stack;
 
+
+
 public class MusicSheet extends AppCompatActivity {
+
+    final float STROKE_WIDTH = 2.0f;
+
+    // Views and Layouts
+    private ScrollView scrollView;
+    private TableLayout tableLayout;
+    private ZoomView zoomView;
+
+    // MIDI objects
+    private Player player = new Player();
+    private Score score;
+    private Fraction timeSignature;
+
+    // Drawing Variables
+    private Bitmap bitmap;
+    private Canvas canvas;
+    private Paint linePaint, fillPaint;
+
+    // Sparse Arrays
+    private SparseIntArray pitchToPos;
+    private SparseArray<ArrayList<Integer>> keys;
+    private SparseArray<ArrayList<Integer>> reverseKeys;
+
+    // Hash Maps
+    private HashMap<Track.Clef, ArrayList<Integer>> clefMods;
+    private HashMap<Track.Clef, ArrayList<Integer>> reverseClefMods;
+    private HashMap<ImageView, Pair<RelativeLayout, Measure>> measures;
+
+    // Note Values
     enum NoteDur {WHOLE, HALF, QUARTER, EIGHTH}
-
-    ZoomView zv;
-
-    SparseIntArray pitchToPos;
-    SparseArray<ArrayList<Integer>> keys;
-    SparseArray<ArrayList<Integer>> reverseKeys;
-    HashMap<Track.Clef, ArrayList<Integer>> clefMods;
-    HashMap<Track.Clef, ArrayList<Integer>> reverseClefMods;
-
-    Stack<Edit> editHistory;
+    private NoteDur selectedNoteDur;
+    private Note tempNote;
+    private Stack<Edit> editHistory; //holds most recently placed notes
 
     int key;
-    /* key values:
-     * -8: Fb Major / db minor
-     * -7: Cb Major / ab minor
-     * -6: Gb Major / eb minor
-     * -5: Db Major / bb minor
-     * -4: Ab Major / f  minor
-     * -3: Eb Major / c  minor
-     * -2: Bb Major / g  minor
-     * -1: F  Major / d  minor
-     *  0: C  Major / a  minor
-     * +1: G  Major / e  minor
-     * +2: D  Major / b  minor
-     * +3: A  Major / f# minor
-     * +4: E  Major / c# minor
-     * +5: B  Major / g# minor
-     * +6: F# Major / d# minor
-     * +7: C# Major / a# minor
-     * +8: G# Major / e# minor
-     */
-    byte accidental = 0; // set default accidental to be "natural"
-
-    //Drawing Variables
-    Bitmap bitmap;
-    Canvas canvas;
-    Paint linePaint, fillPaint;
-
-    /*boolean zooming;
-    boolean initPoint;
-    PointF position;
-    Matrix matrix;
-    BitmapShader bmShader;
-    Paint paint = new Paint(Color.BLACK);
-    Paint bmPaint;
-    Paint outlinePaint;
-    Bitmap screenState;
-    Canvas zoomLoc;*/
-
-    ScrollView scrollView;
-    TableLayout table;
-
     int horizontalStart = 60;
     int horizontalMax = 540;
-
     int verticalStart = 19;
     int verticalOffset = 21;
-    //hard-coded: eye-balled the distance between each bar lol
     int verticalMax = 334;
-
     int lastTouchPointX = 0, lastTouchPointY = 0;
+    int measureLength;
 
-    private Player player = new Player();
-    Score score;
-    Fraction timeSignature;
+    byte accidental = 0; // set default accidental to be "natural"
 
-    HashMap<ImageView, Pair<RelativeLayout, Measure>> measures;
-    NoteDur selectedNoteDur;
-    Note tempNote;
+    boolean newScore;
 
-    // This happens to have its rounding errors in all the right places.
-    byte posToPitch(int pos) {
-        return (byte)(((verticalMax - pos) / 21 + 27) * 12 / 7 + 11);
-    }
-
-    // This one hardcodes the values into a data structure because
-    // the mathematical approach produces the wrong values.
-    void setUpPitchToPos() {
-        pitchToPos = new SparseIntArray();
-        pitchToPos.put(83, 19);
-        pitchToPos.put(81, 40);
-        pitchToPos.put(79, 61);
-        pitchToPos.put(77, 82);
-        pitchToPos.put(76, 103);
-        pitchToPos.put(74, 124);
-        pitchToPos.put(72, 145);
-        pitchToPos.put(71, 166);
-        pitchToPos.put(69, 187);
-        pitchToPos.put(67, 208);
-        pitchToPos.put(65, 229);
-        pitchToPos.put(64, 250);
-        pitchToPos.put(62, 271);
-        pitchToPos.put(60, 292);
-        pitchToPos.put(59, 313);
-        pitchToPos.put(57, 334);
-    }
-
-    void setUpKeys() {
-        keys = new SparseArray<>();
-        reverseKeys = new SparseArray<>();
-        for (int i = -8; i <= 8; ++i) {
-            keys.put(i, new ArrayList<Integer>((12)));
-            reverseKeys.put(i, new ArrayList<Integer>((12)));
-            for (int j = 0; j < 12; ++j) {
-                Objects.requireNonNull(keys.get(i)).add(0);
-                Objects.requireNonNull(reverseKeys.get(i)).add(0);
-            }
-        }
-        for (int i = 1; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(5, 1);  // F#
-            Objects.requireNonNull(reverseKeys.get(i)).set(6, -1);
-        }
-        for (int i = 2; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(0, 1);  // C#
-            Objects.requireNonNull(reverseKeys.get(i)).set(1, -1);
-        }
-        for (int i = 3; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(7, 1);  // G#
-            Objects.requireNonNull(reverseKeys.get(i)).set(8, -1);
-        }
-        for (int i = 4; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(2, 1);  // D#
-            Objects.requireNonNull(reverseKeys.get(i)).set(3, -1);
-        }
-        for (int i = 5; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(9, 1);  // A#
-            Objects.requireNonNull(reverseKeys.get(i)).set(10, -1);
-        }
-        for (int i = 6; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(4, 1);  // E#
-            Objects.requireNonNull(reverseKeys.get(i)).set(5, -1);
-        }
-        for (int i = 7; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(11, 1);  // B#
-            Objects.requireNonNull(reverseKeys.get(i)).set(0, -1);
-        }
-        Objects.requireNonNull(keys.get(8)).set(5, 2);      // Fx
-        Objects.requireNonNull(reverseKeys.get(8)).set(7, -2);
-
-        for (int i = -1; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(11, -1);  // Bb
-            Objects.requireNonNull(reverseKeys.get(i)).set(10, 1);
-        }
-        for (int i = -2; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(4, -1);  // Eb
-            Objects.requireNonNull(reverseKeys.get(i)).set(3, 1);
-        }
-        for (int i = -3; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(9, -1);  // Ab
-            Objects.requireNonNull(reverseKeys.get(i)).set(8, 1);
-        }
-        for (int i = -4; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(2, -1);  // Db
-            Objects.requireNonNull(reverseKeys.get(i)).set(1, 1);
-        }
-        for (int i = -5; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(7, -1);  // Gb
-            Objects.requireNonNull(reverseKeys.get(i)).set(6, 1);
-        }
-        for (int i = -6; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(0, -1);  // Cb
-            Objects.requireNonNull(reverseKeys.get(i)).set(11, 1);
-        }
-        for (int i = -7; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(5, -1);  // Fb
-            Objects.requireNonNull(reverseKeys.get(i)).set(4, 1);
-        }
-        Objects.requireNonNull(keys.get(-8)).set(11, -2);     // Bbb
-        Objects.requireNonNull(reverseKeys.get(-8)).set(9, 2);
-    }
-
-    void setUpClefMods() {
-        clefMods = new HashMap<>();
-        reverseClefMods = new HashMap<>();
-        clefMods.put(Track.Clef.TREBLE, new ArrayList<Integer>((12)));
-        reverseClefMods.put(Track.Clef.TREBLE, new ArrayList<Integer>((12)));
-        for (int i = 0; i < 12; ++i) {
-            Objects.requireNonNull(clefMods.get(Track.Clef.TREBLE)).add(0);
-            Objects.requireNonNull(
-              reverseClefMods.get(Track.Clef.TREBLE)).add(0);
-        }
-
-        clefMods.put(Track.Clef.ALTO, new ArrayList<Integer>((12)));
-        reverseClefMods.put(Track.Clef.ALTO, new ArrayList<Integer>((12)));
-        for (int i = 0; i < 12; ++i) {
-            Objects.requireNonNull(clefMods.get(Track.Clef.ALTO)).add(-10);
-            Objects.requireNonNull(
-              reverseClefMods.get(Track.Clef.ALTO)).add(10);
-        }
-        Objects.requireNonNull(clefMods.get(Track.Clef.ALTO)).set(4, -11);
-        Objects.requireNonNull(clefMods.get(Track.Clef.ALTO)).set(11, -11);
-        Objects.requireNonNull(
-          reverseClefMods.get(Track.Clef.ALTO)).set(0, 11);
-        Objects.requireNonNull(
-          reverseClefMods.get(Track.Clef.ALTO)).set(5, 11);
-
-        clefMods.put(Track.Clef.BASS, new ArrayList<Integer>((12)));
-        reverseClefMods.put(Track.Clef.BASS, new ArrayList<Integer>((12)));
-        for (int i = 0; i < 12; ++i) {
-            Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).add(-21);
-            Objects.requireNonNull(
-              reverseClefMods.get(Track.Clef.BASS)).add(21);
-        }
-        Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).set(0, -20);
-        Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).set(5, -20);
-        Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).set(7, -20);
-        Objects.requireNonNull(
-          reverseClefMods.get(Track.Clef.BASS)).set(4, 20);
-        Objects.requireNonNull(
-          reverseClefMods.get(Track.Clef.BASS)).set(9, 20);
-        Objects.requireNonNull(
-          reverseClefMods.get(Track.Clef.BASS)).set(11, 20);
-    }
-
-    Pair<NoteDur, Boolean> numToDurAndDot(int num) {
-        NoteDur noteDur;
-        boolean dotted = false;
-
-        switch (num) {
-            case 192:
-                noteDur = NoteDur.WHOLE;
-                break;
-            case 148:
-                noteDur = NoteDur.HALF;
-                dotted = true;
-                break;
-            case 96:
-                noteDur = NoteDur.HALF;
-                break;
-            case 72:
-                noteDur = NoteDur.QUARTER;
-                dotted = true;
-                break;
-            case 48:
-                noteDur = NoteDur.QUARTER;
-                break;
-            case 36:
-                noteDur = NoteDur.EIGHTH;
-                dotted = true;
-                break;
-            default:
-                noteDur = NoteDur.EIGHTH;
-        }
-
-        return new Pair<>(noteDur, dotted);
-    }
+    private ToggleButton editButton;
+    private ToggleButton dotButton;
+    private ToggleButton restButton;
 
     @SuppressLint({"ClickableViewAccessibility", "NewApi"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        measures = new HashMap<>();
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_music_sheet);
+        Context context = getApplicationContext();
+
+        score       = new Score(player);
+        measures    = new HashMap<>();
+        editHistory = new Stack<>();
+        zoomView    = new ZoomView(this);
+        tableLayout = new TableLayout(this);
+
+        scrollView  = findViewById(R.id.musicSheetScroll);
+        editButton  = findViewById(R.id.editButton);
+        dotButton   = findViewById(R.id.dotButton);
+        restButton  = findViewById(R.id.restButton);
+
+        linePaint   = setUpPaint(Color.BLACK, true, Paint.Style.STROKE);
+        fillPaint   = setUpPaint(Color.BLACK, true, Paint.Style.FILL_AND_STROKE);
+
         selectedNoteDur = NoteDur.QUARTER;
         key = 0;
 
@@ -294,41 +117,18 @@ public class MusicSheet extends AppCompatActivity {
         setUpKeys();
         setUpClefMods();
 
-        editHistory = new Stack<>();
-
-        //create the paint variables used by the canvas
-        linePaint = new Paint();
-        linePaint.setColor(Color.BLACK);
-        linePaint.setAntiAlias(true);
-        linePaint.setStyle(Paint.Style.STROKE);
-        linePaint.setStrokeWidth(2);
-
-        fillPaint = new Paint();
-        fillPaint.setColor(Color.BLACK);
-        fillPaint.setAntiAlias(true);
-        fillPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        fillPaint.setStrokeWidth(2);
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_music_sheet);
-
-        scrollView = findViewById(R.id.musicSheetScroll);
-        zv = new ZoomView(this);
-        scrollView.addView(zv);
-        table = new TableLayout(this);
-        table.setLayoutParams(new LinearLayout.LayoutParams(
+        scrollView.addView(zoomView);
+        tableLayout.setLayoutParams(new LinearLayout.LayoutParams(
           LinearLayout.LayoutParams.MATCH_PARENT,
           LinearLayout.LayoutParams.MATCH_PARENT));
 
-        zv.addView(table);
-
-        score = new Score(player);
-        boolean newScore = true;
+        zoomView.addView(tableLayout);
 
         tempNote = null;
 
         Bundle extras = getIntent().getExtras();
 
+        newScore = true;
         if (extras != null) {
             score.load(extras.getString("filename"));
             newScore = false;
@@ -336,18 +136,13 @@ public class MusicSheet extends AppCompatActivity {
 
         timeSignature = new Fraction(4, 4);
 
-        final ToggleButton editButton = findViewById(R.id.editButton);
-        final ToggleButton dotButton = findViewById(R.id.dotButton);
-        final ToggleButton restButton = findViewById(R.id.restButton);
-
-        final int measureLength = 192 * timeSignature.num / timeSignature.den;
-
-        Context context = getApplicationContext();
+        measureLength = 192 * timeSignature.num / timeSignature.den;
 
         int height = 10;
-        boolean odd = false;
         int trackCount = 2;
+        boolean odd = false;
 
+        //some method called FindScore...
         if (!newScore) {
             trackCount = score.getTrackCount();
             height = score.getMeasureCount() * trackCount / 2;
@@ -355,8 +150,8 @@ public class MusicSheet extends AppCompatActivity {
         } else
             score.addTrack(new Track((byte)0, Track.Clef.BASS));
 
+        //this could be a method
         int[] counts = new int[trackCount];
-
         for (int i = 0; i < (odd ? height + 1 : height); i++) {
             //for each row
             TableRow tr = new TableRow(context);
@@ -437,7 +232,7 @@ public class MusicSheet extends AppCompatActivity {
                 iv.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-                        zv.setIsEnabled(!editButton.isChecked());
+                        zoomView.setIsEnabled(!editButton.isChecked());
                         if (editButton.isChecked() && !player.running) {
                             boolean dotting = dotButton.isChecked();
                             boolean resting = restButton.isChecked();
@@ -634,12 +429,7 @@ public class MusicSheet extends AppCompatActivity {
                                                (m.number * 192 + imageX),
                                                m.staff, Edit.EditType.ADD));
 
-                                    /*
-                                    accidental = 0;
-                                    ImageView accImg
-                                      = findViewById(R.id.accidentButton);
-                                    accImg.setImageResource(R.drawable.natural);
-                                    */
+
                                     v.getParent()
                                      .requestDisallowInterceptTouchEvent(
                                        (false));
@@ -652,19 +442,6 @@ public class MusicSheet extends AppCompatActivity {
                             }
                             lastTouchPointX = imageX;
                             lastTouchPointY = imageY;
-
-                            //textView.setText("imageX: " + imageX + "
-                            // imageY: " + imageY);
-
-                       /* if(imageX < 0)
-                            textView.setText("Touch: " + (int)event.getX());
-                        else
-                            textView.setText("imageX: " + imageX + " imageY:
-                            " + imageY + " " + v.toString());*/
-
-                            //textView.setText("sX:"+ scrollX + "sY:" +
-                            // scrollY + " iX:" + imageX + "iY:" + imageY + "
-                            // lX:" + localX + "lY:" + localY);
                         }
                         return true;
                     }
@@ -672,11 +449,197 @@ public class MusicSheet extends AppCompatActivity {
                 rl.addView(iv);
                 tr.addView(rl);
             }
-            table.addView(tr);
+            tableLayout.addView(tr);
         }
     }
 
-    public void drawStaff(ImageView iv) {
+    // Hard codes values into data structure, mathematical approach produces wrong values.
+    private void setUpPitchToPos() {
+        pitchToPos = new SparseIntArray();
+        pitchToPos.put(83, 19);
+        pitchToPos.put(81, 40);
+        pitchToPos.put(79, 61);
+        pitchToPos.put(77, 82);
+        pitchToPos.put(76, 103);
+        pitchToPos.put(74, 124);
+        pitchToPos.put(72, 145);
+        pitchToPos.put(71, 166);
+        pitchToPos.put(69, 187);
+        pitchToPos.put(67, 208);
+        pitchToPos.put(65, 229);
+        pitchToPos.put(64, 250);
+        pitchToPos.put(62, 271);
+        pitchToPos.put(60, 292);
+        pitchToPos.put(59, 313);
+        pitchToPos.put(57, 334);
+    }
+
+    private void setUpKeys() {
+        keys = new SparseArray<>();
+        reverseKeys = new SparseArray<>();
+        for (int i = -8; i <= 8; ++i) {
+            keys.put(i, new ArrayList<Integer>((12)));
+            reverseKeys.put(i, new ArrayList<Integer>((12)));
+            for (int j = 0; j < 12; ++j) {
+                Objects.requireNonNull(keys.get(i)).add(0);
+                Objects.requireNonNull(reverseKeys.get(i)).add(0);
+            }
+        }
+        for (int i = 1; i <= 8; ++i) {
+            Objects.requireNonNull(keys.get(i)).set(5, 1);  // F#
+            Objects.requireNonNull(reverseKeys.get(i)).set(6, -1);
+        }
+        for (int i = 2; i <= 8; ++i) {
+            Objects.requireNonNull(keys.get(i)).set(0, 1);  // C#
+            Objects.requireNonNull(reverseKeys.get(i)).set(1, -1);
+        }
+        for (int i = 3; i <= 8; ++i) {
+            Objects.requireNonNull(keys.get(i)).set(7, 1);  // G#
+            Objects.requireNonNull(reverseKeys.get(i)).set(8, -1);
+        }
+        for (int i = 4; i <= 8; ++i) {
+            Objects.requireNonNull(keys.get(i)).set(2, 1);  // D#
+            Objects.requireNonNull(reverseKeys.get(i)).set(3, -1);
+        }
+        for (int i = 5; i <= 8; ++i) {
+            Objects.requireNonNull(keys.get(i)).set(9, 1);  // A#
+            Objects.requireNonNull(reverseKeys.get(i)).set(10, -1);
+        }
+        for (int i = 6; i <= 8; ++i) {
+            Objects.requireNonNull(keys.get(i)).set(4, 1);  // E#
+            Objects.requireNonNull(reverseKeys.get(i)).set(5, -1);
+        }
+        for (int i = 7; i <= 8; ++i) {
+            Objects.requireNonNull(keys.get(i)).set(11, 1);  // B#
+            Objects.requireNonNull(reverseKeys.get(i)).set(0, -1);
+        }
+        Objects.requireNonNull(keys.get(8)).set(5, 2);      // Fx
+        Objects.requireNonNull(reverseKeys.get(8)).set(7, -2);
+
+        for (int i = -1; i >= -8; --i) {
+            Objects.requireNonNull(keys.get(i)).set(11, -1);  // Bb
+            Objects.requireNonNull(reverseKeys.get(i)).set(10, 1);
+        }
+        for (int i = -2; i >= -8; --i) {
+            Objects.requireNonNull(keys.get(i)).set(4, -1);  // Eb
+            Objects.requireNonNull(reverseKeys.get(i)).set(3, 1);
+        }
+        for (int i = -3; i >= -8; --i) {
+            Objects.requireNonNull(keys.get(i)).set(9, -1);  // Ab
+            Objects.requireNonNull(reverseKeys.get(i)).set(8, 1);
+        }
+        for (int i = -4; i >= -8; --i) {
+            Objects.requireNonNull(keys.get(i)).set(2, -1);  // Db
+            Objects.requireNonNull(reverseKeys.get(i)).set(1, 1);
+        }
+        for (int i = -5; i >= -8; --i) {
+            Objects.requireNonNull(keys.get(i)).set(7, -1);  // Gb
+            Objects.requireNonNull(reverseKeys.get(i)).set(6, 1);
+        }
+        for (int i = -6; i >= -8; --i) {
+            Objects.requireNonNull(keys.get(i)).set(0, -1);  // Cb
+            Objects.requireNonNull(reverseKeys.get(i)).set(11, 1);
+        }
+        for (int i = -7; i >= -8; --i) {
+            Objects.requireNonNull(keys.get(i)).set(5, -1);  // Fb
+            Objects.requireNonNull(reverseKeys.get(i)).set(4, 1);
+        }
+        Objects.requireNonNull(keys.get(-8)).set(11, -2);     // Bbb
+        Objects.requireNonNull(reverseKeys.get(-8)).set(9, 2);
+    }
+
+    private void setUpClefMods() {
+        clefMods = new HashMap<>();
+        reverseClefMods = new HashMap<>();
+        clefMods.put(Track.Clef.TREBLE, new ArrayList<Integer>((12)));
+        reverseClefMods.put(Track.Clef.TREBLE, new ArrayList<Integer>((12)));
+        for (int i = 0; i < 12; ++i) {
+            Objects.requireNonNull(clefMods.get(Track.Clef.TREBLE)).add(0);
+            Objects.requireNonNull(
+                    reverseClefMods.get(Track.Clef.TREBLE)).add(0);
+        }
+
+        clefMods.put(Track.Clef.ALTO, new ArrayList<Integer>((12)));
+        reverseClefMods.put(Track.Clef.ALTO, new ArrayList<Integer>((12)));
+        for (int i = 0; i < 12; ++i) {
+            Objects.requireNonNull(clefMods.get(Track.Clef.ALTO)).add(-10);
+            Objects.requireNonNull(
+                    reverseClefMods.get(Track.Clef.ALTO)).add(10);
+        }
+        Objects.requireNonNull(clefMods.get(Track.Clef.ALTO)).set(4, -11);
+        Objects.requireNonNull(clefMods.get(Track.Clef.ALTO)).set(11, -11);
+        Objects.requireNonNull(
+                reverseClefMods.get(Track.Clef.ALTO)).set(0, 11);
+        Objects.requireNonNull(
+                reverseClefMods.get(Track.Clef.ALTO)).set(5, 11);
+
+        clefMods.put(Track.Clef.BASS, new ArrayList<Integer>((12)));
+        reverseClefMods.put(Track.Clef.BASS, new ArrayList<Integer>((12)));
+        for (int i = 0; i < 12; ++i) {
+            Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).add(-21);
+            Objects.requireNonNull(
+                    reverseClefMods.get(Track.Clef.BASS)).add(21);
+        }
+        Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).set(0, -20);
+        Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).set(5, -20);
+        Objects.requireNonNull(clefMods.get(Track.Clef.BASS)).set(7, -20);
+        Objects.requireNonNull(
+                reverseClefMods.get(Track.Clef.BASS)).set(4, 20);
+        Objects.requireNonNull(
+                reverseClefMods.get(Track.Clef.BASS)).set(9, 20);
+        Objects.requireNonNull(
+                reverseClefMods.get(Track.Clef.BASS)).set(11, 20);
+    }
+
+    private Paint setUpPaint(int color, boolean alias, Paint.Style style){
+
+        Paint p = new Paint();
+
+        p.setColor(color);
+        p.setAntiAlias(alias);
+        p.setStyle(style);
+        p.setStrokeWidth(STROKE_WIDTH);
+
+        return p;
+    }
+
+    private Pair<NoteDur, Boolean> numToDurAndDot(int num) {
+        NoteDur noteDur;
+        boolean dotted = false;
+
+        switch (num) {
+            case 192:
+                noteDur = NoteDur.WHOLE;
+                break;
+            case 148:
+                noteDur = NoteDur.HALF;
+                dotted = true;
+                break;
+            case 96:
+                noteDur = NoteDur.HALF;
+                break;
+            case 72:
+                noteDur = NoteDur.QUARTER;
+                dotted = true;
+                break;
+            case 48:
+                noteDur = NoteDur.QUARTER;
+                break;
+            case 36:
+                noteDur = NoteDur.EIGHTH;
+                dotted = true;
+                break;
+            default:
+                noteDur = NoteDur.EIGHTH;
+        }
+
+        return new Pair<>(noteDur, dotted);
+    }
+
+    // This happens to have its rounding errors in all the right places.
+    byte posToPitch(int pos) { return (byte)(((verticalMax - pos) / 21 + 27) * 12 / 7 + 11); }
+
+    private void drawStaff(ImageView iv) {
         double adjustment =
           getApplicationContext().getResources().getDisplayMetrics().density
           / 2.625;
@@ -713,12 +676,7 @@ public class MusicSheet extends AppCompatActivity {
         iv.setImageBitmap(bitmap);
     }
 
-    //Draws note on a given X and Y coordinate
-    //Currently, it takes the old staff bar image coordinates and manually
-    // converts them to xy coordinates that
-    //align with the new bitmap staff bars
-
-    public void drawNote(RelativeLayout rl, int x, int y, Note n,
+    private void drawNote(RelativeLayout rl, int x, int y, Note n,
                          NoteDur dur, boolean dotted, boolean positionFilled) {
         if (n.getNoteType() != Note.NoteType.REST) {
             double adjustment =
@@ -819,7 +777,7 @@ public class MusicSheet extends AppCompatActivity {
     }
 
 
-    //returns nearest point relative to where the user touched
+    //Returns nearest point relative to where the user touched
     private int snapToTime(int touchPoint, int fromWidth, int toWidth,
                            ArrayList<Pair<Integer, LinkedList<Note>>> points) {
         int prevPoint;
@@ -866,8 +824,7 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    //BUTTONS---
-
+    //Buttons
     public void play(View view) {
         score.play();
     }

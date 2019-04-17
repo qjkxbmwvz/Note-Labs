@@ -1,0 +1,50 @@
+/* key values:
+     * -8: Fb Major / db minor
+     * -7: Cb Major / ab minor
+     * -6: Gb Major / eb minor
+     * -5: Db Major / bb minor
+     * -4: Ab Major / f  minor
+     * -3: Eb Major / c  minor
+     * -2: Bb Major / g  minor
+     * -1: F  Major / d  minor
+     *  0: C  Major / a  minor
+     * +1: G  Major / e  minor
+     * +2: D  Major / b  minor
+     * +3: A  Major / f# minor
+     * +4: E  Major / c# minor
+     * +5: B  Major / g# minor
+     * +6: F# Major / d# minor
+     * +7: C# Major / a# minor
+     * +8: G# Major / e# minor
+     */
+
+/*boolean zooming;
+    boolean initPoint;
+    PointF position;
+    Matrix matrix;
+    BitmapShader bmShader;
+    Paint paint = new Paint(Color.BLACK);
+    Paint bmPaint;
+    Paint outlinePaint;
+    Bitmap screenState;
+    Canvas zoomLoc;*/
+
+ /*
+                                    accidental = 0;
+                                    ImageView accImg
+                                      = findViewById(R.id.accidentButton);
+                                    accImg.setImageResource(R.drawable.natural);
+                                    */
+
+//textView.setText("imageX: " + imageX + "
+                            // imageY: " + imageY);
+
+                       /* if(imageX < 0)
+                            textView.setText("Touch: " + (int)event.getX());
+                        else
+                            textView.setText("imageX: " + imageX + " imageY:
+                            " + imageY + " " + v.toString());*/
+
+                            //textView.setText("sX:"+ scrollX + "sY:" +
+                            // scrollY + " iX:" + imageX + "iY:" + imageY + "
+                            // lX:" + localX + "lY:" + localY);
