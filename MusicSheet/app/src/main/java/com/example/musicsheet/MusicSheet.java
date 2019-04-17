@@ -735,18 +735,7 @@ public class MusicSheet extends AppCompatActivity {
                 n.setImageView(noteIv);
                 n.getImageView().setLayoutParams(params);
                 rl.addView(noteIv);
-
-                /*
-                //if(accidental != 0) // as long as accidental is not "natural", create flat or sharp
-                //{
-                    accidentalImage = new ImageView(getApplicationContext());
-                    paramsAccidental = new RelativeLayout.LayoutParams(xActual, yActual);
-                    n.setAccidentalImageView(accidentalImage);
-                    n.getImageView().setLayoutParams(paramsAccidental);
-                    rl.addView(accidentalImage);
-                //}
-                */
-
+                
             } 
           else 
             {
