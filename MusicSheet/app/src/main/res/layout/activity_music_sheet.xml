@@ -5,18 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MusicSheet">
-
+    <TextView
+        android:id="@+id/debugText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <ScrollView
         android:id="@+id/musicSheetScroll"
         android:layout_width="match_parent"
-        android:layout_height="560dp"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/ToolbarLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </ScrollView>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/ToolbarLayout"
@@ -36,7 +39,7 @@
             android:onClick="play"
             app:srcCompat="@android:drawable/ic_media_play"
             tools:layout_editor_absoluteX="124dp"
-            tools:layout_editor_absoluteY="514dp" />
+            tools:layout_editor_absoluteY="514dp"/>
 
         <ImageButton
             android:id="@+id/pauseButton"
@@ -45,7 +48,7 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             android:onClick="pause"
-            app:srcCompat="@android:drawable/ic_media_pause" />
+            app:srcCompat="@android:drawable/ic_media_pause"/>
 
         <ImageButton
             android:id="@+id/restartButton"
@@ -54,17 +57,18 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             android:onClick="restart"
-            app:srcCompat="@android:drawable/ic_media_previous" />
+            app:srcCompat="@android:drawable/ic_media_previous"/>
 
-        <!--<ImageButton
+        <ImageButton
             android:id="@+id/undoButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
-            app:srcCompat="@android:drawable/ic_menu_revert" />
+            android:onClick="undo"
+            app:srcCompat="@android:drawable/ic_menu_revert"/>
 
-        <ImageButton
+        <!--<ImageButton
             android:id="@+id/addInstrumentButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
@@ -78,7 +82,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:checked="true"
-            android:text="." />
+            android:text="."/>
 
         <ImageButton
             android:id="@+id/accidentButton"
@@ -88,7 +92,7 @@
             android:contentDescription="@string/todo"
             android:onClick="cycleAccidental"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/natural" />
+            app:srcCompat="@drawable/natural"/>
 
         <ImageButton
             android:id="@+id/noteButton"
@@ -98,21 +102,21 @@
             android:contentDescription="@string/todo"
             android:onClick="cycleNoteType"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/quarternote" />
+            app:srcCompat="@drawable/quarternote"/>
 
         <ToggleButton
             android:id="@+id/dotButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="." />
+            android:text="."/>
 
         <ToggleButton
             android:id="@+id/restButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="." />
+            android:text="."/>
 
         <ImageButton
             android:id="@+id/saveButton"
@@ -122,8 +126,6 @@
             android:contentDescription="@string/todo"
             android:onClick="save"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/saveicon" />
-
+            app:srcCompat="@drawable/saveicon"/>
     </LinearLayout>
-
 </android.support.constraint.ConstraintLayout>

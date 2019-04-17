@@ -30,11 +30,11 @@ class Score {
         this.player = player;
     }
 
-    int getTempo() { return tempo; }
+    int getTempo()           { return tempo; }
 
     void setTempo(int tempo) { this.tempo = tempo; }
 
-    int getTrackCount() { return tracks.size(); }
+    int getTrackCount()      { return tracks.size(); }
 
     void setTrackClef(int track, Track.Clef clef) {
         tracks.get(track).setClef(clef);
@@ -58,10 +58,19 @@ class Score {
                                            (byte)0, (byte)0, (byte)0));
     }
 
-    void deleteNote(int track, int timePosition, byte pitch) {
-        tracks.get(track).removeNote(timePosition,
-                                     tracks.get(track).getNote(timePosition,
-                                                               pitch));
+    Edit removeNote(int track, int timePosition, byte pitch) {
+        Edit ret = new Edit(tracks.get(track).getNote(timePosition, pitch),
+                            timePosition, track, Edit.EditType.REMOVE);
+
+        ret.note.hide();
+
+        tracks.get(track).removeNote(timePosition, ret.note);
+
+        return ret;
+    }
+
+    Note getNote(int track, int timePosition, byte pitch) {
+        return tracks.get(track).getNote(timePosition, pitch);
     }
 
     void addMeasure(Fraction timeSignature) {
@@ -78,27 +87,27 @@ class Score {
 
     int durationAtTime(int track, int timePosition) {
         if (tracks.get(track).checkNote(timePosition).getFirst().getNoteType()
-         != Note.NoteType.REST)
+            != Note.NoteType.REST)
             return tracks.get(track).checkNote(timePosition)
-                    .getFirst().getDuration();
+                         .getFirst().getDuration();
         else
             return 0;
     }
 
     ArrayList<Pair<Integer, LinkedList<Note>>> getMeasure(
-            int track, int measureNum, Fraction timeSignature) {
+      int track, int measureNum, Fraction timeSignature) {
         if (measureNum >= measureCount)
             throw new IndexOutOfBoundsException();
         else {
             TreeSet<Pair<Integer, LinkedList<Note>>> times
-                    = tracks.get(track).getMeasure(measureNum, timeSignature);
+              = tracks.get(track).getMeasure(measureNum, timeSignature);
             ArrayList<Pair<Integer, LinkedList<Note>>> ret = new ArrayList<>();
 
             for (Pair<Integer, LinkedList<Note>> p : times) {
                 ret.add(new Pair<>(
-                        p.first - measureNum * 192 * timeSignature.num
-                                                   / timeSignature.den,
-                        p.second));
+                  p.first - measureNum * 192 * timeSignature.num
+                            / timeSignature.den,
+                  p.second));
             }
 
             return ret;
@@ -131,9 +140,9 @@ class Score {
                 filename += ".nl";
 
             File out = new File((Environment.getExternalStorageDirectory()
-                              + "/" + filename));
+                                 + "/" + filename));
             DataOutputStream os = new DataOutputStream(
-                    new FileOutputStream(out, (false)));
+              new FileOutputStream(out, (false)));
 
             os.writeInt(tempo);
             os.writeByte((byte)tracks.size());
@@ -169,7 +178,7 @@ class Score {
     void load(String filename) {
         try {
             File in = new File((Environment.getExternalStorageDirectory()
-                              + "/" + filename));
+                                + "/" + filename));
             DataInputStream is = new DataInputStream(new FileInputStream(in));
             byte[] event = new byte[2];
 
@@ -181,7 +190,9 @@ class Score {
             for (int i = 0; i < il; ++i) {
                 Track.Clef clef = Track.Clef.values()[is.readInt()];
                 tracks.add(new Track(is.readByte(), clef));
-                event[0] = (byte)(0xC0 | i);  // 0xC0 = program change, 0x0X = channel X
+                event[0] = (byte)(0xC0
+                                  | i);  // 0xC0 = program change, 0x0X =
+                // channel X
                 event[1] = tracks.get(i).getInstrument();
                 player.directWrite(event);
 
@@ -195,7 +206,7 @@ class Score {
                     for (int k = 0; k < notesAtTime; ++k) {
 
                         Note.NoteType noteType
-                                = Note.NoteType.values()[is.readInt()];
+                          = Note.NoteType.values()[is.readInt()];
 
                         int duration = is.readInt();
                         if (time + duration > maxTime)

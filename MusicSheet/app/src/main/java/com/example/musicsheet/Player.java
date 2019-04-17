@@ -40,20 +40,26 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
 
                 for (Note n : nl) {
                     switch (n.getNoteType()) {
-                    case MELODIC:
-                    case PERCUSSIVE:
-                        if (!times.containsKey(t))
-                            times.put(t, new TimePosition(t));
-                        if (!times.containsKey(t + n.getDuration()))
-                            times.put(t + n.getDuration(),
-                                      new TimePosition(t + n.getDuration()));
-                        Objects.requireNonNull(times.get(t)).addNote(
-                                new NoteEvent(midiDriver, NoteEvent.EventType.START, i, n));
-                        Objects.requireNonNull(times.get(t + n.getDuration())).addNote(
-                                new NoteEvent(midiDriver, NoteEvent.EventType.STOP, i, n));
-                        break;
-                    case REST:
-                        break;
+                        case MELODIC:
+                        case PERCUSSIVE:
+                            if (!times.containsKey(t))
+                                times.put(t, new TimePosition(t));
+                            if (!times.containsKey(t + n.getDuration()))
+                                times.put(t + n.getDuration(),
+                                          new TimePosition(
+                                                  t + n.getDuration()));
+                            Objects.requireNonNull(times.get(t)).addNote(
+                                    new NoteEvent(midiDriver,
+                                                  NoteEvent.EventType.START, i,
+                                                  n));
+                            Objects.requireNonNull(
+                                    times.get(t + n.getDuration())).addNote(
+                                    new NoteEvent(midiDriver,
+                                                  NoteEvent.EventType.STOP, i,
+                                                  n));
+                            break;
+                        case REST:
+                            break;
                     }
                 }
             }
@@ -97,7 +103,9 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
     }
 
     @Override
-    public void onMidiStart() { Log.d(this.getClass().getName(), "onMidiStart()"); }
+    public void onMidiStart() {
+        Log.d(this.getClass().getName(), "onMidiStart()");
+    }
 
     void resume() {
         midiDriver.start();
@@ -118,7 +126,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
 
     int getStartTime() { return startTime; }
 
-    void pause() { midiDriver.stop(); }
+    void pause()       { midiDriver.stop(); }
 
     void directWrite(byte[] event) {
         if (!running) {
@@ -132,7 +140,8 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
         byte[] event = new byte[2];
 
         for (int i = 0; i < instruments.length; ++i) {
-            event[0] = (byte) (0xC0 | i);  // 0xC0 = program change, 0x0X = channel X
+            event[0] = (byte)(0xC0
+                              | i);  // 0xC0 = program change, 0x0X = channel X
             event[1] = instruments[i];
             midiDriver.write(event);
         }

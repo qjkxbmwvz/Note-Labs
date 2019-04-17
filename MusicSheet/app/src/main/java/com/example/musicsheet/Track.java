@@ -10,7 +10,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 class Track {
-    enum Clef { TREBLE, ALTO, BASS, PERCUSSION };
+    enum Clef {TREBLE, ALTO, BASS, PERCUSSION}
 
     private Clef clef;
     private byte instrument;
@@ -22,13 +22,13 @@ class Track {
         notes = new TreeMap<>();
     }
 
-    void setClef(Clef clef) { this.clef = clef; }
+    void setClef(Clef clef)             { this.clef = clef; }
 
-    Clef getClef() { return clef; }
+    Clef getClef()                      { return clef; }
 
     void setInstrument(byte instrument) { this.instrument = instrument; }
 
-    byte getInstrument() { return instrument; }
+    byte getInstrument()                { return instrument; }
 
     Iterator<Integer> getTimeIterator() { return notes.keySet().iterator(); }
 
@@ -42,10 +42,11 @@ class Track {
         if (!notes.containsKey(time))
             notes.put(time, new LinkedList<Note>());
         if (Objects.requireNonNull(notes.get(time)).size() == 0
-                                || note.getNoteType() != Note.NoteType.REST) {
+            || note.getNoteType() != Note.NoteType.REST) {
             if (Objects.requireNonNull(notes.get(time)).size() == 1
-             && Objects.requireNonNull(notes.get(time)).getFirst().getNoteType()
-                                    == Note.NoteType.REST)
+                &&
+                Objects.requireNonNull(notes.get(time)).getFirst().getNoteType()
+                == Note.NoteType.REST)
                 Objects.requireNonNull(notes.get(time)).remove(0);
             Objects.requireNonNull(notes.get(time)).add(note);
         }
@@ -55,7 +56,7 @@ class Track {
         if (notes.containsKey(time)) {
             if (Objects.requireNonNull(notes.get(time)).size() == 1)
                 Objects.requireNonNull(notes.get(time)).getFirst()
-                        .setNoteType(Note.NoteType.REST);
+                       .setNoteType(Note.NoteType.REST);
             else
                 Objects.requireNonNull(notes.get(time)).remove(note);
         }
@@ -79,12 +80,12 @@ class Track {
     TreeSet<Pair<Integer, LinkedList<Note>>> getMeasure(
             int measureNum, Fraction timeSignature) {
         int startPoint = measureNum * 192 * timeSignature.num
-                                          / timeSignature.den;
-        int endPoint   = startPoint + 192 * timeSignature.num
-                                          / timeSignature.den;
+                         / timeSignature.den;
+        int endPoint = startPoint + 192 * timeSignature.num
+                                    / timeSignature.den;
         TreeSet<Pair<Integer, LinkedList<Note>>> ret
                 = new TreeSet<>(new Comparator<Pair<Integer,
-                                               LinkedList<Note>>>() {
+                LinkedList<Note>>>() {
             @Override
             public int compare(Pair<Integer, LinkedList<Note>> a,
                                Pair<Integer, LinkedList<Note>> b) {

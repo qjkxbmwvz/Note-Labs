@@ -19,9 +19,9 @@ import java.util.ArrayList;
 public class FileList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ActivityCompat.requestPermissions(this, new String[] {
+        ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-        }, 100);
+                }, 100);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_list);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -32,21 +32,28 @@ public class FileList extends AppCompatActivity {
         File dir = new File(Environment.getExternalStorageDirectory() + "/");
 
         for (File f : dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String filename) { return filename.endsWith(".nl"); }
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".nl");
+            }
         }))
             projectNames.add(f.getName());
 
         final ArrayAdapter<String> arrayAdapter
-                = new ArrayAdapter<>((this), android.R.layout.simple_list_item_1, projectNames);
+                = new ArrayAdapter<>((this),
+                                     android.R.layout.simple_list_item_1,
+                                     projectNames);
 
         projectList.setAdapter(arrayAdapter);
-        projectList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(FileList.this, MusicSheet.class);
-                intent.putExtra("filename", arrayAdapter.getItem(i));
-                startActivity(intent);
-            }
-        });
+        projectList
+                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView,
+                                            View view, int i, long l) {
+                        Intent intent = new Intent(FileList.this,
+                                                   MusicSheet.class);
+                        intent.putExtra("filename", arrayAdapter.getItem(i));
+                        startActivity(intent);
+                    }
+                });
     }
 }

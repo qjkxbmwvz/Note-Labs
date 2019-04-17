@@ -1,9 +1,11 @@
 package com.example.musicsheet;
 
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 class Note {
-    enum NoteType { MELODIC, PERCUSSIVE, REST }
+    enum NoteType {MELODIC, PERCUSSIVE, REST}
 
     private NoteType noteType;
     private int duration;
@@ -12,33 +14,53 @@ class Note {
     private byte velocity;
     private ImageView imageView, accidentalImageView;
 
-    Note(NoteType noteType, int duration, byte pitch, byte accidental, byte velocity) {
-        this.noteType   = noteType;
-        this.duration   = duration;
-        this.pitch      = pitch;
+    Note(NoteType noteType, int duration, byte pitch, byte accidental,
+         byte velocity) {
+        this.noteType = noteType;
+        this.duration = duration;
+        this.pitch = pitch;
         this.accidental = accidental;
-        this.velocity   = velocity;
+        this.velocity = velocity;
     }
 
-    void setNoteType(NoteType noteType) { this.noteType = noteType; }
+    void setNoteType(NoteType noteType) {
+        this.noteType = noteType;
+    }
 
-    NoteType getNoteType() { return noteType; }
+    NoteType getNoteType()         { return noteType; }
 
-    int getDuration() { return duration; }
+    void setDuration(int duration) { this.duration = duration; }
 
-    void setPitch(byte pitch) { this.pitch = pitch; }
+    int getDuration()              { return duration; }
 
-    void setAccidental(byte accidental) { this.accidental = accidental; }
+    void setPitch(byte pitch)      { this.pitch = pitch; }
 
-    byte getPitch()      { return pitch;      }
-    byte getAccidental() { return accidental; }
-    byte getVelocity()   { return velocity;   }
+    byte getPitch()                { return pitch; }
 
-    void setImageView(ImageView iv) { this.imageView = iv; }
+    byte getAccidental()           { return accidental; }
 
-    ImageView getImageView() { return imageView; }
+    void setAccidental(byte accidental) {
+        this.accidental = accidental;
+    }
+
+    byte getVelocity()                 { return velocity; }
+
+    ImageView getImageView()           { return imageView; }
+
+    void setImageView(ImageView iv)    { this.imageView = iv; }
 
     ImageView getAccidentalImageView() {return accidentalImageView; }
 
-    void setAccidentalImageView(ImageView newImageView) { this.accidentalImageView = newImageView; }
+
+    void setAccidentalImageView(ImageView newImageView) {
+        accidentalImageView = newImageView;
+    }
+
+    void hide() {
+        if (imageView != null)
+            ((RelativeLayout)imageView.getParent()).removeView(imageView);
+        if (accidentalImageView != null)
+            ((RelativeLayout)(accidentalImageView.getParent().getParent()))
+              .removeView(accidentalImageView);
+    }
 }
