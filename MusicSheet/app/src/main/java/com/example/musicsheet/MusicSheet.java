@@ -833,9 +833,13 @@ public class MusicSheet extends AppCompatActivity {
         int yActual = y - 85;
         ImageView noteIv;
         ImageView accidentalImage;
+        ImageView dottedImage;
+
         RelativeLayout.LayoutParams params;
 
         RelativeLayout.LayoutParams accidentalParams;
+
+        RelativeLayout.LayoutParams dottedParams;
 
         noteIv = n.getImageView();
         if (noteIv == null) {
@@ -849,7 +853,8 @@ public class MusicSheet extends AppCompatActivity {
         }
         rl.addView(noteIv);
 
-        switch (n.getNoteType()) {
+        switch (n.getNoteType())
+        {
             case MELODIC:
                 params.leftMargin = (int)(xActual * adjustment);
                 params.topMargin = (int)(yActual * adjustment);
@@ -875,30 +880,26 @@ public class MusicSheet extends AppCompatActivity {
                 }
 
 
-                if (n.getAccidental() != 0) {
+                if (n.getAccidental() != 0)
+                {
                     accidentalImage = n.getAccidentalImageView();
-                    if (accidentalImage == null) {
-                        accidentalImage = new ImageView(
-                          getApplicationContext());
-                        accidentalParams = new RelativeLayout.LayoutParams(
-                          xActual,
-                          yActual);
+                    if (accidentalImage == null)
+                    {
+                        accidentalImage = new ImageView(getApplicationContext());
+                        accidentalParams = new RelativeLayout.LayoutParams(xActual, yActual);
                         n.setAccidentalImageView(accidentalImage);
-                        n.getAccidentalImageView()
-                         .setLayoutParams(accidentalParams);
-                    } else {
-                        accidentalParams
-                          = (RelativeLayout.LayoutParams)accidentalImage
-                          .getLayoutParams();
+                        n.getAccidentalImageView().setLayoutParams(accidentalParams);
+                    }
+                    else
+                        {
+                        accidentalParams = (RelativeLayout.LayoutParams) accidentalImage.getLayoutParams();
                     }
                     rl.addView(accidentalImage);
 
                     //TODO: adjust all of this and make it use resources
 
-                    accidentalParams.leftMargin = (int)((xActual - 30)
-                                                        * adjustment);
-                    accidentalParams.topMargin = (int)((yActual + 54)
-                                                       * adjustment);
+                    accidentalParams.leftMargin = (int)((xActual - 30) * adjustment);
+                    accidentalParams.topMargin = (int)((yActual + 54) * adjustment);
                     accidentalParams.width = (int)(55 * adjustment);
                     accidentalParams.height = (int)(55 * adjustment);
 
@@ -913,6 +914,34 @@ public class MusicSheet extends AppCompatActivity {
                             accidentalImage.setImageResource(R.drawable.sharp);
                     }
                 }
+
+                /*
+                if(dotted)
+                {
+                    dottedImage = n.getDotImageView();
+                    if (dottedImage == null)
+                    {
+                        dottedImage = new ImageView(getApplicationContext());
+                        dottedParams = new RelativeLayout.LayoutParams(xActual, yActual);
+                        n.setDotImageView(dottedImage);
+                        n.getDotImageView().setLayoutParams(dottedParams);
+                    }
+                    else
+                        dottedParams = (RelativeLayout.LayoutParams) dottedImage.getLayoutParams();
+
+                    rl.addView(dottedImage);
+
+                    //TODO: find dot image and set it here
+                    dottedImage.setImageResource(R.drawable.);
+
+                    dottedParams.leftMargin = (int)((xActual + 30) * adjustment);
+                    dottedParams.topMargin = (int)((yActual + 54) * adjustment);
+                    dottedParams.width = (int)(55 * adjustment);
+                    dottedParams.height = (int)(55 * adjustment);
+                }
+                */
+
+
                 break;
             case REST:
                 // TODO: add rest rendering
@@ -1027,12 +1056,14 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    public void cycleNoteType(View view) {
+    public void cycleNoteType(View view)
+    {
         // TODO: make the rest toggle button display
         // a rest matching the chosen duration
         ImageView image = findViewById(R.id.noteButton);
 
-        switch (selectedNoteDur) {
+        switch (selectedNoteDur)
+        {
             case WHOLE:
                 selectedNoteDur = NoteDur.HALF;
                 image.setImageResource(R.drawable.halfnote);
@@ -1071,14 +1102,15 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    public void cycleButtons(View view) {
+    public void cycleButtons(View view)
+    {
         ToggleButton editButton = findViewById(R.id.editButton);
 
-        editButton.setOnCheckedChangeListener(
-          new CompoundButton.OnCheckedChangeListener() {
+        editButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
               @Override
-              public void onCheckedChanged(CompoundButton buttonView,
-                                           boolean isChecked) {
+              public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+              {
                   if (isChecked)
                   {
                       playButton.setVisibility(View.GONE);
