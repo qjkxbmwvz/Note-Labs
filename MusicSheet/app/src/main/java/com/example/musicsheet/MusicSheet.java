@@ -447,8 +447,7 @@ public class MusicSheet extends AppCompatActivity {
                             case MotionEvent.ACTION_UP: {
                                 byte[] midiEvent = new byte[3];
 
-                                midiEvent[0]
-                                  = (byte)(0x80 | measure.staff);
+                                midiEvent[0] = (byte)(0x80 | measure.staff);
                                 midiEvent[1]
                                   = (byte)(p + Objects
                                   .requireNonNull(keys.get(key)).get(p % 12)
@@ -460,8 +459,7 @@ public class MusicSheet extends AppCompatActivity {
                                              .get(p % 12));
                                 midiEvent[2] = 127;
 
-                                // Send the MIDI event to the
-                                // synthesizer.
+                                // Send the MIDI event to the synthesizer.
                                 player.directWrite(midiEvent);
 
                                 score.addNote(measure.staff,
@@ -486,6 +484,25 @@ public class MusicSheet extends AppCompatActivity {
                                 break;
                             }
                             case MotionEvent.ACTION_CANCEL:
+                                byte[] midiEvent = new byte[3];
+
+                                midiEvent[0]
+                                  = (byte)(0x80 | measure.staff);
+                                midiEvent[1]
+                                  = (byte)(p + Objects
+                                  .requireNonNull(keys.get(key)).get(p % 12)
+                                           + accidental + Objects
+                                             .requireNonNull(
+                                               clefMods.get(score
+                                                              .getTrackClef(
+                                                                measure.staff)))
+                                             .get(p % 12));
+                                midiEvent[2] = 127;
+
+                                // Send the MIDI event to the
+                                // synthesizer.
+                                player.directWrite(midiEvent);
+
                                 if (tempNote != null)
                                     tempNote.hide();
                                 break;
@@ -1099,9 +1116,9 @@ public class MusicSheet extends AppCompatActivity {
         if (editButton.isChecked()) {
             playButton.setVisibility(View.GONE);
             restartButton.setVisibility(View.GONE);
-            undoButton.setVisibility(View.GONE);
             saveButton.setVisibility(View.GONE);
             addStuffButton.setVisibility(View.VISIBLE);
+            undoButton.setVisibility(View.VISIBLE);
             accidentButton.setVisibility(View.VISIBLE);
             noteButton.setVisibility(View.VISIBLE);
             dotButton.setVisibility(View.VISIBLE);
@@ -1109,9 +1126,9 @@ public class MusicSheet extends AppCompatActivity {
         } else {
             playButton.setVisibility(View.VISIBLE);
             restartButton.setVisibility(View.VISIBLE);
-            undoButton.setVisibility(View.VISIBLE);
             saveButton.setVisibility(View.VISIBLE);
             addStuffButton.setVisibility(View.GONE);
+            undoButton.setVisibility(View.GONE);
             accidentButton.setVisibility(View.GONE);
             noteButton.setVisibility(View.GONE);
             dotButton.setVisibility(View.GONE);
@@ -1268,8 +1285,7 @@ public class MusicSheet extends AppCompatActivity {
                               for (int k = 0; k < score.getTrackCount(); ++k) {
                                   TableRow tableRow;
 
-                                  if (toBeAdded != 1
-                                      || score.getMeasureCount() % 2 == 0) {
+                                  if (score.getMeasureCount() % 2 == 0) {
                                       tableRow = new TableRow(
                                         getApplicationContext());
                                       tableLayout.addView(
