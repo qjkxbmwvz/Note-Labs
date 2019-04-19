@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -105,24 +106,24 @@ public class MusicSheet extends AppCompatActivity {
 
         Context context = getApplicationContext();
         tableLayout = new TableLayout(context);
-        scrollView = findViewById(R.id.musicSheetScroll);
+        scrollView = findViewById(R.id.music_sheet_scroll);
 
         score = new Score(player);
         measures = new HashMap<>();
         editHistory = new Stack<>();
 
         zoomView = new ZoomView(context);
-        editButton = findViewById(R.id.editButton);
-        dotButton = findViewById(R.id.dotButton);
-        restButton = findViewById(R.id.restButton);
+        editButton = findViewById(R.id.edit_button);
+        dotButton = findViewById(R.id.dot_button);
+        restButton = findViewById(R.id.rest_button);
 
-        playButton = findViewById(R.id.playButton);
-        restartButton = findViewById(R.id.restartButton);
-        undoButton = findViewById(R.id.undoButton);
-        addStuffButton = findViewById(R.id.addStuffButton);
-        accidentButton = findViewById(R.id.accidentButton);
-        noteButton = findViewById(R.id.noteButton);
-        saveButton = findViewById(R.id.saveButton);
+        playButton = findViewById(R.id.play_button);
+        restartButton = findViewById(R.id.restart_button);
+        undoButton = findViewById(R.id.undo_button);
+        addStuffButton = findViewById(R.id.add_stuff_button);
+        accidentButton = findViewById(R.id.accident_button);
+        noteButton = findViewById(R.id.note_button);
+        saveButton = findViewById(R.id.save_button);
 
         cycleButtons(null);
 
@@ -299,10 +300,6 @@ public class MusicSheet extends AppCompatActivity {
                                               verticalStart,
                                               verticalOffset);
 
-//                            TextView debugText = findViewById(R.id.debugText);
-//                            debugText
-//                              .setText(imageX + ", " + imageY);
-
                         NoteDur actualNoteDur = selectedNoteDur;
                         int gottenDur = score.durationAtTime(
                           measure.staff,
@@ -475,7 +472,7 @@ public class MusicSheet extends AppCompatActivity {
 
                                 accidental = 0;
                                 ImageView accImg = findViewById(
-                                  R.id.accidentButton);
+                                  R.id.accident_button);
 
                                 accImg.setImageResource(R.drawable.natural);
 
@@ -1024,7 +1021,7 @@ public class MusicSheet extends AppCompatActivity {
 
     //Buttons
     public void play(View view) {
-        ImageView image = findViewById(R.id.playButton);
+        ImageView image = findViewById(R.id.play_button);
         //redundant
         if (!player.running) {
             score.play();
@@ -1036,7 +1033,7 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void resetPlayButton() {
-        ImageView image = findViewById(R.id.playButton);
+        ImageView image = findViewById(R.id.play_button);
 
         image.setImageResource(R.drawable.ic_media_play);
     }
@@ -1044,7 +1041,7 @@ public class MusicSheet extends AppCompatActivity {
     public void restart(View view) {
         if (!player.running) {
             score.resetPlayPos();
-            ImageView image = findViewById(R.id.playButton);
+            ImageView image = findViewById(R.id.play_button);
 
             image.setImageResource(R.drawable.ic_media_play);
         }
@@ -1069,7 +1066,7 @@ public class MusicSheet extends AppCompatActivity {
     public void cycleNoteType(View view) {
         // TODO: make the rest toggle button display
         // a rest matching the chosen duration
-        ImageView image = findViewById(R.id.noteButton);
+        ImageView image = findViewById(R.id.note_button);
 
         switch (selectedNoteDur) {
             case WHOLE:
@@ -1091,7 +1088,7 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void cycleAccidental(View view) {
-        ImageView image = findViewById(R.id.accidentButton);
+        ImageView image = findViewById(R.id.accident_button);
 
         ++accidental;
 
@@ -1111,7 +1108,7 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void cycleButtons(View view) {
-        ToggleButton editButton = findViewById(R.id.editButton);
+        ToggleButton editButton = findViewById(R.id.edit_button);
 
         if (editButton.isChecked()) {
             playButton.setVisibility(View.GONE);
@@ -1146,9 +1143,11 @@ public class MusicSheet extends AppCompatActivity {
         alertDialogBuilder.setView(promptView);
 
         Button addInstrumentButton = promptView
-          .findViewById(R.id.addInstrumentButton);
+          .findViewById(R.id.add_instrument_button);
         Button addMeasuresButton = promptView
-          .findViewById(R.id.addMeasuresButton);
+          .findViewById(R.id.add_measures_button);
+        final TextView tempoText = promptView.findViewById(R.id.tempo_tex);
+        SeekBar tempoBar = promptView.findViewById(R.id.tempo_bar);
 
         addInstrumentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1311,6 +1310,29 @@ public class MusicSheet extends AppCompatActivity {
                 alertDialog.show();
             }
         });
+
+        tempoText.setText("Tempo: " + score.getTempo());
+
+        tempoBar.setProgress(score.getTempo());
+
+        tempoBar.setOnSeekBarChangeListener(
+          new SeekBar.OnSeekBarChangeListener() {
+              @Override
+              public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                  if (b)
+                    tempoText.setText("Tempo: " + i);
+              }
+
+              @Override
+              public void onStartTrackingTouch(SeekBar seekBar) {
+
+              }
+
+              @Override
+              public void onStopTrackingTouch(SeekBar seekBar) {
+                  score.setTempo(seekBar.getProgress());
+              }
+          });
 
         alertDialogBuilder
           .setCancelable(false)

@@ -86,7 +86,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
 
             if (time > prevTime) {
                 try {
-                    Thread.sleep((time - prevTime) * 300 / tempo);
+                    Thread.sleep((time - prevTime) * 600 / tempo);
                 } catch (InterruptedException e) {
                     running = false;
                     stopAllNotes();

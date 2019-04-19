@@ -22,7 +22,7 @@ class Score {
     private Thread playerThread;
 
     Score(Player player) {
-        tempo = 60;
+        tempo = 120;
         startTime = 0;
         measureCount = 0;
         tracks = new ArrayList<>();
