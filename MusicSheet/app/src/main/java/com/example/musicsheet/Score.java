@@ -26,7 +26,6 @@ class Score {
         startTime = 0;
         measureCount = 0;
         tracks = new ArrayList<>();
-        tracks.add(new Track((byte)0, Track.Clef.TREBLE));
         this.player = player;
     }
 
@@ -56,20 +55,18 @@ class Score {
         return tracks.get(track).getInstrument();
     }
 
-    int addTrack(Track track) {
-        if (tracks.size() < 16) {
+    void addTrack(Track track) {
+        if (tracks.size() < 16)
             tracks.add(track);
-            return tracks.size();
-        } else
-            return -1;
     }
 
     //velocity 127: good volume
     void addNote(int track, int timePosition, Note note) {
         tracks.get(track).addNote(timePosition, note);
-        tracks.get(track).addNote((timePosition + note.getDuration()),
-                                  new Note(Note.NoteType.REST, (0),
-                                           (byte)0, (byte)0, (byte)0));
+        if (note.getNoteType() != Note.NoteType.REST)
+            tracks.get(track).addNote((timePosition + note.getDuration()),
+                                      new Note(Note.NoteType.REST, (0),
+                                               (byte)0, (byte)0, (byte)0));
     }
 
     Edit removeNote(int track, int timePosition, byte pitch) {

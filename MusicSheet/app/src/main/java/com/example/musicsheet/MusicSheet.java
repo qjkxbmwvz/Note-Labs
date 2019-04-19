@@ -19,7 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CompoundButton;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -27,7 +27,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -89,12 +88,15 @@ public class MusicSheet extends AppCompatActivity {
     private ImageButton accidentButton;
     private ImageButton noteButton;
     private ImageButton saveButton;
+    private ImageButton addStuffButton;
 
     private ToggleButton editButton;
     private ToggleButton dotButton;
     private ToggleButton restButton;
 
-    @SuppressLint({"ClickableViewAccessibility", "NewApi"})
+    private ScrollView scrollView;
+    private TableLayout tableLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,8 +104,8 @@ public class MusicSheet extends AppCompatActivity {
         setContentView(R.layout.activity_music_sheet);
 
         Context context = getApplicationContext();
-        final TableLayout tableLayout = new TableLayout(context);
-        ScrollView scrollView = findViewById(R.id.musicSheetScroll);
+        tableLayout = new TableLayout(context);
+        scrollView = findViewById(R.id.musicSheetScroll);
 
         score = new Score(player);
         measures = new HashMap<>();
@@ -117,9 +119,12 @@ public class MusicSheet extends AppCompatActivity {
         playButton = findViewById(R.id.playButton);
         restartButton = findViewById(R.id.restartButton);
         undoButton = findViewById(R.id.undoButton);
+        addStuffButton = findViewById(R.id.addStuffButton);
         accidentButton = findViewById(R.id.accidentButton);
         noteButton = findViewById(R.id.noteButton);
         saveButton = findViewById(R.id.saveButton);
+
+        cycleButtons(null);
 
         linePaint = setUpPaint(Color.BLACK, (true), Paint.Style.STROKE);
 
@@ -151,444 +156,436 @@ public class MusicSheet extends AppCompatActivity {
 
         measureLength = 192 * timeSignature.num / timeSignature.den;
 
-        int height = 10;
-        int trackCount = 2;
-        boolean odd = false;
+        int trackCount = 1;
+        int measureCount = 4;
 
-        //some method called FindScore...
         if (!newScore) {
             trackCount = score.getTrackCount();
-            height = score.getMeasureCount() * trackCount / 2;
-            odd = score.getMeasureCount() % 2 != 0;
+            measureCount = score.getMeasureCount();
         } else
-            score.addTrack(new Track((byte)0, Track.Clef.BASS));
+            for (int i = 0; i < measureCount; ++i)
+                score.addMeasure(timeSignature);
 
-        //this could be a method
-        int[] counts = new int[trackCount];
+        for (int i = 0; i < trackCount; ++i) {
+            if (newScore) {
+                score.addTrack(new Track((byte)0, Track.Clef.TREBLE));
+                for (int j = 0; j < score.getMeasureCount(); ++j) {
+                    score.addNote(i, (measureLength * j), new Note(
+                      Note.NoteType.REST, measureLength,
+                      (byte)0, (byte)0, (byte)0));
+                }
+            }
+            addStaff(i, measureCount);
+        }
+    }
 
-        for (int i = 0; i < counts.length; ++i)
-            counts[i] = -1;
+    void addStaff(int staffNum, int measureCount) {
+        int count = -1;
+        boolean odd = (measureCount + 1) % 2 != 0;
+        int height = measureCount / 2 + (odd ? 1 : 0);
+        Context context = getApplicationContext();
 
-        for (int i = 0; i < (odd ? height + 1 : height); ++i) {
+        for (int i = 0; i < height; ++i) {
             //for each row
             TableRow tableRow = new TableRow(context);
 
             tableRow.setLayoutParams(new TableRow.LayoutParams(
               TableRow.LayoutParams.MATCH_PARENT));
 
-            for (int j = 0; j < (odd && i == height ? 1 : 2); ++j) {
-                //each imageView in row
-                TableRow.LayoutParams layoutParams
-                  = new TableRow.LayoutParams();
+            for (int j = 0; j < (odd && i == height - 1 ? 1 : 2); ++j)
+                addMeasure(staffNum, count++, tableRow);
 
-                RelativeLayout relativeLayout = new RelativeLayout(context);
+            tableLayout.addView(tableRow, (staffNum + i * (staffNum + 1)));
+        }
+    }
 
-                relativeLayout.setLayoutParams(layoutParams);
-                relativeLayout.getLayoutParams().height = (int)(
-                  verticalMax * context.getResources()
-                                       .getDisplayMetrics().density
-                  / 2.625);
-                relativeLayout.getLayoutParams().width = (int)(
-                  horizontalMax * context.getResources()
-                                         .getDisplayMetrics().density
-                  / 2.625);
+    @SuppressLint("ClickableViewAccessibility")
+    private void addMeasure(int staffNum, int count, TableRow tableRow) {
+        Context context = getApplicationContext();
+        TableRow.LayoutParams layoutParams
+          = new TableRow.LayoutParams();
 
-                ImageView imageView = new ImageView(context);
+        RelativeLayout relativeLayout = new RelativeLayout(context);
 
-                imageView.setLayoutParams(layoutParams);
-                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+        relativeLayout.setLayoutParams(layoutParams);
+        relativeLayout.getLayoutParams().height = (int)(
+          verticalMax * context.getResources()
+                               .getDisplayMetrics().density / 2.625);
+        relativeLayout.getLayoutParams().width = (int)(
+          horizontalMax * context.getResources()
+                                 .getDisplayMetrics().density / 2.625);
 
-                drawStaff(imageView);
+        ImageView imageView = new ImageView(context);
 
-                if (newScore && i % trackCount == 0)
-                    score.addMeasure(timeSignature);
-                else {
-                    if (counts[i % trackCount] < score.getMeasureCount()) {
-                        ArrayList<Pair<Integer, LinkedList<Note>>> measure
-                          = score.getMeasure((i % trackCount),
-                                             counts[i % trackCount],
-                                             timeSignature);
-                        for (Pair<Integer, LinkedList<Note>> p : measure) {
-                            Pair<NoteDur, Boolean> durAndDot = numToDurAndDot(
-                              p.second.getFirst().getDuration());
+        imageView.setLayoutParams(layoutParams);
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
 
-                            NoteDur noteDur = durAndDot.first;
-                            boolean dotted = durAndDot.second;
+        drawStaff(imageView);
 
-                            for (Note n : p.second) {
-                                byte pitch = (byte)(n.getPitch()
-                                                    + Objects.requireNonNull(
-                                  reverseKeys.get(key)).get(n.getPitch()
-                                                            % 12));
+        if (count != -1 && count < score.getMeasureCount()) {
+            ArrayList<Pair<Integer, LinkedList<Note>>> measure
+              = score.getMeasure(staffNum, count, timeSignature);
+            for (Pair<Integer, LinkedList<Note>> p : measure) {
+                Pair<NoteDur, Boolean> durAndDot = numToDurAndDot(
+                  p.second.getFirst().getDuration());
 
-                                drawNote(relativeLayout, p.first,
-                                         pitchToPos.get(
-                                           pitch
-                                           + Objects.requireNonNull(
-                                             reverseClefMods
-                                               .get(score.getTrackClef(
-                                                 i
-                                                 % trackCount)))
-                                                    .get(pitch % 12)), n,
-                                         noteDur, dotted, (false));
-                            }
-                        }
-                    }
+                NoteDur noteDur = durAndDot.first;
+                boolean dotted = durAndDot.second;
+
+                for (Note n : p.second) {
+                    byte pitch = (byte)(n.getPitch()
+                                        + Objects.requireNonNull(
+                      reverseKeys.get(key)).get(n.getPitch() % 12));
+
+                    drawNote(relativeLayout, p.first, pitchToPos.get(
+                      pitch + Objects.requireNonNull(
+                        reverseClefMods
+                          .get(score.getTrackClef(staffNum)))
+                                     .get(pitch % 12)),
+                             n, noteDur, dotted, (false));
                 }
+            }
+        }
 
-                measures.put(imageView,
-                             new Pair<>(relativeLayout,
-                                        new Measure((i % trackCount),
-                                                    counts[i % trackCount])));
+        measures.put(imageView,
+                     new Pair<>(relativeLayout, new Measure(staffNum,
+                                                            count)));
 
-                ++counts[i % trackCount];
+        scrollView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return editButton.isChecked();
+            }
+        });
 
-                scrollView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return editButton.isChecked();
-                    }
-                });
+        //create onTouchListener for each ImageView
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                zoomView.setIsEnabled(!editButton.isChecked());
+                if (editButton.isChecked() && !player.running) {
+                    boolean dotting = dotButton.isChecked();
+                    boolean resting = restButton.isChecked();
+                    @SuppressWarnings("SuspiciousMethodCalls")
+                    RelativeLayout rl = Objects
+                      .requireNonNull(measures.get(v)).first;
+                    @SuppressWarnings("SuspiciousMethodCalls") final Measure
+                      measure = Objects
+                      .requireNonNull(measures.get(v)).second;
 
-                //create onTouchListener for each ImageView
-                imageView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        zoomView.setIsEnabled(!editButton.isChecked());
-                        if (editButton.isChecked() && !player.running) {
-                            boolean dotting = dotButton.isChecked();
-                            boolean resting = restButton.isChecked();
-                            @SuppressWarnings("SuspiciousMethodCalls")
-                            RelativeLayout rl = Objects
-                              .requireNonNull(measures.get(v)).first;
-                            @SuppressWarnings("SuspiciousMethodCalls")
-                            final Measure measure = Objects
-                              .requireNonNull(measures.get(v)).second;
+                    int imageX = (int)(event.getX()
+                                       / getApplicationContext()
+                                         .getResources()
+                                         .getDisplayMetrics().density
+                                       * 2.625);
+                    int imageY = (int)(event.getY()
+                                       / getApplicationContext()
+                                         .getResources()
+                                         .getDisplayMetrics().density
+                                       * 2.625);
 
-                            int imageX = (int)(event.getX()
-                                               / getApplicationContext()
-                                                 .getResources()
-                                                 .getDisplayMetrics().density
-                                               * 2.625);
-                            int imageY = (int)(event.getY()
-                                               / getApplicationContext()
-                                                 .getResources()
-                                                 .getDisplayMetrics().density
-                                               * 2.625);
+                    assert measure != null;
 
-                            assert measure != null;
-
-                            if (measure.number >= 0) {
-                                imageX = snapToTime((imageX - horizontalStart),
-                                                    measureLength,
-                                                    (horizontalMax
-                                                     - horizontalStart),
-                                                    score.getMeasure(
-                                                      measure.staff,
-                                                      measure.number,
-                                                      timeSignature));
-                                imageY = snapToHeight(imageY, verticalMax,
-                                                      verticalStart,
-                                                      verticalOffset);
+                    if (measure.number >= 0) {
+                        imageX = snapToTime((imageX - horizontalStart),
+                                            measureLength,
+                                            (horizontalMax
+                                             - horizontalStart),
+                                            score.getMeasure(
+                                              measure.staff,
+                                              measure.number,
+                                              timeSignature));
+                        imageY = snapToHeight(imageY, verticalMax,
+                                              verticalStart,
+                                              verticalOffset);
 
 //                            TextView debugText = findViewById(R.id.debugText);
 //                            debugText
 //                              .setText(imageX + ", " + imageY);
 
-                                NoteDur actualNoteDur = selectedNoteDur;
-                                int gottenDur = score.durationAtTime(
-                                  measure.staff,
-                                  (measure.number * measureLength + imageX));
-                                int duration;
-                                boolean shouldBeDotted = dotting;
+                        NoteDur actualNoteDur = selectedNoteDur;
+                        int gottenDur = score.durationAtTime(
+                          measure.staff,
+                          (measure.number * measureLength + imageX));
+                        int duration;
+                        boolean shouldBeDotted = dotting;
 
-                                switch (selectedNoteDur) {
-                                    case WHOLE:
-                                        duration = 192;
-                                        break;
-                                    case HALF:
-                                        duration = 96;
-                                        break;
-                                    case QUARTER:
-                                        duration = 48;
-                                        break;
-                                    default:
-                                        duration = 24;
-                                }
+                        switch (selectedNoteDur) {
+                            case WHOLE:
+                                duration = 192;
+                                break;
+                            case HALF:
+                                duration = 96;
+                                break;
+                            case QUARTER:
+                                duration = 48;
+                                break;
+                            default:
+                                duration = 24;
+                        }
 
-                                if (dotting)
-                                    duration += duration >> 1;
+                        if (dotting)
+                            duration += duration >> 1;
 
-                                if (gottenDur != 0 && gottenDur != duration) {
-                                    Pair<NoteDur, Boolean> durAndDot
-                                      = numToDurAndDot(gottenDur);
+                        if (gottenDur != 0 && gottenDur != duration) {
+                            Pair<NoteDur, Boolean> durAndDot
+                              = numToDurAndDot(gottenDur);
 
-                                    actualNoteDur = durAndDot.first;
-                                    shouldBeDotted = durAndDot.second;
-                                }
+                            actualNoteDur = durAndDot.first;
+                            shouldBeDotted = durAndDot.second;
+                        }
 
-                                byte lP = 0;
-                                if (lastTouchPointY != 0)
-                                    lP = posToPitch(lastTouchPointY);
-                                byte p = posToPitch(imageY);
+                        byte lP = 0;
+                        if (lastTouchPointY != 0)
+                            lP = posToPitch(lastTouchPointY);
+                        byte p = posToPitch(imageY);
 
-                                switch (event.getAction()) {
-                                    case MotionEvent.ACTION_DOWN: {
-                                        v.getParent()
-                                         .requestDisallowInterceptTouchEvent(
-                                           (true));
-                                        byte[] midiEvent = new byte[3];
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN: {
+                                v.getParent()
+                                 .requestDisallowInterceptTouchEvent((true));
+                                byte[] midiEvent = new byte[3];
 
-                                        byte nominalPitch = (byte)(
-                                          p + Objects.requireNonNull(
-                                            keys.get(key))
-                                                     .get(p % 12)
-                                          + Objects.requireNonNull(
-                                            clefMods.get(
-                                              score.getTrackClef(
-                                                measure.staff)))
-                                                   .get(p % 12));
+                                byte nominalPitch = (byte)(
+                                  p + Objects.requireNonNull(
+                                    keys.get(key))
+                                             .get(p % 12)
+                                  + Objects.requireNonNull(
+                                    clefMods.get(
+                                      score.getTrackClef(
+                                        measure.staff)))
+                                           .get(p % 12));
 
-                                        midiEvent[0] = (byte)(0x90
-                                                              | measure.staff);
-                                        midiEvent[1] =
-                                          (byte)(nominalPitch
-                                                 + accidental);
-                                        midiEvent[2] = 127;
+                                midiEvent[0] = (byte)(0x90
+                                                      | measure.staff);
+                                midiEvent[1] =
+                                  (byte)(nominalPitch
+                                         + accidental);
+                                midiEvent[2] = 127;
 
-                                        // Send the MIDI event to the
-                                        // synthesizer.
-                                        player.directWrite(midiEvent);
+                                // Send the MIDI event to the
+                                // synthesizer.
+                                player.directWrite(midiEvent);
 
-                                        tempNote = new Note(
-                                          resting ? Note.NoteType.REST
-                                                  : Note.NoteType.MELODIC,
-                                          gottenDur == 0 ? duration
-                                                         : gottenDur,
-                                          resting ? (byte)0
-                                                  : (byte)(
-                                                    p + Objects
-                                                      .requireNonNull(
-                                                        keys.get(
-                                                          key))
-                                                      .get(p
-                                                           % 12)
-                                                    + Objects
-                                                      .requireNonNull(
-                                                        clefMods.get(
-                                                          score.getTrackClef(
-                                                            measure.staff)))
-                                                      .get(p
-                                                           % 12)),
-                                          accidental, (byte)127);
-
-                                        drawNote(rl, imageX, imageY,
-                                                 tempNote, actualNoteDur,
-                                                 shouldBeDotted, (false));
-                                    }
-                                    break;
-                                    case MotionEvent.ACTION_MOVE:
-                                        if (lastTouchPointY != imageY
-                                            || lastTouchPointX != imageX) {
-                                            byte[] midiEvent = new byte[6];
-                                            byte nominalPitch
-                                              = (byte)(
-                                              p
-                                              + Objects
-                                                .requireNonNull(
-                                                  keys.get(key)).get(p % 12)
-                                              + Objects.requireNonNull(
+                                tempNote = new Note(
+                                  resting ? Note.NoteType.REST
+                                          : Note.NoteType.MELODIC,
+                                  gottenDur == 0 ? duration
+                                                 : gottenDur,
+                                  resting ? (byte)0
+                                          : (byte)(
+                                            p + Objects
+                                              .requireNonNull(
+                                                keys.get(
+                                                  key))
+                                              .get(p
+                                                   % 12)
+                                            + Objects
+                                              .requireNonNull(
                                                 clefMods.get(
                                                   score.getTrackClef(
                                                     measure.staff)))
-                                                       .get(p % 12));
+                                              .get(p
+                                                   % 12)),
+                                  accidental, (byte)127);
 
-                                            midiEvent[0]
-                                              = (byte)(0x80 | measure.staff);
-                                            midiEvent[1]
-                                              = (byte)(lP + Objects
-                                              .requireNonNull(
-                                                keys.get(key))
-                                              .get(lP % 12) + accidental
-                                                       + Objects
-                                                         .requireNonNull(
-                                                           clefMods.get(
-                                                             score.getTrackClef(
-                                                               measure.staff)))
-                                                         .get(lP % 12));
-                                            midiEvent[2] = 127;
-                                            midiEvent[3]
-                                              = (byte)(0x90 | measure.staff);
-                                            midiEvent[4]
-                                              = (byte)(nominalPitch
-                                                       + accidental);
-                                            midiEvent[5] = 127;
-
-                                            // Send the MIDI event to the
-                                            // synthesizer.
-                                            player.directWrite(midiEvent);
-
-                                            tempNote.setPitch(nominalPitch);
-                                            if (gottenDur != 0)
-                                                tempNote.setDuration(gottenDur);
-
-                                            drawNote(rl, imageX, imageY,
-                                                     tempNote, actualNoteDur,
-                                                     shouldBeDotted, (false));
-                                        }
-                                        break;
-                                    case MotionEvent.ACTION_UP: {
-                                        byte[] midiEvent = new byte[3];
-
-                                        midiEvent[0]
-                                          = (byte)(0x80 | measure.staff);
-                                        midiEvent[1]
-                                          = (byte)(p + Objects
-                                          .requireNonNull(keys.get(key))
-                                          .get(p % 12)
-                                                   + accidental + Objects
-                                                     .requireNonNull(
-                                                       clefMods.get(
-                                                         score.getTrackClef(
-                                                           measure.staff)))
-                                                     .get(p % 12));
-                                        midiEvent[2] = 127;
-
-                                        // Send the MIDI event to the
-                                        // synthesizer.
-                                        player.directWrite(midiEvent);
-
-                                        score.addNote(
-                                          measure.staff,
-                                          (measure.number * measureLength
-                                           + imageX),
-                                          tempNote);
-
-                                        editHistory.push(
-                                          new Edit(tempNote,
-                                                   (measure.number
-                                                    * measureLength + imageX),
-                                                   measure.staff,
-                                                   Edit.EditType.ADD));
-
-                                        accidental = 0;
-                                        ImageView accImg = findViewById(
-                                          R.id.accidentButton);
-
-                                        accImg
-                                          .setImageResource(R.drawable.natural);
-
-                                        v.getParent()
-                                         .requestDisallowInterceptTouchEvent(
-                                           (false));
-                                        break;
-                                    }
-                                    case MotionEvent.ACTION_CANCEL:
-                                        if (tempNote != null)
-                                            tempNote.hide();
-                                        break;
-                                }
-                                lastTouchPointX = imageX;
-                                lastTouchPointY = imageY;
-                            } else { // Measure -1 is for clefs and signatures.
-                                if (event.getAction()
-                                    == MotionEvent.ACTION_DOWN) {
-                                    LayoutInflater li
-                                      = LayoutInflater.from(MusicSheet.this);
-                                    View promptView = li.inflate(
-                                      R.layout.instrument_prompt, (null));
-                                    AlertDialog.Builder alertDialogBuilder
-                                      = new AlertDialog.Builder(
-                                      (MusicSheet.this));
-
-                                    alertDialogBuilder.setView(promptView);
-
-                                    Spinner instrumentSpinner = promptView
-                                      .findViewById(R.id.instrument_spinner);
-
-                                    instrumentSpinner.setSelection(
-                                      score.getTrackInstrument(measure.staff));
-
-                                    instrumentSpinner.setOnItemSelectedListener(
-                                      new AdapterView.OnItemSelectedListener() {
-                                          @Override
-                                          public void onItemSelected(
-                                            AdapterView<?> parent, View view,
-                                            int position, long id) {
-                                              score
-                                                .setTrackInstrument(
-                                                  measure.staff,
-                                                  (byte)position);
-                                          }
-
-                                          @Override
-                                          public void onNothingSelected(
-                                            AdapterView<?> parent) {}
-                                      });
-
-                                    instrumentSpinner.setSelection(
-                                      score.getTrackInstrument(measure.staff));
-
-
-                                    Spinner clefSpinner = promptView
-                                      .findViewById(R.id.clef_spinner);
-
-                                    clefSpinner.setSelection(
-                                      score.getTrackInstrument(measure.staff));
-
-                                    clefSpinner.setOnItemSelectedListener(
-                                      new AdapterView.OnItemSelectedListener() {
-                                          @Override
-                                          public void onItemSelected(
-                                            AdapterView<?> parent, View view,
-                                            int position, long id) {
-                                              score.setTrackClef(
-                                                measure.staff,
-                                                Track.Clef
-                                                  .values()[position]);
-                                          }
-
-                                          @Override
-                                          public void onNothingSelected(
-                                            AdapterView<?> parent) {}
-                                      });
-
-                                    clefSpinner.setSelection(
-                                      score.getTrackClef(measure.staff)
-                                           .ordinal());
-
-
-                                    alertDialogBuilder.setPositiveButton(
-                                      ("Done"),
-                                      new DialogInterface.OnClickListener() {
-                                          @Override
-                                          public void onClick(
-                                            DialogInterface dialogInterface,
-                                            int i) {
-
-                                          }
-                                      });
-
-                                    AlertDialog alertDialog = alertDialogBuilder
-                                      .create();
-
-                                    alertDialog.show();
-                                }
-                                TableRow tableRow = new TableRow(MusicSheet.this);
-
-                                tableRow.setLayoutParams(new TableRow.LayoutParams(
-                                  TableRow.LayoutParams.MATCH_PARENT));
-                                tableLayout.addView(tableRow, 1);
+                                drawNote(rl, imageX, imageY,
+                                         tempNote, actualNoteDur,
+                                         shouldBeDotted, (false));
                             }
+                            break;
+                            case MotionEvent.ACTION_MOVE:
+                                if (lastTouchPointY != imageY
+                                    || lastTouchPointX != imageX) {
+                                    byte[] midiEvent = new byte[6];
+                                    byte nominalPitch
+                                      = (byte)(
+                                      p
+                                      + Objects
+                                        .requireNonNull(
+                                          keys.get(key)).get(p % 12)
+                                      + Objects.requireNonNull(
+                                        clefMods.get(
+                                          score.getTrackClef(
+                                            measure.staff)))
+                                               .get(p % 12));
+
+                                    midiEvent[0]
+                                      = (byte)(0x80 | measure.staff);
+                                    midiEvent[1]
+                                      = (byte)(lP + Objects
+                                      .requireNonNull(
+                                        keys.get(key))
+                                      .get(lP % 12) + accidental
+                                               + Objects
+                                                 .requireNonNull(
+                                                   clefMods.get(
+                                                     score.getTrackClef(
+                                                       measure.staff)))
+                                                 .get(lP % 12));
+                                    midiEvent[2] = 127;
+                                    midiEvent[3]
+                                      = (byte)(0x90 | measure.staff);
+                                    midiEvent[4]
+                                      = (byte)(nominalPitch
+                                               + accidental);
+                                    midiEvent[5] = 127;
+
+                                    // Send the MIDI event to the
+                                    // synthesizer.
+                                    player.directWrite(midiEvent);
+
+                                    tempNote.setPitch(nominalPitch);
+                                    if (gottenDur != 0)
+                                        tempNote.setDuration(gottenDur);
+
+                                    drawNote(rl, imageX, imageY,
+                                             tempNote, actualNoteDur,
+                                             shouldBeDotted, (false));
+                                }
+                                break;
+                            case MotionEvent.ACTION_UP: {
+                                byte[] midiEvent = new byte[3];
+
+                                midiEvent[0]
+                                  = (byte)(0x80 | measure.staff);
+                                midiEvent[1]
+                                  = (byte)(p + Objects
+                                  .requireNonNull(keys.get(key)).get(p % 12)
+                                           + accidental + Objects
+                                             .requireNonNull(
+                                               clefMods.get(score
+                                                              .getTrackClef(
+                                                                measure.staff)))
+                                             .get(p % 12));
+                                midiEvent[2] = 127;
+
+                                // Send the MIDI event to the
+                                // synthesizer.
+                                player.directWrite(midiEvent);
+
+                                score.addNote(measure.staff,
+                                              (measure.number * measureLength
+                                               + imageX), tempNote);
+
+                                editHistory.push(new Edit(tempNote,
+                                                          (measure.number
+                                                           * measureLength
+                                                           + imageX),
+                                                          measure.staff,
+                                                          Edit.EditType.ADD));
+
+                                accidental = 0;
+                                ImageView accImg = findViewById(
+                                  R.id.accidentButton);
+
+                                accImg.setImageResource(R.drawable.natural);
+
+                                v.getParent()
+                                 .requestDisallowInterceptTouchEvent((false));
+                                break;
+                            }
+                            case MotionEvent.ACTION_CANCEL:
+                                if (tempNote != null)
+                                    tempNote.hide();
+                                break;
                         }
-                        return true;
+                        lastTouchPointX = imageX;
+                        lastTouchPointY = imageY;
+                    } else { // Measure -1 is for clefs and signatures.
+                        if (event.getAction()
+                            == MotionEvent.ACTION_DOWN) {
+                            LayoutInflater li
+                              = LayoutInflater.from(MusicSheet.this);
+                            View promptView = li.inflate(
+                              R.layout.instrument_prompt, (null));
+                            AlertDialog.Builder alertDialogBuilder
+                              = new AlertDialog.Builder(
+                              (MusicSheet.this));
+
+                            alertDialogBuilder.setView(promptView);
+
+                            Spinner instrumentSpinner = promptView
+                              .findViewById(R.id.instrument_spinner);
+
+                            byte instrument = score
+                              .getTrackInstrument(measure.staff);
+
+                            instrumentSpinner.setSelection(instrument);
+
+                            instrumentSpinner.setOnItemSelectedListener(
+                              new AdapterView.OnItemSelectedListener() {
+                                  @Override
+                                  public void onItemSelected(
+                                    AdapterView<?> parent, View view,
+                                    int position, long id) {
+                                      score
+                                        .setTrackInstrument(
+                                          measure.staff,
+                                          (byte)position);
+                                  }
+
+                                  @Override
+                                  public void onNothingSelected(
+                                    AdapterView<?> parent) {}
+                              });
+
+                            instrumentSpinner.setSelection(
+                              score.getTrackInstrument(measure.staff));
+
+
+                            Spinner clefSpinner = promptView
+                              .findViewById(R.id.clef_spinner);
+
+                            clefSpinner.setSelection(
+                              score.getTrackClef(measure.staff)
+                                   .ordinal());
+
+                            clefSpinner.setOnItemSelectedListener(
+                              new AdapterView.OnItemSelectedListener() {
+                                  @Override
+                                  public void onItemSelected(
+                                    AdapterView<?> parent, View view,
+                                    int position, long id) {
+                                      score.setTrackClef(
+                                        measure.staff,
+                                        Track.Clef
+                                          .values()[position]);
+                                  }
+
+                                  @Override
+                                  public void onNothingSelected(
+                                    AdapterView<?> parent) {}
+                              });
+
+                            clefSpinner.setSelection(
+                              score.getTrackClef(measure.staff)
+                                   .ordinal());
+
+
+                            alertDialogBuilder.setPositiveButton(
+                              ("Done"),
+                              new DialogInterface.OnClickListener() {
+                                  @Override
+                                  public void onClick(
+                                    DialogInterface dialogInterface,
+                                    int i) {
+                                      dialogInterface.dismiss();
+                                  }
+                              });
+
+                            AlertDialog alertDialog = alertDialogBuilder
+                              .create();
+
+                            alertDialog.show();
+                        }
                     }
-                });
-                relativeLayout.addView(imageView);
-                tableRow.addView(relativeLayout);
+                }
+                return true;
             }
-            tableLayout.addView(tableRow);
-        }
+        });
+        relativeLayout.addView(imageView);
+        tableRow.addView(relativeLayout);
     }
 
     // Hard codes values into data structure, mathematical approach produces
@@ -853,8 +850,7 @@ public class MusicSheet extends AppCompatActivity {
         }
         rl.addView(noteIv);
 
-        switch (n.getNoteType())
-        {
+        switch (n.getNoteType()) {
             case MELODIC:
                 params.leftMargin = (int)(xActual * adjustment);
                 params.topMargin = (int)(yActual * adjustment);
@@ -880,26 +876,29 @@ public class MusicSheet extends AppCompatActivity {
                 }
 
 
-                if (n.getAccidental() != 0)
-                {
+                if (n.getAccidental() != 0) {
                     accidentalImage = n.getAccidentalImageView();
-                    if (accidentalImage == null)
-                    {
-                        accidentalImage = new ImageView(getApplicationContext());
-                        accidentalParams = new RelativeLayout.LayoutParams(xActual, yActual);
+                    if (accidentalImage == null) {
+                        accidentalImage = new ImageView(
+                          getApplicationContext());
+                        accidentalParams = new RelativeLayout.LayoutParams(
+                          xActual, yActual);
                         n.setAccidentalImageView(accidentalImage);
-                        n.getAccidentalImageView().setLayoutParams(accidentalParams);
-                    }
-                    else
-                        {
-                        accidentalParams = (RelativeLayout.LayoutParams) accidentalImage.getLayoutParams();
+                        n.getAccidentalImageView()
+                         .setLayoutParams(accidentalParams);
+                    } else {
+                        accidentalParams
+                          = (RelativeLayout.LayoutParams)accidentalImage
+                          .getLayoutParams();
                     }
                     rl.addView(accidentalImage);
 
                     //TODO: adjust all of this and make it use resources
 
-                    accidentalParams.leftMargin = (int)((xActual - 30) * adjustment);
-                    accidentalParams.topMargin = (int)((yActual + 54) * adjustment);
+                    accidentalParams.leftMargin = (int)((xActual - 30)
+                                                        * adjustment);
+                    accidentalParams.topMargin = (int)((yActual + 54)
+                                                       * adjustment);
                     accidentalParams.width = (int)(55 * adjustment);
                     accidentalParams.height = (int)(55 * adjustment);
 
@@ -914,33 +913,6 @@ public class MusicSheet extends AppCompatActivity {
                             accidentalImage.setImageResource(R.drawable.sharp);
                     }
                 }
-
-                if(dotted)
-                {
-                    dottedImage = n.getDotImageView();
-                    if (dottedImage == null)
-                    {
-                        dottedImage = new ImageView(getApplicationContext());
-                        dottedParams = new RelativeLayout.LayoutParams(xActual, yActual);
-                        n.setDotImageView(dottedImage);
-                        n.getDotImageView().setLayoutParams(dottedParams);
-                    }
-                    else
-                        dottedParams = (RelativeLayout.LayoutParams) dottedImage.getLayoutParams();
-
-                    rl.addView(dottedImage);
-
-                    dottedParams.leftMargin = (int)((xActual + 45) * adjustment);
-                    dottedParams.topMargin = (int)((yActual + 54) * adjustment);
-                    dottedParams.width = (int)(45 * adjustment);
-                    dottedParams.height = (int)(45 * adjustment);
-
-                    //TODO: find dot image and set it here
-                    dottedImage.setImageResource(R.drawable.saveicon);
-                }
-
-
-
                 break;
             case REST:
                 // TODO: add rest rendering
@@ -949,7 +921,29 @@ public class MusicSheet extends AppCompatActivity {
                 break;
         }
         // TODO: add dot rendering for both notes and rests
-        if (dotted) {}
+        if (dotted) {
+            dottedImage = n.getDotImageView();
+            if (dottedImage == null) {
+                dottedImage = new ImageView(getApplicationContext());
+                dottedParams = new RelativeLayout.LayoutParams(xActual,
+                                                               yActual);
+                n.setDotImageView(dottedImage);
+                n.getDotImageView().setLayoutParams(dottedParams);
+            } else
+                dottedParams = (RelativeLayout.LayoutParams)dottedImage
+                  .getLayoutParams();
+
+            rl.addView(dottedImage);
+
+            dottedParams.leftMargin = (int)((xActual + 45)
+                                            * adjustment);
+            dottedParams.topMargin = (int)((yActual + 54) * adjustment);
+            dottedParams.width = (int)(45 * adjustment);
+            dottedParams.height = (int)(45 * adjustment);
+
+            //TODO: find dot image and set it here
+            dottedImage.setImageResource(R.drawable.saveicon);
+        }
     }
 
     @Override
@@ -1055,14 +1049,12 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    public void cycleNoteType(View view)
-    {
+    public void cycleNoteType(View view) {
         // TODO: make the rest toggle button display
         // a rest matching the chosen duration
         ImageView image = findViewById(R.id.noteButton);
 
-        switch (selectedNoteDur)
-        {
+        switch (selectedNoteDur) {
             case WHOLE:
                 selectedNoteDur = NoteDur.HALF;
                 image.setImageResource(R.drawable.halfnote);
@@ -1101,40 +1093,223 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    public void cycleButtons(View view)
-    {
+    public void cycleButtons(View view) {
         ToggleButton editButton = findViewById(R.id.editButton);
 
-        editButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-              @Override
-              public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-              {
-                  if (isChecked)
-                  {
-                      playButton.setVisibility(View.GONE);
-                      restartButton.setVisibility(View.GONE);
-                      undoButton.setVisibility(View.GONE);
-                      saveButton.setVisibility(View.GONE);
-                      accidentButton.setVisibility(View.VISIBLE);
-                      noteButton.setVisibility(View.VISIBLE);
-                      dotButton.setVisibility(View.VISIBLE);
-                      restButton.setVisibility(View.VISIBLE);
-                  }
-                  else
-                      {
-                      playButton.setVisibility(View.VISIBLE);
-                      restartButton.setVisibility(View.VISIBLE);
-                      undoButton.setVisibility(View.VISIBLE);
-                      saveButton.setVisibility(View.VISIBLE);
-                      accidentButton.setVisibility(View.GONE);
-                      noteButton.setVisibility(View.GONE);
-                      dotButton.setVisibility(View.GONE);
-                      restButton.setVisibility(View.GONE);
-                  }
-              }
-          });
+        if (editButton.isChecked()) {
+            playButton.setVisibility(View.GONE);
+            restartButton.setVisibility(View.GONE);
+            undoButton.setVisibility(View.GONE);
+            saveButton.setVisibility(View.GONE);
+            addStuffButton.setVisibility(View.VISIBLE);
+            accidentButton.setVisibility(View.VISIBLE);
+            noteButton.setVisibility(View.VISIBLE);
+            dotButton.setVisibility(View.VISIBLE);
+            restButton.setVisibility(View.VISIBLE);
+        } else {
+            playButton.setVisibility(View.VISIBLE);
+            restartButton.setVisibility(View.VISIBLE);
+            undoButton.setVisibility(View.VISIBLE);
+            saveButton.setVisibility(View.VISIBLE);
+            addStuffButton.setVisibility(View.GONE);
+            accidentButton.setVisibility(View.GONE);
+            noteButton.setVisibility(View.GONE);
+            dotButton.setVisibility(View.GONE);
+            restButton.setVisibility(View.GONE);
+        }
+    }
 
+    public void addStuff(View view) {
+        LayoutInflater li = LayoutInflater.from(this);
+        @SuppressLint("InflateParams") View promptView = li.inflate(
+          R.layout.stuff_prompt, (null));
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+          (this));
+
+        alertDialogBuilder.setView(promptView);
+
+        Button addInstrumentButton = promptView
+          .findViewById(R.id.addInstrumentButton);
+        Button addMeasuresButton = promptView
+          .findViewById(R.id.addMeasuresButton);
+
+        addInstrumentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Track track = new Track((byte)0, Track.Clef.TREBLE);
+
+                score.addTrack(track);
+
+                for (int i = 0; i < score.getMeasureCount(); ++i)
+                    score
+                      .addNote((score.getTrackCount() - 1), (measureLength * i),
+                               new Note(Note.NoteType.REST, measureLength,
+                                        (byte)0, (byte)0, (byte)0));
+
+                LayoutInflater li = LayoutInflater.from(MusicSheet.this);
+                View promptView = li
+                  .inflate(R.layout.instrument_prompt, (null));
+                AlertDialog.Builder alertDialogBuilder
+                  = new AlertDialog.Builder((MusicSheet.this));
+
+                alertDialogBuilder.setView(promptView);
+
+                Spinner instrumentSpinner = promptView
+                  .findViewById(R.id.instrument_spinner);
+
+                instrumentSpinner.setOnItemSelectedListener(
+                  new AdapterView.OnItemSelectedListener() {
+                      @Override
+                      public void onItemSelected(AdapterView<?> parent,
+                                                 View view, int position,
+                                                 long id) {
+                          score.setTrackInstrument((score.getTrackCount() - 1),
+                                                   (byte)position);
+                      }
+
+                      @Override
+                      public void onNothingSelected(
+                        AdapterView<?> parent) {}
+                  });
+
+                instrumentSpinner.setSelection(
+                  score.getTrackInstrument(score.getTrackCount() - 1));
+
+                Spinner clefSpinner = promptView
+                  .findViewById(R.id.clef_spinner);
+
+                clefSpinner.setOnItemSelectedListener(
+                  new AdapterView.OnItemSelectedListener() {
+                      @Override
+                      public void onItemSelected(AdapterView<?> parent,
+                                                 View view, int position,
+                                                 long id) {
+                          score.setTrackClef((score.getTrackCount() - 1),
+                                             Track.Clef.values()[position]);
+                      }
+
+                      @Override
+                      public void onNothingSelected(
+                        AdapterView<?> parent) {}
+                  });
+
+                clefSpinner.setSelection(
+                  score.getTrackClef(score.getTrackCount() - 1).ordinal());
+
+                addStaff((score.getTrackCount() - 1), score.getMeasureCount());
+
+
+                alertDialogBuilder.setPositiveButton(
+                  ("Done"),
+                  new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialogInterface,
+                                          int i) { dialogInterface.dismiss(); }
+                  });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                alertDialog.show();
+            }
+        });
+
+        addMeasuresButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LayoutInflater li = LayoutInflater.from(MusicSheet.this);
+                View promptView = li
+                  .inflate(R.layout.up_down, (null));
+                AlertDialog.Builder alertDialogBuilder
+                  = new AlertDialog.Builder((MusicSheet.this));
+
+                alertDialogBuilder.setView(promptView);
+
+                Button upButton = promptView.findViewById(R.id.up_button);
+                Button downButton = promptView.findViewById(R.id.down_button);
+                final TextView addCount = promptView
+                  .findViewById(R.id.add_count);
+
+                upButton.setOnClickListener(new View.OnClickListener() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onClick(View view) {
+                        int temp = Integer
+                          .parseInt(addCount.getText().toString());
+                        ++temp;
+                        addCount.setText(Integer.toString(temp));
+                    }
+                });
+
+                downButton.setOnClickListener(new View.OnClickListener() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onClick(View view) {
+                        int temp = Integer
+                          .parseInt(addCount.getText().toString());
+                        if (temp > 0) {
+                            --temp;
+                            addCount.setText(Integer.toString(temp));
+                        }
+                    }
+                });
+
+                alertDialogBuilder.setPositiveButton(
+                  ("Done"),
+                  new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialogInterface,
+                                          int i) {
+                          int toBeAdded = Integer
+                            .parseInt(addCount.getText().toString());
+
+                          for (int j = 0; j < toBeAdded; ++j) {
+                              score.addMeasure(timeSignature);
+
+                              for (int k = 0; k < score.getTrackCount(); ++k) {
+                                  TableRow tableRow;
+
+                                  if (toBeAdded != 1
+                                      || score.getMeasureCount() % 2 == 0) {
+                                      tableRow = new TableRow(
+                                        getApplicationContext());
+                                      tableLayout.addView(
+                                        tableRow, (k + score.getTrackCount() * (
+                                          (score.getMeasureCount() + 1) / 2)));
+                                  } else {
+                                      tableRow = (TableRow)tableLayout
+                                        .getChildAt(
+                                          (k + score.getTrackCount() *
+                                               (score.getMeasureCount() / 2)));
+                                  }
+                                  addMeasure(k, (score.getMeasureCount() - 1),
+                                             tableRow);
+                              }
+                          }
+
+                          dialogInterface.dismiss();
+                      }
+                  });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                alertDialog.show();
+            }
+        });
+
+        alertDialogBuilder
+          .setCancelable(false)
+          .setPositiveButton(("Done"),
+                             new DialogInterface.OnClickListener() {
+                                 @Override
+                                 public void onClick(
+                                   DialogInterface dialogInterface, int i) {
+                                     dialogInterface.dismiss();
+                                 }
+                             });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        alertDialog.show();
     }
 
     public void save(View view) {

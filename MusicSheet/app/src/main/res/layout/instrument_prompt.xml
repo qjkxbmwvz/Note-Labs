@@ -20,6 +20,7 @@
         android:prompt="@string/instrument_prompt"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:entries="@array/instruments_array"/>
+
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

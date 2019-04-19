@@ -61,13 +61,14 @@
             android:onClick="undo"
             app:srcCompat="@android:drawable/ic_menu_revert"/>
 
-        <!--<ImageButton
-            android:id="@+id/addInstrumentButton"
+        <ImageButton
+            android:id="@+id/addStuffButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/todo"
-            app:srcCompat="@android:drawable/ic_menu_add"/>-->
+            android:onClick="addStuff"
+            app:srcCompat="@android:drawable/ic_menu_add"/>
 
         <ImageButton
             android:id="@+id/accidentButton"
@@ -77,7 +78,6 @@
             android:contentDescription="@string/todo"
             android:onClick="cycleAccidental"
             android:scaleType="fitCenter"
-            android:visibility="gone"
             app:srcCompat="@drawable/natural"/>
 
         <ImageButton
@@ -88,24 +88,19 @@
             android:contentDescription="@string/todo"
             android:onClick="cycleNoteType"
             android:scaleType="fitCenter"
-            android:visibility="gone"
             app:srcCompat="@drawable/quarternote"/>
 
         <ToggleButton
             android:id="@+id/dotButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone"
-            android:text="."/>
+            android:layout_weight="1"/>
 
         <ToggleButton
             android:id="@+id/restButton"
             android:layout_width="75dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone"
-            android:text="."/>
+            android:layout_weight="1"/>
 
         <ImageButton
             android:id="@+id/saveButton"
@@ -125,12 +120,10 @@
 
             <ToggleButton
                 android:id="@+id/editButton"
-                android:layout_width="75dp"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:contentDescription="TODO"
-                android:onClick="cycleButtons"
-                android:text="Switch"/>
+                android:onClick="cycleButtons"/>
         </LinearLayout>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
