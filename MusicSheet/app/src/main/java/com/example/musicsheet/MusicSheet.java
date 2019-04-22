@@ -802,7 +802,7 @@ public class MusicSheet extends AppCompatActivity {
           getApplicationContext().getResources()
                                  .getDisplayMetrics().density / 2.625;
 
-        int xActual = (x * 125 / 48);
+        int xActual = (x * 125 / 48) + 30;
         int yActual = y - 85;
         ImageView noteIv;
         ImageView accidentalImage;
