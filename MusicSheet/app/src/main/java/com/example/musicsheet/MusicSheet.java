@@ -886,6 +886,25 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
+    protected void drawClef(){
+
+        //grab the first entry
+        HashMap.Entry<ImageView, Pair<RelativeLayout, Measure>> entry = measures.entrySet().iterator().next();
+
+        //grab the ImageView and RelativeLayout of first entry (ie the clef measure)
+        ImageView clefIv = entry.getKey();
+        Pair<RelativeLayout, Measure> rlM = entry.getValue();
+        RelativeLayout rl = rlM.first;
+
+        //draw a clef at an X and Y position
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(10, 30);
+        clefIv.setLayoutParams(params);
+        clefIv.setImageResource(R.drawable.altoclef);
+
+        //add to the RelativeLayout view
+        rl.addView(clefIv);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
