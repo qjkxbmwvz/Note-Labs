@@ -156,6 +156,7 @@
         <item>"Gunshot"</item>
     </string-array>
     <string name="clef_prompt">Select a clef:</string>
+    <string name="tempo_text">Tempo: %d</string>
     <string-array name="clefs_array">
         <item>"Treble Clef"</item>
         <item>"Alto Clef"</item>

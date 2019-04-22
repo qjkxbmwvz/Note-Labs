@@ -45,7 +45,7 @@ public class MusicSheet extends AppCompatActivity {
     private ZoomView zoomView;
 
     // MIDI objects
-    private Player player = new Player(this);
+    private Player player = new Player((this));
     private Score score;
     private Fraction timeSignature;
 
@@ -757,8 +757,7 @@ public class MusicSheet extends AppCompatActivity {
     private void drawStaff(ImageView iv) {
         double adjustment =
           getApplicationContext().getResources()
-                                 .getDisplayMetrics().density
-          / 2.625;
+                                 .getDisplayMetrics().density / 2.625;
 
         float dipW = (float)(horizontalMax * adjustment);
         float dipH = (float)(verticalMax * adjustment);
@@ -1082,8 +1081,15 @@ public class MusicSheet extends AppCompatActivity {
 
             switch (lastEdit.editType) {
                 case ADD:
-                    score.removeNote(lastEdit.staff, lastEdit.time,
-                                     lastEdit.note.getPitch());
+                    Note n = score.removeNote(lastEdit.staff, lastEdit.time,
+                                              lastEdit.note.getPitch()).note;
+                    RelativeLayout rl = (RelativeLayout)n.getImageView()
+                                                         .getParent();
+
+                    Pair<NoteDur, Boolean> p = numToDurAndDot(n.getDuration());
+
+                    drawNote(rl, (lastEdit.time % score.getMeasureLength()),
+                             (0), n, p.first, p.second, (false));
                     break;
                 case REMOVE:
                     score.addNote(lastEdit.staff, lastEdit.time, lastEdit.note);
@@ -1341,7 +1347,7 @@ public class MusicSheet extends AppCompatActivity {
             }
         });
 
-        tempoText.setText("Tempo: " + score.getTempo());
+        tempoText.setText(getString(R.string.tempo_text, score.getTempo()));
 
         tempoBar.setProgress(score.getTempo());
 
@@ -1350,7 +1356,7 @@ public class MusicSheet extends AppCompatActivity {
               @Override
               public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                   if (b)
-                      tempoText.setText("Tempo: " + i);
+                      tempoText.setText(getString(R.string.tempo_text,  i));
               }
 
               @Override
