@@ -53,8 +53,8 @@ class Track {
                 &&
                 Objects.requireNonNull(notes.get(time)).getFirst().getNoteType()
                 == Note.NoteType.REST) {
-                notes.get(time).get(0).hide();
-                Objects.requireNonNull(notes.get(time)).remove(0);
+                Objects.requireNonNull(notes.get(time)).get(0).hide();
+                Objects.requireNonNull(notes.get(time)).remove((0));
             }
             Objects.requireNonNull(notes.get(time)).add(note);
         }
@@ -69,6 +69,8 @@ class Track {
                 Objects.requireNonNull(notes.get(time)).remove(note);
         }
     }
+
+    boolean noteAtPosition(int time) { return notes.containsKey(time); }
 
     Note getNote(int time, byte pitch) {
         if (notes.containsKey(time))

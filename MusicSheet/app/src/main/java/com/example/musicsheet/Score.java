@@ -86,6 +86,8 @@ class Score {
 
             remainder /= 1.5;
             while (remainder != 0) {
+                if (tracks.get(track).noteAtPosition(timePosition))
+                    return ret;
                 boolean addHere = remainder % 2 == 1;
 
                 remainder /= 2;
@@ -122,7 +124,7 @@ class Score {
 
     void addMeasure() {
         for (Track track : tracks)
-            track.addNote(measureLength,
+            track.addNote((measureCount * measureLength),
                           new Note(Note.NoteType.REST, measureLength,
                                    (byte)0, (byte)0, (byte)0));
         ++measureCount;

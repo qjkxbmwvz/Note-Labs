@@ -419,7 +419,7 @@ public class MusicSheet extends AppCompatActivity {
 
                                 int restTime = imageX + tempNote.getDuration();
 
-                                if (!rests.isEmpty())
+                                if (rests != null && !rests.isEmpty())
                                     for (Note rest : rests) {
                                         Pair<NoteDur, Boolean> durAndDot
                                           = numToDurAndDot(rest.getDuration());
