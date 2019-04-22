@@ -90,21 +90,25 @@
             android:id="@+id/dot_button"
             android:layout_width="75dp"
             android:layout_height="match_parent"
+
             android:layout_margin="6dp"
             android:textOff=""
             android:textOn=""
             android:background="@drawable/dot_toggle"
             android:layout_weight="1"/>
 
+
         <ToggleButton
             android:id="@+id/rest_button"
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+
             android:layout_margin="6dp"
             android:textOff=""
             android:textOn=""
             android:background="@drawable/rest_toggle" />
+
 
         <ImageButton
             android:id="@+id/save_button"
@@ -132,6 +136,7 @@
                 android:textOn=""
                 android:background="@drawable/edit_toggle"
                 android:onClick="cycleButtons"/>
+
 
         </LinearLayout>
     </LinearLayout>
