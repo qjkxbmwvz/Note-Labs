@@ -796,7 +796,8 @@ public class MusicSheet extends AppCompatActivity {
     // stem sharing and add an accidental bias for matching
     // and contrasting with the key and recent notes
     private void drawNote(RelativeLayout rl, int x, int y, Note n,
-                          NoteDur dur, boolean dotted, boolean positionFilled) {
+                          NoteDur dur, boolean dotted, boolean positionFilled)
+    {
         double adjustment =
           getApplicationContext().getResources()
                                  .getDisplayMetrics().density / 2.625;
@@ -921,7 +922,8 @@ public class MusicSheet extends AppCompatActivity {
 
         }
 
-        if (dotted) {
+        if (dotted)
+        {
             dottedImage = n.getDotImageView();
             if (dottedImage == null) {
                 dottedImage = new ImageView(getApplicationContext());
@@ -935,10 +937,13 @@ public class MusicSheet extends AppCompatActivity {
 
             rl.addView(dottedImage);
 
-            dotParams.leftMargin = (int)((xActual + 55) * adjustment);
+            dotParams.leftMargin = (int)((xActual + 100) * adjustment);
             dotParams.topMargin = (int)((yActual + 73) * adjustment);
             dotParams.width = (int)(35 * adjustment);
             dotParams.height = (int)(35 * adjustment);
+
+
+
 
             dottedImage.setImageResource(R.drawable.dot);
         }
