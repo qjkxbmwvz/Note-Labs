@@ -533,10 +533,8 @@ public class MusicSheet extends AppCompatActivity {
                                   public void onItemSelected(
                                     AdapterView<?> parent, View view,
                                     int position, long id) {
-                                      score
-                                        .setTrackInstrument(
-                                          measure.staff,
-                                          (byte)position);
+                                      score.setTrackInstrument(measure.staff, (byte)position);
+                                      //update imageView here
                                   }
 
                                   @Override
@@ -957,6 +955,18 @@ public class MusicSheet extends AppCompatActivity {
             //TODO: find dot image and set it here
             dottedImage.setImageResource(R.drawable.dot);
         }
+    }
+
+    protected void drawClef(RelativeLayout rl, ImageView iv){
+
+        //draw a clef on the first imageview at a coordinate
+        //draw it based on score.track.clef
+
+        RelativeLayout.LayoutParams params;
+        params = new RelativeLayout.LayoutParams(10, 30);
+        iv.setLayoutParams(params);
+
+        rl.addView(noteIv);
     }
 
     @Override
