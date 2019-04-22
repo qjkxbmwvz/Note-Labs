@@ -209,7 +209,7 @@ public class MusicSheet extends AppCompatActivity {
           horizontalMax * context.getResources()
                                  .getDisplayMetrics().density / 2.625);
 
-        ImageView imageView = new ImageView(context);
+        final ImageView imageView = new ImageView(context);
 
         imageView.setLayoutParams(layoutParams);
         imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -522,8 +522,11 @@ public class MusicSheet extends AppCompatActivity {
                                     int position, long id) {
                                       score.setTrackClef(
                                         measure.staff,
-                                        Track.Clef
-                                          .values()[position]);
+                                        Track.Clef.values()[position]);
+                                      drawStaffHead(
+                                        Objects.requireNonNull(
+                                          measures.get(imageView)).first,
+                                        score.getTrack(measure.staff));
                                   }
 
                                   @Override
@@ -964,18 +967,20 @@ public class MusicSheet extends AppCompatActivity {
         rl.addView(clefIv);
 
         clefParams.leftMargin = (int)(-50 * adjustment);
-        clefParams.topMargin = (int)(80 * adjustment);
         clefParams.width = (int)(200 * adjustment);
         clefParams.height = (int)(200 * adjustment);
 
         switch (track.getClef()) {
             case TREBLE:
+                clefParams.topMargin = (int)(80 * adjustment);
                 clefIv.setImageResource(R.drawable.treble_clef);
                 break;
             case ALTO:
+                clefParams.topMargin = (int)(80 * adjustment);
                 clefIv.setImageResource(R.drawable.alto_clef);
                 break;
             case BASS:
+                clefParams.topMargin = (int)(80 * adjustment);
                 clefIv.setImageResource(R.drawable.bass_clef);
                 break;
             case PERCUSSION:
