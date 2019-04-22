@@ -216,7 +216,9 @@ public class MusicSheet extends AppCompatActivity {
 
         drawStaff(imageView);
 
-        if (count != -1 && count < score.getMeasureCount()) {
+        if (count == -1)
+            drawStaffHead(relativeLayout, score.getTrack(staffNum));
+        else if (count < score.getMeasureCount()) {
             ArrayList<Pair<Integer, LinkedList<Note>>> measure = score
               .getMeasure(staffNum, count, timeSignature);
             for (Pair<Integer, LinkedList<Note>> p : measure) {
@@ -409,22 +411,23 @@ public class MusicSheet extends AppCompatActivity {
                                                       + accidental),
                                                (byte)127);
 
-                                Note rest = score
+                                LinkedList<Note> rests = score
                                   .addNote(measure.staff,
                                            (measure.number * score
                                              .getMeasureLength()
                                             + imageX), tempNote);
 
-                                if (rest != null) {
+                                int restTime = imageX + tempNote.getDuration();
+
+                                for (Note rest : rests) {
                                     Pair<NoteDur, Boolean> durAndDot
                                       = numToDurAndDot(rest.getDuration());
-
                                     NoteDur restDur = durAndDot.first;
                                     boolean restDotted = durAndDot.second;
 
-                                    drawNote(rl, (imageX + tempNote
-                                               .getDuration()), (0), rest,
+                                    drawNote(rl, restTime, (0), rest,
                                              restDur, restDotted, (false));
+                                    restTime += rest.getDuration();
                                 }
 
                                 editHistory.push(
@@ -801,47 +804,47 @@ public class MusicSheet extends AppCompatActivity {
         ImageView accidentalImage;
         ImageView dottedImage;
 
-        RelativeLayout.LayoutParams params;
+        RelativeLayout.LayoutParams noteParams;
 
         RelativeLayout.LayoutParams accidentalParams;
 
-        RelativeLayout.LayoutParams dottedParams;
+        RelativeLayout.LayoutParams dotParams;
 
         noteIv = n.getImageView();
         if (noteIv == null) {
             noteIv = new ImageView(getApplicationContext());
-            params = new RelativeLayout.LayoutParams(xActual, yActual);
+            noteParams = new RelativeLayout.LayoutParams(xActual, yActual);
             n.setImageView(noteIv);
-            n.getImageView().setLayoutParams(params);
+            n.getImageView().setLayoutParams(noteParams);
         } else {
             n.hide();
-            params = (RelativeLayout.LayoutParams)noteIv.getLayoutParams();
+            noteParams = (RelativeLayout.LayoutParams)noteIv.getLayoutParams();
         }
         rl.addView(noteIv);
 
         switch (n.getNoteType()) {
             case MELODIC:
-                params.leftMargin = (int)(xActual * adjustment);
-                params.topMargin = (int)(yActual * adjustment);
-                params.width = (int)(100 * adjustment);
-                params.height = (int)(100 * adjustment);
+                noteParams.leftMargin = (int)(xActual * adjustment);
+                noteParams.topMargin = (int)(yActual * adjustment);
+                noteParams.width = (int)(100 * adjustment);
+                noteParams.height = (int)(100 * adjustment);
 
                 switch (dur) {
                     case WHOLE:
-                        noteIv.setImageResource(R.drawable.wholenote);
-                        params.leftMargin += (int)(20 * adjustment);
-                        params.topMargin += (int)(67 * adjustment);
-                        params.height = (int)(40 * adjustment);
-                        params.width = (int)(40 * adjustment);
+                        noteIv.setImageResource(R.drawable.whole_note);
+                        noteParams.leftMargin += (int)(20 * adjustment);
+                        noteParams.topMargin += (int)(67 * adjustment);
+                        noteParams.height = (int)(40 * adjustment);
+                        noteParams.width = (int)(40 * adjustment);
                         break;
                     case HALF:
-                        noteIv.setImageResource(R.drawable.halfnote);
+                        noteIv.setImageResource(R.drawable.half_note);
                         break;
                     case QUARTER:
-                        noteIv.setImageResource(R.drawable.quarternote);
+                        noteIv.setImageResource(R.drawable.quarter_note);
                         break;
                     case EIGHTH:
-                        noteIv.setImageResource(R.drawable.eighthnote);
+                        noteIv.setImageResource(R.drawable.eighth_note);
                 }
 
 
@@ -885,46 +888,54 @@ public class MusicSheet extends AppCompatActivity {
                 break;
             case REST:
                 // TODO: add rest rendering
-                yActual = 81; // probably correct
-                params.leftMargin = (int)(xActual * adjustment);
-                params.topMargin = (int)(yActual * adjustment);
-                params.width = (int)(100 * adjustment);
-                params.height = (int)(100 * adjustment);
+                yActual = 82;
+                noteParams.leftMargin = (int)(xActual * adjustment);
+                noteParams.topMargin = (int)(yActual * adjustment);
+                noteParams.width = (int)(100 * adjustment);
+                noteParams.height = (int)(100 * adjustment);
 
                 switch (dur) {
                     case WHOLE:
-                        noteIv.setImageResource(R.drawable.wholerest);
+                        noteIv.setImageResource(R.drawable.whole_rest);
                         break;
                     case HALF:
-                        noteIv.setImageResource(R.drawable.halfrest);
+                        noteParams.topMargin = (int)((yActual + 23)
+                                                     * adjustment);
+                        noteIv.setImageResource(R.drawable.half_rest);
                         break;
                     case QUARTER:
-                        noteIv.setImageResource(R.drawable.quarterrest);
+                        noteParams.width = (int)(150 * adjustment);
+                        noteParams.height = (int)(150 * adjustment);
+                        noteIv.setImageResource(R.drawable.quarter_rest);
                         break;
                     case EIGHTH:
-                        noteIv.setImageResource(R.drawable.eighthrest);
+                        noteParams.topMargin = (int)((yActual + 22)
+                                                     * adjustment);
+                        noteParams.width = (int)(150 * adjustment);
+                        noteParams.height = (int)(150 * adjustment);
+                        noteIv.setImageResource(R.drawable.eighth_rest);
                 }
 
         }
-        // TODO: add dot rendering for both notes and rests
+
         if (dotted) {
             dottedImage = n.getDotImageView();
             if (dottedImage == null) {
                 dottedImage = new ImageView(getApplicationContext());
-                dottedParams = new RelativeLayout.LayoutParams(xActual,
-                                                               yActual);
+                dotParams = new RelativeLayout.LayoutParams(xActual,
+                                                            yActual);
                 n.setDotImageView(dottedImage);
-                n.getDotImageView().setLayoutParams(dottedParams);
+                n.getDotImageView().setLayoutParams(dotParams);
             } else
-                dottedParams = (RelativeLayout.LayoutParams)dottedImage
+                dotParams = (RelativeLayout.LayoutParams)dottedImage
                   .getLayoutParams();
 
             rl.addView(dottedImage);
 
-            dottedParams.leftMargin = (int)((xActual + 55) * adjustment);
-            dottedParams.topMargin = (int)((yActual + 73) * adjustment);
-            dottedParams.width = (int)(35 * adjustment);
-            dottedParams.height = (int)(35 * adjustment);
+            dotParams.leftMargin = (int)((xActual + 55) * adjustment);
+            dotParams.topMargin = (int)((yActual + 73) * adjustment);
+            dotParams.width = (int)(35 * adjustment);
+            dotParams.height = (int)(35 * adjustment);
 
             dottedImage.setImageResource(R.drawable.dot);
         }
@@ -932,25 +943,44 @@ public class MusicSheet extends AppCompatActivity {
 
     // TODO: make this take arguments so that it can be applied on demand
     // to any of the sixteen possible staves that we support simultaneously.
-    protected void drawClef() {
-        //grab the first entry
-        HashMap.Entry<ImageView, Pair<RelativeLayout, Measure>> entry = measures
-          .entrySet().iterator().next();
+    protected void drawStaffHead(RelativeLayout rl, Track track) {
+        double adjustment =
+          getApplicationContext().getResources()
+                                 .getDisplayMetrics().density / 2.625;
 
-        //grab the ImageView and RelativeLayout of first entry (ie the clef
-        // measure)
-        ImageView clefIv = entry.getKey();
-        Pair<RelativeLayout, Measure> rlM = entry.getValue();
-        RelativeLayout rl = rlM.first;
+        ImageView clefIv = track.getClefImage();
+        RelativeLayout.LayoutParams clefParams;
 
-        //draw a clef at an X and Y position
-        RelativeLayout.LayoutParams params
-          = new RelativeLayout.LayoutParams((10), (30));
-        clefIv.setLayoutParams(params);
-        clefIv.setImageResource(R.drawable.altoclef);
-
-        //add to the RelativeLayout view
+        if (clefIv == null) {
+            clefIv = new ImageView(getApplicationContext());
+            clefParams = new RelativeLayout.LayoutParams(
+              (int)(100 * adjustment), (int)(200 * adjustment));
+            track.setClefImage(clefIv);
+            track.getClefImage().setLayoutParams(clefParams);
+        } else {
+            track.hideHead();
+            clefParams = (RelativeLayout.LayoutParams)clefIv.getLayoutParams();
+        }
         rl.addView(clefIv);
+
+        clefParams.leftMargin = (int)(-50 * adjustment);
+        clefParams.topMargin = (int)(80 * adjustment);
+        clefParams.width = (int)(200 * adjustment);
+        clefParams.height = (int)(200 * adjustment);
+
+        switch (track.getClef()) {
+            case TREBLE:
+                clefIv.setImageResource(R.drawable.treble_clef);
+                break;
+            case ALTO:
+                clefIv.setImageResource(R.drawable.alto_clef);
+                break;
+            case BASS:
+                clefIv.setImageResource(R.drawable.bass_clef);
+                break;
+            case PERCUSSION:
+                clefIv.setImageResource(R.drawable.percussion_clef);
+        }
     }
 
     @Override
@@ -1064,19 +1094,19 @@ public class MusicSheet extends AppCompatActivity {
         switch (selectedNoteDur) {
             case WHOLE:
                 selectedNoteDur = NoteDur.HALF;
-                noteImage.setImageResource(R.drawable.halfnote);
+                noteImage.setImageResource(R.drawable.half_note);
                 break;
             case HALF:
                 selectedNoteDur = NoteDur.QUARTER;
-                noteImage.setImageResource(R.drawable.quarternote);
+                noteImage.setImageResource(R.drawable.quarter_note);
                 break;
             case QUARTER:
                 selectedNoteDur = NoteDur.EIGHTH;
-                noteImage.setImageResource(R.drawable.eighthnote);
+                noteImage.setImageResource(R.drawable.eighth_note);
                 break;
             case EIGHTH:
                 selectedNoteDur = NoteDur.WHOLE;
-                noteImage.setImageResource(R.drawable.wholenote);
+                noteImage.setImageResource(R.drawable.whole_note);
         }
     }
 
@@ -1208,7 +1238,6 @@ public class MusicSheet extends AppCompatActivity {
                   score.getTrackClef(score.getTrackCount() - 1).ordinal());
 
                 addStaff((score.getTrackCount() - 1), score.getMeasureCount());
-
 
                 alertDialogBuilder.setPositiveButton(
                   ("Done"),

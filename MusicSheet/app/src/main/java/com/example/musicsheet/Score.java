@@ -41,6 +41,8 @@ class Score {
         this.measureLength = measureLength;
     }
 
+    Track getTrack(int track) { return tracks.get(track); }
+
     int getTrackCount() { return tracks.size(); }
 
     void setTrackClef(int track, Track.Clef clef) {
@@ -71,18 +73,34 @@ class Score {
     }
 
     //velocity 127: good volume
-    Note addNote(int track, int timePosition, Note note) {
+    LinkedList<Note> addNote(int track, int timePosition, Note note) {
         tracks.get(track).addNote(timePosition, note);
 
-        if ((timePosition + note.getDuration()) % measureLength != 0) {
-            int remainder = measureLength - (timePosition + note.getDuration())
-                                            % measureLength;
-            Note rest = new Note(Note.NoteType.REST, remainder,
-                                 (byte)0, (byte)0, (byte)0);
+        timePosition += note.getDuration();
 
-            tracks.get(track).addNote((timePosition + note.getDuration()),
-                                      rest);
-            return rest;
+        LinkedList<Note> ret = new LinkedList<>();
+
+        if (timePosition % measureLength != 0) {
+            int remainder = (measureLength - timePosition % measureLength) / 2;
+            int dur = 3;
+
+            remainder /= 1.5;
+            while (remainder != 0) {
+                boolean addHere = remainder % 2 == 1;
+
+                remainder /= 2;
+
+                if (addHere) {
+                    Note rest = new Note(Note.NoteType.REST, dur,
+                                         (byte)0, (byte)0, (byte)0);
+
+                    tracks.get(track).addNote(timePosition, rest);
+                    ret.add(rest);
+                    timePosition += dur;
+                }
+                dur *= 2;
+            }
+            return ret;
         } else
             return null;
     }

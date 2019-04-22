@@ -2,6 +2,7 @@ package com.example.musicsheet;
 
 import android.util.Pair;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -18,12 +19,13 @@ class Track {
     private TreeMap<Integer, LinkedList<Note>> notes;
 
     private ImageView clefImage, numImage, denImage;
-    private ImageView[] keySigImage;
+    private ImageView[] keySigImages;
 
     Track(byte instrument, Clef clef) {
         this.clef = clef;
         this.instrument = instrument;
         notes = new TreeMap<>();
+        keySigImages = new ImageView[7];
     }
 
     void setClef(Clef clef)             { this.clef = clef; }
@@ -84,14 +86,14 @@ class Track {
     }
 
     TreeSet<Pair<Integer, LinkedList<Note>>> getMeasure(
-            int measureNum, Fraction timeSignature) {
+      int measureNum, Fraction timeSignature) {
         int startPoint = measureNum * 192 * timeSignature.num
                          / timeSignature.den;
         int endPoint = startPoint + 192 * timeSignature.num
                                     / timeSignature.den;
         TreeSet<Pair<Integer, LinkedList<Note>>> ret
-                = new TreeSet<>(new Comparator<Pair<Integer,
-                LinkedList<Note>>>() {
+          = new TreeSet<>(new Comparator<Pair<Integer,
+          LinkedList<Note>>>() {
             @Override
             public int compare(Pair<Integer, LinkedList<Note>> a,
                                Pair<Integer, LinkedList<Note>> b) {
@@ -106,5 +108,38 @@ class Track {
                 break;
 
         return ret;
+    }
+
+    ImageView getClefImage() { return clefImage; }
+
+    void setClefImage(ImageView clefImage) {
+        this.clefImage = clefImage;
+    }
+
+    public ImageView getNumImage()              { return numImage; }
+
+    public void setNumImage(ImageView numImage) { this.numImage = numImage; }
+
+    public ImageView getDenImage()              { return denImage; }
+
+    public void setDenImage(ImageView denImage) { this.denImage = denImage; }
+
+    public ImageView[] getKeySigImages()        { return keySigImages; }
+
+    public void setKeySigImages(ImageView[] keySigImages) {
+        this.keySigImages = keySigImages;
+    }
+
+    void hideHead() {
+        if (clefImage != null)
+            ((RelativeLayout)clefImage.getParent()).removeView(clefImage);
+        if (numImage != null)
+            ((RelativeLayout)numImage.getParent()).removeView(numImage);
+        if (denImage != null)
+            ((RelativeLayout)denImage.getParent()).removeView(denImage);
+        for (ImageView keySigImage : keySigImages)
+            if (keySigImage != null)
+                ((RelativeLayout)keySigImage.getParent())
+                  .removeView(keySigImage);
     }
 }
