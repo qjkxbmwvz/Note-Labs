@@ -1,6 +1,5 @@
 package com.example.musicsheet;
 
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -23,47 +22,46 @@ class Note {
         this.velocity = velocity;
     }
 
-    void setNoteType(NoteType noteType) {
-        this.noteType = noteType;
-    }
+    void setNoteType(NoteType noteType) { this.noteType = noteType; }
 
-    NoteType getNoteType()         { return noteType; }
+    NoteType getNoteType()              { return noteType; }
 
-    void setDuration(int duration) { this.duration = duration; }
+    void setDuration(int duration)      { this.duration = duration; }
 
-    int getDuration()              { return duration; }
+    int getDuration()                   { return duration; }
 
-    void setPitch(byte pitch)      { this.pitch = pitch; }
+    void setPitch(byte pitch)           { this.pitch = pitch; }
 
-    byte getPitch()                { return pitch; }
+    byte getPitch()                     { return pitch; }
 
-    byte getAccidental()           { return accidental; }
+    byte getAccidental()                { return accidental; }
 
-    void setAccidental(byte accidental) {
-        this.accidental = accidental;
-    }
+    void setAccidental(byte accidental) { this.accidental = accidental; }
 
-    byte getVelocity()                 { return velocity; }
+    byte getVelocity()                  { return velocity; }
 
-    ImageView getImageView()           { return imageView; }
+    ImageView getImageView()            { return imageView; }
 
-    void setImageView(ImageView iv)    { this.imageView = iv; }
+    void setImageView(ImageView iv)     { this.imageView = iv; }
 
-    ImageView getAccidentalImageView() {return accidentalImageView; }
+    ImageView getAccidentalImageView()  {return accidentalImageView; }
 
     void setAccidentalImageView(ImageView newImageView) {
         accidentalImageView = newImageView;
     }
 
-    ImageView getDotImageView()         { return dotImageView; }
+    ImageView getDotImageView() { return dotImageView; }
 
-    void setDotImageView(ImageView newImageView)              { this.dotImageView = newImageView; }
+    void setDotImageView(ImageView newImageView) {
+        this.dotImageView = newImageView;
+    }
 
     void hide() {
         if (imageView != null)
             ((RelativeLayout)imageView.getParent()).removeView(imageView);
         if (accidentalImageView != null)
-            ((RelativeLayout)accidentalImageView.getParent()).removeView(accidentalImageView);
+            ((RelativeLayout)accidentalImageView.getParent())
+              .removeView(accidentalImageView);
         if (dotImageView != null)
             ((RelativeLayout)dotImageView.getParent()).removeView(dotImageView);
     }

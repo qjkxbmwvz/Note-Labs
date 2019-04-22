@@ -17,7 +17,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
     private int startTime;
     private byte[] instruments;
     boolean running;
-    MusicSheet musicSheet;
+    private MusicSheet musicSheet;
 
     Player(MusicSheet musicSheet) {
         midiDriver = new MidiDriver();
@@ -49,16 +49,16 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
                             if (!times.containsKey(t + n.getDuration()))
                                 times.put(t + n.getDuration(),
                                           new TimePosition(
-                                                  t + n.getDuration()));
+                                            t + n.getDuration()));
                             Objects.requireNonNull(times.get(t)).addNote(
-                                    new NoteEvent(midiDriver,
-                                                  NoteEvent.EventType.START, i,
-                                                  n));
+                              new NoteEvent(midiDriver,
+                                            NoteEvent.EventType.START, i,
+                                            n));
                             Objects.requireNonNull(
-                                    times.get(t + n.getDuration())).addNote(
-                                    new NoteEvent(midiDriver,
-                                                  NoteEvent.EventType.STOP, i,
-                                                  n));
+                              times.get(t + n.getDuration())).addNote(
+                              new NoteEvent(midiDriver,
+                                            NoteEvent.EventType.STOP, i,
+                                            n));
                             break;
                         case REST:
                             break;
@@ -131,7 +131,7 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
 
     void pause()       { midiDriver.stop(); }
 
-    void directWrite(byte[] event) {
+    void directWrite(byte... event) {
         if (!running) {
             midiDriver.write(event);
             if ((event[0] & 0xF0) == 0xC0)
@@ -140,27 +140,13 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
     }
 
     private void setAllInstruments() {
-        byte[] event = new byte[2];
-
-        for (int i = 0; i < instruments.length; ++i) {
-            event[0] = (byte)(0xC0
-                              | i);  // 0xC0 = program change, 0x0X = channel X
-            event[1] = instruments[i];
-            midiDriver.write(event);
-        }
+        for (int i = 0; i < instruments.length; ++i)
+            directWrite((byte)(0xC0 | i), instruments[i]);
     }
 
     private void stopAllNotes() {
-        byte[] event = new byte[3];
-
-        event[2] = 0x7F;
-
-        for (int i = 0; i < instruments.length; ++i) {
-            event[0] = (byte)(0x80 | i);
-            for (int j = 0; j < 128; ++j) {
-                event[1] = (byte)j;
-                midiDriver.write(event);
-            }
-        }
+        for (int i = 0; i < instruments.length; ++i)
+            for (int j = 0; j < 128; ++j)
+                directWrite((byte)(0x80 | i), (byte)j, (byte)0x7F);
     }
 }

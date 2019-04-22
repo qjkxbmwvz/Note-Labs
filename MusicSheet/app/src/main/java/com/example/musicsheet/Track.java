@@ -50,8 +50,10 @@ class Track {
             if (Objects.requireNonNull(notes.get(time)).size() == 1
                 &&
                 Objects.requireNonNull(notes.get(time)).getFirst().getNoteType()
-                == Note.NoteType.REST)
+                == Note.NoteType.REST) {
+                notes.get(time).get(0).hide();
                 Objects.requireNonNull(notes.get(time)).remove(0);
+            }
             Objects.requireNonNull(notes.get(time)).add(note);
         }
     }
