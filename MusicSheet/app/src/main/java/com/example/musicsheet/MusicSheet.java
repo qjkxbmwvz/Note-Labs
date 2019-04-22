@@ -242,8 +242,7 @@ public class MusicSheet extends AppCompatActivity {
         }
 
         measures.put(imageView,
-                     new Pair<>(relativeLayout, new Measure(staffNum,
-                                                            count)));
+                     new Pair<>(relativeLayout, new Measure(staffNum, count)));
 
         scrollView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -264,17 +263,16 @@ public class MusicSheet extends AppCompatActivity {
                     RelativeLayout rl = Objects
                       .requireNonNull(measures.get(v)).first;
                     @SuppressWarnings("SuspiciousMethodCalls") final Measure
-                      measure = Objects
-                      .requireNonNull(measures.get(v)).second;
+                      measure = Objects.requireNonNull(measures.get(v)).second;
 
                     int imageX = (int)(
                       event.getX() / getApplicationContext().getResources()
-                                                            .getDisplayMetrics().density
-                      * 2.625);
+                                                            .getDisplayMetrics()
+                        .density * 2.625);
                     int imageY = (int)(
                       event.getY() / getApplicationContext().getResources()
-                                                            .getDisplayMetrics().density
-                      * 2.625);
+                                                            .getDisplayMetrics()
+                        .density * 2.625);
 
                     assert measure != null;
 
@@ -1241,6 +1239,11 @@ public class MusicSheet extends AppCompatActivity {
                                                  long id) {
                           score.setTrackClef((score.getTrackCount() - 1),
                                              Track.Clef.values()[position]);
+                          drawStaffHead(
+                            Objects.requireNonNull((RelativeLayout)score
+                              .getTrack(score.getTrackCount() - 1)
+                              .getClefImage().getParent()),
+                            score.getTrack(score.getTrackCount() - 1));
                       }
 
                       @Override
@@ -1358,7 +1361,7 @@ public class MusicSheet extends AppCompatActivity {
               @Override
               public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                   if (b)
-                      tempoText.setText(getString(R.string.tempo_text,  i));
+                      tempoText.setText(getString(R.string.tempo_text, i));
               }
 
               @Override
