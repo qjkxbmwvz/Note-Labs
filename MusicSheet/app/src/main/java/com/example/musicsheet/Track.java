@@ -4,6 +4,7 @@ import android.util.Pair;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,15 +18,17 @@ class Track {
     private Clef clef;
     private byte instrument;
     private TreeMap<Integer, LinkedList<Note>> notes;
+    private int key;
 
     private ImageView clefImage, numImage, denImage;
-    private ImageView[] keySigImages;
+    private ArrayList<ImageView> keySigImages;
 
-    Track(byte instrument, Clef clef) {
+    Track(byte instrument, Clef clef, int key) {
         this.clef = clef;
         this.instrument = instrument;
         notes = new TreeMap<>();
-        keySigImages = new ImageView[7];
+        this.key = key;
+        keySigImages = new ArrayList<>((7));
     }
 
     void setClef(Clef clef)             { this.clef = clef; }
@@ -35,6 +38,10 @@ class Track {
     void setInstrument(byte instrument) { this.instrument = instrument; }
 
     byte getInstrument()                { return instrument; }
+
+    void setKey(int key)                { this.key = key; }
+
+    int getKey()                        { return key; }
 
     Iterator<Integer> getTimeIterator() { return notes.keySet().iterator(); }
 
@@ -122,9 +129,9 @@ class Track {
 
     public void setDenImage(ImageView denImage) { this.denImage = denImage; }
 
-    public ImageView[] getKeySigImages()        { return keySigImages; }
+    ArrayList<ImageView> getKeySigImages()      { return keySigImages; }
 
-    public void setKeySigImages(ImageView[] keySigImages) {
+    public void setKeySigImages(ArrayList<ImageView> keySigImages) {
         this.keySigImages = keySigImages;
     }
 

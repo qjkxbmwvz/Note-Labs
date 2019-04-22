@@ -168,7 +168,7 @@ public class MusicSheet extends AppCompatActivity {
 
         for (int i = 0; i < trackCount; ++i) {
             if (newScore)
-                score.addTrack(new Track((byte)0, Track.Clef.TREBLE));
+                score.addTrack(new Track((byte)0, Track.Clef.TREBLE, key));
             addStaff(i, measureCount);
         }
     }
@@ -991,6 +991,15 @@ public class MusicSheet extends AppCompatActivity {
             case PERCUSSION:
                 clefIv.setImageResource(R.drawable.percussion_clef);
         }
+
+        ArrayList<ImageView> keySigImages = track.getKeySigImages();
+        RelativeLayout.LayoutParams[] keySigParamses;
+
+        if (keySigImages.isEmpty()) {
+
+        } else {
+            
+        }
     }
 
     @Override
@@ -1192,7 +1201,7 @@ public class MusicSheet extends AppCompatActivity {
         addInstrumentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Track track = new Track((byte)0, Track.Clef.TREBLE);
+                Track track = new Track((byte)0, Track.Clef.TREBLE, key);
 
                 score.addTrack(track);
 
@@ -1240,8 +1249,8 @@ public class MusicSheet extends AppCompatActivity {
                   new AdapterView.OnItemSelectedListener() {
                       @Override
                       public void onItemSelected(AdapterView<?> parent,
-                                                 View view, int position,
-                                                 long id) {
+                                                 View view,
+                                                 int position, long id) {
                           score.setTrackClef((score.getTrackCount() - 1),
                                              Track.Clef.values()[position]);
                           drawStaffHead(
