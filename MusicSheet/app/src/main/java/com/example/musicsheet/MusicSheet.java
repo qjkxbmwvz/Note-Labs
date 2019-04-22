@@ -968,7 +968,7 @@ public class MusicSheet extends AppCompatActivity {
         rl.addView(clefIv);
 
         clefParams.leftMargin = (int)(-30 * adjustment);
-        clefParams.width = (int)(200 * adjustment);
+        clefParams.width = (int)(298 * adjustment);
         clefParams.height = (int)(298 * adjustment); //200
 
         switch (track.getClef()) {
@@ -977,11 +977,13 @@ public class MusicSheet extends AppCompatActivity {
                 clefIv.setImageResource(R.drawable.treble_clef);
                 break;
             case ALTO:
-                clefParams.topMargin = (int)(80 * adjustment);
+                clefParams.topMargin = (int)(38 * adjustment);
+                clefParams.width = (int)(250 * adjustment);
+                clefParams.height = (int)(250 * adjustment);
                 clefIv.setImageResource(R.drawable.alto_clef);
                 break;
             case BASS:
-                clefParams.topMargin = (int)(80 * adjustment);
+                clefParams.topMargin = (int)(1 * adjustment);
                 clefIv.setImageResource(R.drawable.bass_clef);
                 break;
             case PERCUSSION:
