@@ -34,9 +34,11 @@ class Note {
 
     byte getPitch()                     { return pitch; }
 
+    void setAccidental(byte accidental) { this.accidental = accidental; }
+
     byte getAccidental()                { return accidental; }
 
-    void setAccidental(byte accidental) { this.accidental = accidental; }
+    void setVelocity(byte velocity)     { this.velocity = velocity; }
 
     byte getVelocity()                  { return velocity; }
 

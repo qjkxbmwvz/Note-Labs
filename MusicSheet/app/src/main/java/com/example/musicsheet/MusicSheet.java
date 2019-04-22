@@ -419,16 +419,17 @@ public class MusicSheet extends AppCompatActivity {
 
                                 int restTime = imageX + tempNote.getDuration();
 
-                                for (Note rest : rests) {
-                                    Pair<NoteDur, Boolean> durAndDot
-                                      = numToDurAndDot(rest.getDuration());
-                                    NoteDur restDur = durAndDot.first;
-                                    boolean restDotted = durAndDot.second;
+                                if (!rests.isEmpty())
+                                    for (Note rest : rests) {
+                                        Pair<NoteDur, Boolean> durAndDot
+                                          = numToDurAndDot(rest.getDuration());
+                                        NoteDur restDur = durAndDot.first;
+                                        boolean restDotted = durAndDot.second;
 
-                                    drawNote(rl, restTime, (0), rest,
-                                             restDur, restDotted, (false));
-                                    restTime += rest.getDuration();
-                                }
+                                        drawNote(rl, restTime, (0), rest,
+                                                 restDur, restDotted, (false));
+                                        restTime += rest.getDuration();
+                                    }
 
                                 editHistory.push(
                                   new Edit(tempNote,
