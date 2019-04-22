@@ -967,13 +967,13 @@ public class MusicSheet extends AppCompatActivity {
         }
         rl.addView(clefIv);
 
-        clefParams.leftMargin = (int)(-50 * adjustment);
+        clefParams.leftMargin = (int)(-30 * adjustment);
         clefParams.width = (int)(200 * adjustment);
-        clefParams.height = (int)(200 * adjustment);
+        clefParams.height = (int)(298 * adjustment); //200
 
         switch (track.getClef()) {
             case TREBLE:
-                clefParams.topMargin = (int)(80 * adjustment);
+                clefParams.topMargin = (int)(18 * adjustment); //80
                 clefIv.setImageResource(R.drawable.treble_clef);
                 break;
             case ALTO:
