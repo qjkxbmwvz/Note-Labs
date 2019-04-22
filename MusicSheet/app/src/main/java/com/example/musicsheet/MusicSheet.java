@@ -223,27 +223,20 @@ public class MusicSheet extends AppCompatActivity {
 
         drawStaff(imageView);
 
-        if (count != -1 && count < score.getMeasureCount()) {
-            ArrayList<Pair<Integer, LinkedList<Note>>> measure
-              = score.getMeasure(staffNum, count, timeSignature);
-            for (Pair<Integer, LinkedList<Note>> p : measure) {
-                Pair<NoteDur, Boolean> durAndDot = numToDurAndDot(
-                  p.second.getFirst().getDuration());
+        if (count != -1 && count < score.getMeasureCount())
+        {
+            ArrayList<Pair<Integer, LinkedList<Note>>> measure = score.getMeasure(staffNum, count, timeSignature);
+            for (Pair<Integer, LinkedList<Note>> p : measure)
+            {
+                Pair<NoteDur, Boolean> durAndDot = numToDurAndDot(p.second.getFirst().getDuration());
 
                 NoteDur noteDur = durAndDot.first;
                 boolean dotted = durAndDot.second;
 
-                for (Note n : p.second) {
-                    byte pitch = (byte)(n.getPitch()
-                                        + Objects.requireNonNull(
-                      reverseKeys.get(key)).get(n.getPitch() % 12));
-
-                    drawNote(relativeLayout, p.first, pitchToPos.get(
-                      pitch + Objects.requireNonNull(
-                        reverseClefMods
-                          .get(score.getTrackClef(staffNum)))
-                                     .get(pitch % 12)),
-                             n, noteDur, dotted, (false));
+                for (Note n : p.second)
+                {
+                    byte pitch = (byte)(n.getPitch() + Objects.requireNonNull(reverseKeys.get(key)).get(n.getPitch() % 12));
+                    drawNote(relativeLayout, p.first, pitchToPos.get(pitch + Objects.requireNonNull(reverseClefMods.get(score.getTrackClef(staffNum))).get(pitch % 12)), n, noteDur, dotted, (false));
                 }
             }
         }
@@ -274,16 +267,8 @@ public class MusicSheet extends AppCompatActivity {
                       measure = Objects
                       .requireNonNull(measures.get(v)).second;
 
-                    int imageX = (int)(event.getX()
-                                       / getApplicationContext()
-                                         .getResources()
-                                         .getDisplayMetrics().density
-                                       * 2.625);
-                    int imageY = (int)(event.getY()
-                                       / getApplicationContext()
-                                         .getResources()
-                                         .getDisplayMetrics().density
-                                       * 2.625);
+                    int imageX = (int)(event.getX() / getApplicationContext().getResources().getDisplayMetrics().density * 2.625);
+                    int imageY = (int)(event.getY() / getApplicationContext().getResources().getDisplayMetrics().density * 2.625);
 
                     assert measure != null;
 
@@ -338,43 +323,22 @@ public class MusicSheet extends AppCompatActivity {
                         byte p = posToPitch(imageY);
 
                         switch (event.getAction()) {
-                            case MotionEvent.ACTION_DOWN: {
-                                v.getParent()
-                                 .requestDisallowInterceptTouchEvent((true));
+                            case MotionEvent.ACTION_DOWN:
+                                {
+                                v.getParent().requestDisallowInterceptTouchEvent((true));
                                 byte[] midiEvent = new byte[3];
 
-                                byte nominalPitch = (byte)(
-                                  p + Objects.requireNonNull(
-                                    keys.get(key))
-                                             .get(p % 12)
-                                  + Objects.requireNonNull(
-                                    clefMods.get(
-                                      score.getTrackClef(
-                                        measure.staff)))
-                                           .get(p % 12));
+                                byte nominalPitch = (byte)(p + Objects.requireNonNull(keys.get(key)).get(p % 12) + Objects.requireNonNull(clefMods.get(score.getTrackClef(measure.staff))).get(p % 12));
 
-                                midiEvent[0] = (byte)(0x90
-                                                      | measure.staff);
-                                midiEvent[1] =
-                                  (byte)(nominalPitch
-                                         + accidental);
+                                midiEvent[0] = (byte)(0x90 | measure.staff);
+                                midiEvent[1] = (byte)(nominalPitch + accidental);
                                 midiEvent[2] = 127;
 
                                 // Send the MIDI event to the
                                 // synthesizer.
                                 player.directWrite(midiEvent);
 
-                                tempNote = new Note(
-                                  resting ? Note.NoteType.REST
-                                          : Note.NoteType.MELODIC,
-                                  gottenDur == 0 ? duration
-                                                 : gottenDur,
-                                  resting ? (byte)0
-                                          : (byte)(
-                                            p + Objects
-                                              .requireNonNull(
-                                                keys.get(
-                                                  key))
+                                tempNote = new Note(resting ? Note.NoteType.REST : Note.NoteType.MELODIC, gottenDur == 0 ? duration : gottenDur, resting ? (byte)0 : (byte)(p + Objects.requireNonNull(keys.get(key))
                                               .get(p
                                                    % 12)
                                             + Objects
@@ -386,46 +350,20 @@ public class MusicSheet extends AppCompatActivity {
                                                    % 12)),
                                   accidental, (byte)127);
 
-                                drawNote(rl, imageX, imageY,
-                                         tempNote, actualNoteDur,
-                                         shouldBeDotted, (false));
+                                drawNote(rl, imageX, imageY, tempNote, actualNoteDur, shouldBeDotted, (false));
                             }
                             break;
                             case MotionEvent.ACTION_MOVE:
-                                if (lastTouchPointY != imageY
-                                    || lastTouchPointX != imageX) {
+                                if (lastTouchPointY != imageY || lastTouchPointX != imageX)
+                                {
                                     byte[] midiEvent = new byte[6];
-                                    byte nominalPitch
-                                      = (byte)(
-                                      p
-                                      + Objects
-                                        .requireNonNull(
-                                          keys.get(key)).get(p % 12)
-                                      + Objects.requireNonNull(
-                                        clefMods.get(
-                                          score.getTrackClef(
-                                            measure.staff)))
-                                               .get(p % 12));
+                                    byte nominalPitch = (byte)(p + Objects.requireNonNull(keys.get(key)).get(p % 12) + Objects.requireNonNull(clefMods.get(score.getTrackClef(measure.staff))).get(p % 12));
 
-                                    midiEvent[0]
-                                      = (byte)(0x80 | measure.staff);
-                                    midiEvent[1]
-                                      = (byte)(lP + Objects
-                                      .requireNonNull(
-                                        keys.get(key))
-                                      .get(lP % 12) + accidental
-                                               + Objects
-                                                 .requireNonNull(
-                                                   clefMods.get(
-                                                     score.getTrackClef(
-                                                       measure.staff)))
-                                                 .get(lP % 12));
+                                    midiEvent[0] = (byte)(0x80 | measure.staff);
+                                    midiEvent[1] = (byte)(lP + Objects.requireNonNull(keys.get(key)).get(lP % 12) + accidental + Objects.requireNonNull(clefMods.get(score.getTrackClef(measure.staff))).get(lP % 12));
                                     midiEvent[2] = 127;
-                                    midiEvent[3]
-                                      = (byte)(0x90 | measure.staff);
-                                    midiEvent[4]
-                                      = (byte)(nominalPitch
-                                               + accidental);
+                                    midiEvent[3] = (byte)(0x90 | measure.staff);
+                                    midiEvent[4] = (byte)(nominalPitch + accidental);
                                     midiEvent[5] = 127;
 
                                     // Send the MIDI event to the
@@ -436,48 +374,31 @@ public class MusicSheet extends AppCompatActivity {
                                     if (gottenDur != 0)
                                         tempNote.setDuration(gottenDur);
 
-                                    drawNote(rl, imageX, imageY,
-                                             tempNote, actualNoteDur,
-                                             shouldBeDotted, (false));
+                                    drawNote(rl, imageX, imageY, tempNote, actualNoteDur, shouldBeDotted, (false));
                                 }
                                 break;
-                            case MotionEvent.ACTION_UP: {
+                            case MotionEvent.ACTION_UP:
+                                {
                                 byte[] midiEvent = new byte[3];
 
                                 midiEvent[0] = (byte)(0x80 | measure.staff);
-                                midiEvent[1]
-                                  = (byte)(p + Objects
-                                  .requireNonNull(keys.get(key)).get(p % 12)
-                                           + accidental + Objects
-                                             .requireNonNull(
-                                               clefMods.get(score
-                                                              .getTrackClef(
-                                                                measure.staff)))
-                                             .get(p % 12));
+                                midiEvent[1] = (byte)(p + Objects.requireNonNull(keys.get(key)).get(p % 12) + accidental + Objects.requireNonNull(clefMods.get(score.getTrackClef(measure.staff))).get(p % 12));
                                 midiEvent[2] = 127;
 
                                 // Send the MIDI event to the synthesizer.
                                 player.directWrite(midiEvent);
 
-                                score.addNote(measure.staff,
-                                              (measure.number * measureLength
-                                               + imageX), tempNote);
+                                score.addNote(measure.staff, (measure.number * measureLength + imageX), tempNote);
 
-                                editHistory.push(new Edit(tempNote,
-                                                          (measure.number
-                                                           * measureLength
-                                                           + imageX),
-                                                          measure.staff,
-                                                          Edit.EditType.ADD));
+                                editHistory.push(new Edit(tempNote, (measure.number * measureLength + imageX), measure.staff, Edit.EditType.ADD));
 
                                 accidental = 0;
-                                ImageView accImg = findViewById(
-                                  R.id.accident_button);
+
+                                ImageView accImg = findViewById(R.id.accident_button);
 
                                 accImg.setImageResource(R.drawable.natural);
 
-                                v.getParent()
-                                 .requestDisallowInterceptTouchEvent((false));
+                                v.getParent().requestDisallowInterceptTouchEvent((false));
                                 break;
                             }
                             case MotionEvent.ACTION_CANCEL:
@@ -506,41 +427,34 @@ public class MusicSheet extends AppCompatActivity {
                         }
                         lastTouchPointX = imageX;
                         lastTouchPointY = imageY;
-                    } else { // Measure -1 is for clefs and signatures.
-                        if (event.getAction()
-                            == MotionEvent.ACTION_DOWN) {
-                            LayoutInflater li
-                              = LayoutInflater.from(MusicSheet.this);
-                            View promptView = li.inflate(
-                              R.layout.instrument_prompt, (null));
-                            AlertDialog.Builder alertDialogBuilder
-                              = new AlertDialog.Builder(
-                              (MusicSheet.this));
+                    }
+                    else
+                        { // Measure -1 is for clefs and signatures.
+                        if (event.getAction() == MotionEvent.ACTION_DOWN)
+                        {
+                            LayoutInflater li = LayoutInflater.from(MusicSheet.this);
+                            View promptView = li.inflate(R.layout.instrument_prompt, (null));
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder((MusicSheet.this));
 
                             alertDialogBuilder.setView(promptView);
 
-                            Spinner instrumentSpinner = promptView
-                              .findViewById(R.id.instrument_spinner);
+                            Spinner instrumentSpinner = promptView.findViewById(R.id.instrument_spinner);
 
-                            byte instrument = score
-                              .getTrackInstrument(measure.staff);
+                            byte instrument = score.getTrackInstrument(measure.staff);
 
                             instrumentSpinner.setSelection(instrument);
 
-                            instrumentSpinner.setOnItemSelectedListener(
-                              new AdapterView.OnItemSelectedListener() {
+                            instrumentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+                            {
                                   @Override
-                                  public void onItemSelected(
-                                    AdapterView<?> parent, View view,
-                                    int position, long id) {
+                                  public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                                  {
                                       score.setTrackInstrument(measure.staff, (byte)position);
-                                      //update imageView here
                                   }
 
                                   @Override
-                                  public void onNothingSelected(
-                                    AdapterView<?> parent) {}
-                              });
+                                  public void onNothingSelected(AdapterView<?> parent) {}
+                            });
 
                             instrumentSpinner.setSelection(
                               score.getTrackInstrument(measure.staff));
@@ -928,22 +842,38 @@ public class MusicSheet extends AppCompatActivity {
                 break;
             case REST:
                 // TODO: add rest rendering
-                yActual = 81; // probably correct
+                //yActual = 81; // probably correct
 
-                break;
+                switch (dur)
+                {
+                    case WHOLE:
+                        noteIv.setImageResource(R.drawable.wholerest);
+                        break;
+                    case HALF:
+                        noteIv.setImageResource(R.drawable.halfrest);
+                        break;
+                    case QUARTER:
+                        noteIv.setImageResource(R.drawable.quarterrest);
+                        break;
+                    case EIGHTH:
+                        noteIv.setImageResource(R.drawable.eighthrest);
+                }
+
         }
         // TODO: add dot rendering for both notes and rests
-        if (dotted) {
+        if (dotted)
+        {
             dottedImage = n.getDotImageView();
-            if (dottedImage == null) {
+            if (dottedImage == null)
+            {
                 dottedImage = new ImageView(getApplicationContext());
                 dottedParams = new RelativeLayout.LayoutParams(xActual,
                                                                yActual);
                 n.setDotImageView(dottedImage);
                 n.getDotImageView().setLayoutParams(dottedParams);
-            } else
-                dottedParams = (RelativeLayout.LayoutParams)dottedImage
-                  .getLayoutParams();
+            }
+            else
+                dottedParams = (RelativeLayout.LayoutParams)dottedImage.getLayoutParams();
 
             rl.addView(dottedImage);
 
@@ -952,21 +882,8 @@ public class MusicSheet extends AppCompatActivity {
             dottedParams.width = (int)(35 * adjustment);
             dottedParams.height = (int)(35 * adjustment);
 
-            //TODO: find dot image and set it here
             dottedImage.setImageResource(R.drawable.dot);
         }
-    }
-
-    protected void drawClef(RelativeLayout rl, ImageView iv){
-
-        //draw a clef on the first imageview at a coordinate
-        //draw it based on score.track.clef
-
-        RelativeLayout.LayoutParams params;
-        params = new RelativeLayout.LayoutParams(10, 30);
-        iv.setLayoutParams(params);
-
-        rl.addView(noteIv);
     }
 
     @Override
