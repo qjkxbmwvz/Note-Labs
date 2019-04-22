@@ -47,17 +47,13 @@ class Track {
     void addNote(int time, Note note) {
         if (!notes.containsKey(time))
             notes.put(time, new LinkedList<Note>());
-        if (Objects.requireNonNull(notes.get(time)).size() == 0
-            || note.getNoteType() != Note.NoteType.REST) {
-            if (Objects.requireNonNull(notes.get(time)).size() == 1
-                &&
-                Objects.requireNonNull(notes.get(time)).getFirst().getNoteType()
-                == Note.NoteType.REST) {
-                Objects.requireNonNull(notes.get(time)).get(0).hide();
-                Objects.requireNonNull(notes.get(time)).remove((0));
-            }
-            Objects.requireNonNull(notes.get(time)).add(note);
+        if (Objects.requireNonNull(notes.get(time)).size() == 1
+            && Objects.requireNonNull(notes.get(time)).getFirst().getNoteType()
+               == Note.NoteType.REST) {
+            Objects.requireNonNull(notes.get(time)).get(0).hide();
+            Objects.requireNonNull(notes.get(time)).remove((0));
         }
+        Objects.requireNonNull(notes.get(time)).add(note);
     }
 
     void removeNote(int time, Note note) {
