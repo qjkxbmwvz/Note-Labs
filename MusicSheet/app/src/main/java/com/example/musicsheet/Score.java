@@ -61,15 +61,14 @@ class Score {
     }
 
     //velocity 127: good volume
-    void addNote(int track, int timePosition, Note note) {
+    void addNote(int track, int timePosition, Note note)
+    {
         tracks.get(track).addNote(timePosition, note);
-        if (note.getNoteType() != Note.NoteType.REST)
-            tracks.get(track).addNote((timePosition + note.getDuration()),
-                                      new Note(Note.NoteType.REST, (0),
-                                               (byte)0, (byte)0, (byte)0));
+        if (note.getNoteType() != Note.NoteType.REST) tracks.get(track).addNote((timePosition + note.getDuration()), new Note(Note.NoteType.REST, (0), (byte)0, (byte)0, (byte)0));
     }
 
-    Edit removeNote(int track, int timePosition, byte pitch) {
+    Edit removeNote(int track, int timePosition, byte pitch)
+    {
         Edit ret = new Edit(tracks.get(track).getNote(timePosition, pitch),
                             timePosition, track, Edit.EditType.REMOVE);
 
