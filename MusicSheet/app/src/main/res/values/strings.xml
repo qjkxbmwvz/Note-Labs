@@ -155,11 +155,33 @@
         <item>"Applause"</item>
         <item>"Gunshot"</item>
     </string-array>
-    <string name="clef_prompt">Select a clef:</string>
     <string name="tempo_text">Tempo: %d</string>
+    <string name="transposition_text">Transposition: %d</string>
+    <string name="add_staff">Add Staff</string>
+    <string name="add_measures">Add Measures</string>
+    <string name="staff_properties">Staff Properties</string>
+    <string name="clef_prompt">Select a clef:</string>
     <string-array name="clefs_array">
         <item>"Treble Clef"</item>
         <item>"Alto Clef"</item>
         <item>"Bass Clef"</item>
+    </string-array>
+    <string name="key_prompt">Select a key:</string>
+    <string-array name="keys_array">
+        <item>"C♭ Major / a♭ minor"</item>
+        <item>"G♭ Major / e♭ minor"</item>
+        <item>"D♭ Major / b♭ minor"</item>
+        <item>"A♭ Major / f minor"</item>
+        <item>"E♭ Major / c minor"</item>
+        <item>"B♭ Major / g minor"</item>
+        <item>"F Major / d minor"</item>
+        <item>"C Major / a minor"</item>
+        <item>"G Major / e minor"</item>
+        <item>"D Major / b minor"</item>
+        <item>"A Major / f♯ minor"</item>
+        <item>"E Major / c♯ minor"</item>
+        <item>"B Major / g♯ minor"</item>
+        <item>"F♯ Major / d♯ minor"</item>
+        <item>"C♯ Major / a♯ minor"</item>
     </string-array>
 </resources>
