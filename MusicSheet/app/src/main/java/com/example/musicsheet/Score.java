@@ -43,7 +43,7 @@ class Score {
 
     Track getTrack(int track) { return tracks.get(track); }
 
-    int getTrackCount() { return tracks.size(); }
+    int getTrackCount()       { return tracks.size(); }
 
     void setTrackClef(int track, Track.Clef clef) {
         tracks.get(track).setClef(clef);
@@ -141,22 +141,18 @@ class Score {
             return 0;
     }
 
-    ArrayList<Pair<Integer, LinkedList<Note>>> getMeasure(
-      int track, int measureNum, Fraction timeSignature) {
+    ArrayList<Pair<Integer, LinkedList<Note>>> getMeasure(int track,
+                                                          int measureNum) {
         if (measureNum >= measureCount)
             throw new IndexOutOfBoundsException();
         else {
             TreeSet<Pair<Integer, LinkedList<Note>>> times
-              = tracks.get(track).getMeasure(measureNum, timeSignature);
+              = tracks.get(track).getMeasure(measureNum, measureLength);
             ArrayList<Pair<Integer, LinkedList<Note>>> ret = new ArrayList<>();
 
-            for (Pair<Integer, LinkedList<Note>> p : times) {
-                ret.add(new Pair<>(
-                  p.first - measureNum * measureLength * timeSignature.num
-                            / timeSignature.den,
-                  p.second));
-            }
-
+            for (Pair<Integer, LinkedList<Note>> p : times)
+                ret.add(new Pair<>(p.first - measureNum * measureLength,
+                                   p.second));
             return ret;
         }
     }
@@ -191,6 +187,8 @@ class Score {
             os.writeByte((byte)tracks.size());
             for (Track track : tracks) {
                 os.writeInt(track.getClef().ordinal());
+                os.writeByte(track.getKey());
+                os.writeByte(track.getTransposition());
                 os.writeByte(track.getInstrument());
                 os.writeInt(track.getTrackLength());
                 Iterator<Integer> tIt = track.getTimeIterator();
@@ -230,7 +228,9 @@ class Score {
             tracks = new ArrayList<>(il);
             for (int i = 0; i < il; ++i) {
                 Track.Clef clef = Track.Clef.values()[is.readInt()];
-                tracks.add(new Track(is.readByte(), clef));
+                int key = is.readByte();
+                int transposition = is.readByte();
+                tracks.add(new Track(is.readByte(), clef, key, transposition));
                 player.directWrite((byte)(0xC0 | i),
                                    tracks.get(i).getInstrument());
 

@@ -40,14 +40,11 @@ import java.util.Objects;
 import java.util.Stack;
 
 public class MusicSheet extends AppCompatActivity {
-    final float STROKE_WIDTH = 2.0f;
-
     private ZoomView zoomView;
 
     // MIDI objects
     private Player player = new Player((this));
     private Score score;
-    private Fraction timeSignature;
 
     private Paint linePaint;
 
@@ -68,7 +65,7 @@ public class MusicSheet extends AppCompatActivity {
 
     private NoteDur selectedNoteDur;
     private Note tempNote;
-    private Stack<Edit> editHistory; //holds most recently placed notes
+    private Stack<Edit> editHistory;
 
     int key;
     int horizontalStart = 60;
@@ -126,7 +123,7 @@ public class MusicSheet extends AppCompatActivity {
 
         cycleButtons(null);
 
-        linePaint = setUpPaint(Color.BLACK, (true), Paint.Style.STROKE);
+        linePaint = setUpPaint();
 
         selectedNoteDur = NoteDur.QUARTER;
         key = 0;
@@ -152,7 +149,7 @@ public class MusicSheet extends AppCompatActivity {
             newScore = false;
         }
 
-        timeSignature = new Fraction(4, 4);
+        Fraction timeSignature = new Fraction(4, 4);
 
         score.setMeasureLength(192 * timeSignature.num / timeSignature.den);
 
@@ -168,7 +165,7 @@ public class MusicSheet extends AppCompatActivity {
 
         for (int i = 0; i < trackCount; ++i) {
             if (newScore)
-                score.addTrack(new Track((byte)0, Track.Clef.TREBLE, key));
+                score.addTrack(new Track((byte)0, Track.Clef.TREBLE, key, 0));
             addStaff(i, measureCount);
         }
     }
@@ -220,7 +217,7 @@ public class MusicSheet extends AppCompatActivity {
             drawStaffHead(relativeLayout, score.getTrack(staffNum));
         else if (count < score.getMeasureCount()) {
             ArrayList<Pair<Integer, LinkedList<Note>>> measure = score
-              .getMeasure(staffNum, count, timeSignature);
+              .getMeasure(staffNum, count);
             for (Pair<Integer, LinkedList<Note>> p : measure) {
                 Pair<NoteDur, Boolean> durAndDot = numToDurAndDot(
                   p.second.getFirst().getDuration());
@@ -232,11 +229,12 @@ public class MusicSheet extends AppCompatActivity {
                     byte pitch = (byte)(n.getPitch() + Objects
                       .requireNonNull(reverseKeys.get(key))
                       .get(n.getPitch() % 12));
-                    drawNote(relativeLayout, p.first,
-                             pitchToPos.get(pitch + Objects
+                    drawNote(relativeLayout,
+                             new XYCoord(p.first, pitchToPos.get(pitch + Objects
                                .requireNonNull(reverseClefMods.get(
                                  score.getTrackClef(staffNum)))
-                               .get(pitch % 12)), n, noteDur, dotted, (false));
+                               .get(pitch % 12))), n, noteDur, dotted,
+                             score.getTrack(staffNum).getKey(), measure);
                 }
             }
         }
@@ -283,8 +281,7 @@ public class MusicSheet extends AppCompatActivity {
                                              - horizontalStart),
                                             score.getMeasure(
                                               measure.staff,
-                                              measure.number,
-                                              timeSignature));
+                                              measure.number));
                         imageY = snapToHeight(imageY, verticalMax,
                                               verticalStart,
                                               verticalOffset);
@@ -357,9 +354,12 @@ public class MusicSheet extends AppCompatActivity {
                                                 measure.staff))).get(p % 12)),
                                   accidental, (byte)127);
 
-                                drawNote(rl, imageX, imageY, tempNote,
-                                         actualNoteDur,
-                                         shouldBeDotted, (false));
+                                drawNote(rl, new XYCoord(imageX, imageY),
+                                         tempNote, actualNoteDur,
+                                         shouldBeDotted,
+                                         score.getTrack(measure.staff).getKey(),
+                                         score.getMeasure(measure.staff,
+                                                          measure.number));
                             }
                             break;
                             case MotionEvent.ACTION_MOVE:
@@ -391,9 +391,13 @@ public class MusicSheet extends AppCompatActivity {
                                     if (gottenDur != 0)
                                         tempNote.setDuration(gottenDur);
 
-                                    drawNote(rl, imageX, imageY, tempNote,
-                                             actualNoteDur,
-                                             shouldBeDotted, (false));
+                                    drawNote(rl, new XYCoord(imageX, imageY),
+                                             tempNote, actualNoteDur,
+                                             shouldBeDotted,
+                                             score.getTrack(measure.staff)
+                                                  .getKey(), score
+                                               .getMeasure(measure.staff,
+                                                           measure.number));
                                 }
                                 break;
                             case MotionEvent.ACTION_UP: {
@@ -424,8 +428,13 @@ public class MusicSheet extends AppCompatActivity {
                                         NoteDur restDur = durAndDot.first;
                                         boolean restDotted = durAndDot.second;
 
-                                        drawNote(rl, restTime, (0), rest,
-                                                 restDur, restDotted, (false));
+                                        drawNote(rl, new XYCoord(restTime, (0)),
+                                                 rest, restDur,
+                                                 restDotted,
+                                                 score.getTrack(measure.staff)
+                                                      .getKey(), score
+                                                   .getMeasure(measure.staff,
+                                                               measure.number));
                                         restTime += rest.getDuration();
                                     }
 
@@ -588,7 +597,7 @@ public class MusicSheet extends AppCompatActivity {
     private void setUpKeys() {
         keys = new SparseArray<>();
         reverseKeys = new SparseArray<>();
-        for (int i = -8; i <= 8; ++i) {
+        for (int i = -7; i <= 7; ++i) {
             keys.put(i, new ArrayList<Integer>((12)));
             reverseKeys.put(i, new ArrayList<Integer>((12)));
             for (int j = 0; j < 12; ++j) {
@@ -596,67 +605,59 @@ public class MusicSheet extends AppCompatActivity {
                 Objects.requireNonNull(reverseKeys.get(i)).add(0);
             }
         }
-        for (int i = 1; i <= 8; ++i) {
+        for (int i = 1; i <= 7; ++i) {
             Objects.requireNonNull(keys.get(i)).set(5, 1);  // F#
             Objects.requireNonNull(reverseKeys.get(i)).set(6, -1);
         }
-        for (int i = 2; i <= 8; ++i) {
+        for (int i = 2; i <= 7; ++i) {
             Objects.requireNonNull(keys.get(i)).set(0, 1);  // C#
             Objects.requireNonNull(reverseKeys.get(i)).set(1, -1);
         }
-        for (int i = 3; i <= 8; ++i) {
+        for (int i = 3; i <= 7; ++i) {
             Objects.requireNonNull(keys.get(i)).set(7, 1);  // G#
             Objects.requireNonNull(reverseKeys.get(i)).set(8, -1);
         }
-        for (int i = 4; i <= 8; ++i) {
+        for (int i = 4; i <= 7; ++i) {
             Objects.requireNonNull(keys.get(i)).set(2, 1);  // D#
             Objects.requireNonNull(reverseKeys.get(i)).set(3, -1);
         }
-        for (int i = 5; i <= 8; ++i) {
+        for (int i = 5; i <= 7; ++i) {
             Objects.requireNonNull(keys.get(i)).set(9, 1);  // A#
             Objects.requireNonNull(reverseKeys.get(i)).set(10, -1);
         }
-        for (int i = 6; i <= 8; ++i) {
+        for (int i = 6; i <= 7; ++i) {
             Objects.requireNonNull(keys.get(i)).set(4, 1);  // E#
             Objects.requireNonNull(reverseKeys.get(i)).set(5, -1);
         }
-        for (int i = 7; i <= 8; ++i) {
-            Objects.requireNonNull(keys.get(i)).set(11, 1);  // B#
-            Objects.requireNonNull(reverseKeys.get(i)).set(0, -1);
-        }
-        Objects.requireNonNull(keys.get(8)).set(5, 2);      // Fx
-        Objects.requireNonNull(reverseKeys.get(8)).set(7, -2);
+        Objects.requireNonNull(keys.get(7)).set(11, 1);  // B#
+        Objects.requireNonNull(reverseKeys.get(7)).set(0, -1);
 
-        for (int i = -1; i >= -8; --i) {
+        for (int i = -1; i >= -7; --i) {
             Objects.requireNonNull(keys.get(i)).set(11, -1);  // Bb
             Objects.requireNonNull(reverseKeys.get(i)).set(10, 1);
         }
-        for (int i = -2; i >= -8; --i) {
+        for (int i = -2; i >= -7; --i) {
             Objects.requireNonNull(keys.get(i)).set(4, -1);  // Eb
             Objects.requireNonNull(reverseKeys.get(i)).set(3, 1);
         }
-        for (int i = -3; i >= -8; --i) {
+        for (int i = -3; i >= -7; --i) {
             Objects.requireNonNull(keys.get(i)).set(9, -1);  // Ab
             Objects.requireNonNull(reverseKeys.get(i)).set(8, 1);
         }
-        for (int i = -4; i >= -8; --i) {
+        for (int i = -4; i >= -7; --i) {
             Objects.requireNonNull(keys.get(i)).set(2, -1);  // Db
             Objects.requireNonNull(reverseKeys.get(i)).set(1, 1);
         }
-        for (int i = -5; i >= -8; --i) {
+        for (int i = -5; i >= -7; --i) {
             Objects.requireNonNull(keys.get(i)).set(7, -1);  // Gb
             Objects.requireNonNull(reverseKeys.get(i)).set(6, 1);
         }
-        for (int i = -6; i >= -8; --i) {
+        for (int i = -6; i >= -7; --i) {
             Objects.requireNonNull(keys.get(i)).set(0, -1);  // Cb
             Objects.requireNonNull(reverseKeys.get(i)).set(11, 1);
         }
-        for (int i = -7; i >= -8; --i) {
-            Objects.requireNonNull(keys.get(i)).set(5, -1);  // Fb
-            Objects.requireNonNull(reverseKeys.get(i)).set(4, 1);
-        }
-        Objects.requireNonNull(keys.get(-8)).set(11, -2);     // Bbb
-        Objects.requireNonNull(reverseKeys.get(-8)).set(9, 2);
+        Objects.requireNonNull(keys.get(-7)).set(5, -1);  // Fb
+        Objects.requireNonNull(reverseKeys.get(-7)).set(4, 1);
     }
 
     private void setUpClefMods() {
@@ -702,13 +703,14 @@ public class MusicSheet extends AppCompatActivity {
           reverseClefMods.get(Track.Clef.BASS)).set(11, 20);
     }
 
-    private Paint setUpPaint(int color, boolean isAntialiased,
-                             Paint.Style style) {
+    private Paint setUpPaint() {
+        final float STROKE_WIDTH = 2.0f;
+
         Paint p = new Paint();
 
-        p.setColor(color);
-        p.setAntiAlias(isAntialiased);
-        p.setStyle(style);
+        p.setColor(Color.BLACK);
+        p.setAntiAlias(true);
+        p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(STROKE_WIDTH);
 
         return p;
@@ -790,18 +792,19 @@ public class MusicSheet extends AppCompatActivity {
         iv.setImageBitmap(bitmap);
     }
 
-    // TODO: replace positionFilled with a TimePosition for
-    // stem sharing and add an accidental bias for matching
-    // and contrasting with the key and recent notes
-    private void drawNote(RelativeLayout rl, int x, int y, Note n,
-                          NoteDur dur, boolean dotted, boolean positionFilled)
-    {
+    // TODO: rotate notes based on height, but make all notes in the
+    // same TimePosition have the same orientation.  Also, draw eighth
+    // notes as quarters unless they're the highest in the given
+    // TimePosition (if rightside-up) or the lowest (if upside-down).
+    private void drawNote(RelativeLayout rl, XYCoord xy, Note n,
+                          NoteDur dur, boolean dotted, int key,
+                          ArrayList<Pair<Integer, LinkedList<Note>>> measure) {
         double adjustment =
           getApplicationContext().getResources()
                                  .getDisplayMetrics().density / 2.625;
 
-        int xActual = (x * 125 / 48) + 30;
-        int yActual = y - 85;
+        int xActual = (xy.x * 125 / 48) + 30;
+        int yActual = xy.y - 85;
         ImageView noteIv;
         ImageView accidentalImage;
         ImageView dottedImage;
@@ -846,7 +849,10 @@ public class MusicSheet extends AppCompatActivity {
                         noteIv.setImageResource(R.drawable.quarter_note);
                         break;
                     case EIGHTH:
-                        noteIv.setImageResource(R.drawable.eighth_note);
+                        if (measure.get(xy.x) != null)
+                            noteIv.setImageResource(R.drawable.quarter_note);
+                        else
+                            noteIv.setImageResource(R.drawable.eighth_note);
                 }
 
 
@@ -889,7 +895,6 @@ public class MusicSheet extends AppCompatActivity {
                 }
                 break;
             case REST:
-                // TODO: add rest rendering
                 yActual = 82;
                 noteParams.leftMargin = (int)(xActual * adjustment);
                 noteParams.topMargin = (int)(yActual * adjustment);
@@ -920,8 +925,7 @@ public class MusicSheet extends AppCompatActivity {
 
         }
 
-        if (dotted)
-        {
+        if (dotted) {
             dottedImage = n.getDotImageView();
             if (dottedImage == null) {
                 dottedImage = new ImageView(getApplicationContext());
@@ -941,14 +945,10 @@ public class MusicSheet extends AppCompatActivity {
             dotParams.height = (int)(35 * adjustment);
 
 
-
-
             dottedImage.setImageResource(R.drawable.dot);
         }
     }
 
-    // TODO: make this take arguments so that it can be applied on demand
-    // to any of the sixteen possible staves that we support simultaneously.
     protected void drawStaffHead(RelativeLayout rl, Track track) {
         double adjustment =
           getApplicationContext().getResources()
@@ -995,10 +995,28 @@ public class MusicSheet extends AppCompatActivity {
         ArrayList<ImageView> keySigImages = track.getKeySigImages();
         RelativeLayout.LayoutParams[] keySigParamses;
 
+        // TODO: instantiate and draw accidental images for time signatures.
+        /* By key:
+         * -7: Bb, Eb, Ab, Db, Gb, Cb, Fb
+         * -6: Bb, Eb, Ab, Db, Gb, Cb
+         * -5: Bb, Eb, Ab, Db, Gb
+         * -4: Bb, Eb, Ab, Db
+         * -3: Bb, Eb, Ab
+         * -2: Bb, Eb
+         * -1: Bb
+         *  0: -
+         * +1: F#
+         * +2: F#, C#
+         * +3: F#, C#, G#
+         * +4: F#, C#, G#, D#
+         * +5: F#, C#, G#, D#, A#
+         * +6: F#, C#, G#, D#, A#, E#
+         * +7: F#, C#, G#, D#, A#, E#, B#
+         */
         if (keySigImages.isEmpty()) {
 
         } else {
-            
+
         }
     }
 
@@ -1102,8 +1120,14 @@ public class MusicSheet extends AppCompatActivity {
 
                     Pair<NoteDur, Boolean> p = numToDurAndDot(n.getDuration());
 
-                    drawNote(rl, (lastEdit.time % score.getMeasureLength()),
-                             (0), n, p.first, p.second, (false));
+                    drawNote(rl, new XYCoord(
+                               (lastEdit.time % score.getMeasureLength()),
+                               (0)), n,
+                             p.first, p.second,
+                             score.getTrack(lastEdit.staff).getKey(), score
+                               .getMeasure(lastEdit.staff,
+                                           (lastEdit.time / score
+                                             .getMeasureLength())));
                     break;
                 case REMOVE:
                     score.addNote(lastEdit.staff, lastEdit.time, lastEdit.note);
@@ -1201,7 +1225,7 @@ public class MusicSheet extends AppCompatActivity {
         addInstrumentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Track track = new Track((byte)0, Track.Clef.TREBLE, key);
+                Track track = new Track((byte)0, Track.Clef.TREBLE, key, (0));
 
                 score.addTrack(track);
 

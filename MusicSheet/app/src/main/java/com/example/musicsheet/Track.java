@@ -18,16 +18,17 @@ class Track {
     private Clef clef;
     private byte instrument;
     private TreeMap<Integer, LinkedList<Note>> notes;
-    private int key;
+    private int key, transposition;
 
     private ImageView clefImage, numImage, denImage;
     private ArrayList<ImageView> keySigImages;
 
-    Track(byte instrument, Clef clef, int key) {
+    Track(byte instrument, Clef clef, int key, int transposition) {
         this.clef = clef;
+        this.key = key;
+        this.transposition = transposition;
         this.instrument = instrument;
         notes = new TreeMap<>();
-        this.key = key;
         keySigImages = new ArrayList<>((7));
     }
 
@@ -42,6 +43,12 @@ class Track {
     void setKey(int key)                { this.key = key; }
 
     int getKey()                        { return key; }
+
+    void setTransposition(int transposition) {
+        this.transposition = transposition;
+    }
+
+    int getTransposition()              { return transposition; }
 
     Iterator<Integer> getTimeIterator() { return notes.keySet().iterator(); }
 
@@ -91,11 +98,9 @@ class Track {
     }
 
     TreeSet<Pair<Integer, LinkedList<Note>>> getMeasure(
-      int measureNum, Fraction timeSignature) {
-        int startPoint = measureNum * 192 * timeSignature.num
-                         / timeSignature.den;
-        int endPoint = startPoint + 192 * timeSignature.num
-                                    / timeSignature.den;
+      int measureNum, int measureLength) {
+        int startPoint = measureNum * measureLength;
+        int endPoint = startPoint + measureLength;
         TreeSet<Pair<Integer, LinkedList<Note>>> ret
           = new TreeSet<>(new Comparator<Pair<Integer,
           LinkedList<Note>>>() {
