@@ -165,7 +165,7 @@ public class MusicSheet extends AppCompatActivity {
 
         for (int i = 0; i < trackCount; ++i) {
             if (newScore)
-                score.addTrack(new Track((byte)0, Track.Clef.TREBLE, key, 0));
+                score.addTrack(new Track((byte)0, Track.Clef.TREBLE, key, (0)));
             addStaff(i, measureCount);
         }
     }
@@ -227,7 +227,8 @@ public class MusicSheet extends AppCompatActivity {
 
                 for (Note n : p.second) {
                     byte pitch = (byte)(n.getPitch() + Objects
-                      .requireNonNull(reverseKeys.get(key))
+                      .requireNonNull(
+                        reverseKeys.get(score.getTrack(staffNum).getKey()))
                       .get(n.getPitch() % 12));
                     drawNote(relativeLayout,
                              new XYCoord(p.first, pitchToPos.get(pitch + Objects
@@ -328,7 +329,8 @@ public class MusicSheet extends AppCompatActivity {
                                 v.getParent()
                                  .requestDisallowInterceptTouchEvent((true));
                                 byte nominalPitch = (byte)(p + Objects
-                                  .requireNonNull(keys.get(key))
+                                  .requireNonNull(keys.get(
+                                    score.getTrack(measure.staff).getKey()))
                                   .get(p % 12) + Objects.requireNonNull(
                                   clefMods.get(score.getTrackClef(
                                     measure.staff))).get(p % 12));
@@ -336,7 +338,9 @@ public class MusicSheet extends AppCompatActivity {
                                 player
                                   .directWrite((byte)(0x90 | measure.staff),
                                                (byte)(nominalPitch
-                                                      + accidental),
+                                                      + accidental + score
+                                                        .getTrack(measure.staff)
+                                                        .getTransposition()),
                                                (byte)127);
 
                                 tempNote = new Note(
@@ -347,11 +351,16 @@ public class MusicSheet extends AppCompatActivity {
                                           : (byte)(
                                             p
                                             + Objects
-                                              .requireNonNull(keys.get(key))
+                                              .requireNonNull(keys.get(
+                                                score.getTrack(measure.staff)
+                                                     .getKey()))
                                               .get(p % 12)
                                             + Objects.requireNonNull(
                                               clefMods.get(score.getTrackClef(
-                                                measure.staff))).get(p % 12)),
+                                                measure.staff))).get(p % 12)
+                                            + score
+                                              .getTrack(measure.staff)
+                                              .getTransposition()),
                                   accidental, (byte)127);
 
                                 drawNote(rl, new XYCoord(imageX, imageY),
@@ -366,14 +375,17 @@ public class MusicSheet extends AppCompatActivity {
                                 if (lastTouchPointY != imageY
                                     || lastTouchPointX != imageX) {
                                     byte nominalPitch = (byte)(
-                                      p + Objects.requireNonNull(keys.get(key))
+                                      p + Objects.requireNonNull(keys.get(
+                                        score.getTrack(measure.staff).getKey()))
                                                  .get(p % 12)
                                       + Objects.requireNonNull(clefMods.get(
                                         score.getTrackClef(measure.staff)))
                                                .get(p % 12));
                                     byte oldNominalPitch = (byte)(
                                       lP + Objects
-                                        .requireNonNull(keys.get(key))
+                                        .requireNonNull(keys.get(
+                                          score.getTrack(measure.staff)
+                                               .getKey()))
                                         .get(lP % 12)
                                       + Objects
                                         .requireNonNull(clefMods.get(
@@ -382,12 +394,19 @@ public class MusicSheet extends AppCompatActivity {
 
                                     player.directWrite(
                                       (byte)(0x80 | measure.staff),
-                                      (byte)(oldNominalPitch + accidental),
+                                      (byte)(oldNominalPitch + accidental
+                                             + score.getTrack(measure.staff)
+                                                    .getTransposition()),
                                       (byte)127, (byte)(0x90 | measure.staff),
-                                      (byte)(nominalPitch + accidental),
+                                      (byte)(nominalPitch + accidental + score
+                                        .getTrack(measure.staff)
+                                        .getTransposition()),
                                       (byte)127);
 
-                                    tempNote.setPitch(nominalPitch);
+                                    tempNote
+                                      .setPitch((byte)(nominalPitch + score
+                                        .getTrack(measure.staff)
+                                        .getTransposition()));
                                     if (gottenDur != 0)
                                         tempNote.setDuration(gottenDur);
 
@@ -402,7 +421,8 @@ public class MusicSheet extends AppCompatActivity {
                                 break;
                             case MotionEvent.ACTION_UP: {
                                 byte nominalPitch = (byte)(p + Objects
-                                  .requireNonNull(keys.get(key))
+                                  .requireNonNull(keys.get(
+                                    score.getTrack(measure.staff).getKey()))
                                   .get(p % 12) + Objects.requireNonNull(
                                   clefMods.get(score.getTrackClef(
                                     measure.staff))).get(p % 12));
@@ -410,7 +430,9 @@ public class MusicSheet extends AppCompatActivity {
                                 player
                                   .directWrite((byte)(0x80 | measure.staff),
                                                (byte)(nominalPitch
-                                                      + accidental),
+                                                      + accidental + score
+                                                        .getTrack(measure.staff)
+                                                        .getTransposition()),
                                                (byte)127);
 
                                 LinkedList<Note> rests = score
@@ -458,7 +480,8 @@ public class MusicSheet extends AppCompatActivity {
                             }
                             case MotionEvent.ACTION_CANCEL:
                                 byte nominalPitch = (byte)(p + Objects
-                                  .requireNonNull(keys.get(key))
+                                  .requireNonNull(keys.get(
+                                    score.getTrack(measure.staff).getKey()))
                                   .get(p % 12) + Objects.requireNonNull(
                                   clefMods.get(score.getTrackClef(
                                     measure.staff))).get(p % 12));
@@ -466,7 +489,9 @@ public class MusicSheet extends AppCompatActivity {
                                 player
                                   .directWrite((byte)(0x80 | measure.staff),
                                                (byte)(nominalPitch
-                                                      + accidental),
+                                                      + accidental + score
+                                                        .getTrack(measure.staff)
+                                                        .getTransposition()),
                                                (byte)127);
 
                                 if (tempNote != null)
@@ -546,6 +571,71 @@ public class MusicSheet extends AppCompatActivity {
                               score.getTrackClef(measure.staff)
                                    .ordinal());
 
+                            Spinner keySpinner = promptView
+                              .findViewById(R.id.key_spinner);
+
+                            keySpinner.setOnItemSelectedListener(
+                              new AdapterView.OnItemSelectedListener() {
+                                  @Override
+                                  public void onItemSelected(
+                                    AdapterView<?> adapterView,
+                                    View view, int i, long l) {
+                                      score.getTrack(score.getTrackCount() - 1)
+                                           .setKey(i - 7);
+
+                                      drawStaffHead(
+                                        Objects
+                                          .requireNonNull((RelativeLayout)score
+                                            .getTrack(measure.staff)
+                                            .getClefImage().getParent()),
+                                        score
+                                          .getTrack(score.getTrackCount() - 1));
+                                  }
+
+                                  @Override
+                                  public void onNothingSelected(
+                                    AdapterView<?> adapterView) {}
+                              });
+
+                            keySpinner.setSelection(
+                              score.getTrack(measure.staff).getKey() + 7);
+
+                            final TextView transpositionText = promptView
+                              .findViewById(R.id.transposition_text);
+
+                            final SeekBar transpositionBar = promptView
+                              .findViewById(R.id.transposition_bar);
+
+                            transpositionText
+                              .setText(getString(R.string.transposition_text,
+                                                 score.getTrack(measure.staff)
+                                                      .getTransposition()));
+                            transpositionBar.setProgress(0);
+
+                            transpositionBar.setOnSeekBarChangeListener(
+                              new SeekBar.OnSeekBarChangeListener() {
+                                  @Override
+                                  public void onProgressChanged(SeekBar seekBar,
+                                                                int i,
+                                                                boolean b) {
+                                      if (b)
+                                          transpositionText.setText(
+                                            getString(
+                                              R.string.transposition_text, i));
+                                  }
+
+                                  @Override
+                                  public void onStartTrackingTouch(
+                                    SeekBar seekBar) {}
+
+                                  @Override
+                                  public void onStopTrackingTouch(
+                                    SeekBar seekBar) {
+                                      score.getTrack(score.getTrackCount() - 1)
+                                           .setTransposition(
+                                             seekBar.getProgress());
+                                  }
+                              });
 
                             alertDialogBuilder.setPositiveButton(
                               ("Done"),
@@ -1137,8 +1227,6 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     public void cycleNoteType(View view) {
-        // TODO: make the rest toggle button display
-        // a rest matching the chosen duration
         ImageView noteImage = findViewById(R.id.note_button);
 
         switch (selectedNoteDur) {
@@ -1291,6 +1379,63 @@ public class MusicSheet extends AppCompatActivity {
 
                 clefSpinner.setSelection(
                   score.getTrackClef(score.getTrackCount() - 1).ordinal());
+
+                Spinner keySpinner = promptView.findViewById(R.id.key_spinner);
+
+                keySpinner.setOnItemSelectedListener(
+                  new AdapterView.OnItemSelectedListener() {
+                      @Override
+                      public void onItemSelected(AdapterView<?> adapterView,
+                                                 View view, int i, long l) {
+                          score.getTrack(score.getTrackCount() - 1)
+                               .setKey(i - 7);
+
+                          drawStaffHead(
+                            Objects.requireNonNull((RelativeLayout)score
+                              .getTrack(score.getTrackCount() - 1)
+                              .getClefImage().getParent()),
+                            score.getTrack(score.getTrackCount() - 1));
+                      }
+
+                      @Override
+                      public void onNothingSelected(
+                        AdapterView<?> adapterView) {}
+                  });
+
+                keySpinner.setSelection(
+                  score.getTrack(score.getTrackCount() - 1).getKey() + 7);
+
+                final TextView transpositionText = promptView
+                  .findViewById(R.id.transposition_text);
+
+                final SeekBar transpositionBar = promptView
+                  .findViewById(R.id.transposition_bar);
+
+                transpositionText.setText(getString(R.string.transposition_text,
+                                                    score.getTrack(
+                                                      score.getTrackCount() - 1)
+                                                         .getTransposition()));
+                transpositionBar.setProgress(0);
+
+                transpositionBar.setOnSeekBarChangeListener(
+                  new SeekBar.OnSeekBarChangeListener() {
+                      @Override
+                      public void onProgressChanged(SeekBar seekBar, int i,
+                                                    boolean b) {
+                          if (b)
+                              transpositionText.setText(
+                                getString(R.string.transposition_text, i));
+                      }
+
+                      @Override
+                      public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                      @Override
+                      public void onStopTrackingTouch(SeekBar seekBar) {
+                          score.getTrack(score.getTrackCount() - 1)
+                               .setTransposition(seekBar.getProgress());
+                      }
+                  });
 
                 addStaff((score.getTrackCount() - 1), score.getMeasureCount());
 
