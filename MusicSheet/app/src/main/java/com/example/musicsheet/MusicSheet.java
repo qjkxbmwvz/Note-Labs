@@ -938,11 +938,21 @@ public class MusicSheet extends AppCompatActivity {
                     case QUARTER:
                         noteIv.setImageResource(R.drawable.quarter_note);
                         break;
-                    case EIGHTH:
-                        if (measure.get(xy.x) != null)
-                            noteIv.setImageResource(R.drawable.quarter_note);
-                        else
-                            noteIv.setImageResource(R.drawable.eighth_note);
+                    case EIGHTH: {
+                        for (int i = 0; i < measure.size(); ++i) {
+                            if (measure.get(i).first == xy.x) {
+                                if (
+                                  measure.get(i).second.getFirst().getNoteType()
+                                  != Note.NoteType.REST)
+                                    noteIv.setImageResource(
+                                      R.drawable.quarter_note);
+                                else
+                                    noteIv
+                                      .setImageResource(R.drawable.eighth_note);
+                                break;
+                            }
+                        }
+                    }
                 }
 
 
