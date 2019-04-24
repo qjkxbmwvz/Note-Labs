@@ -1259,7 +1259,7 @@ public class MusicSheet extends AppCompatActivity {
             score.resetPlayPos();
             ImageView image = findViewById(R.id.play_button);
 
-            image.setImageResource(R.drawable.ic_media_play);
+            image.setImageResource(R.drawable.play);
         }
     }
 
