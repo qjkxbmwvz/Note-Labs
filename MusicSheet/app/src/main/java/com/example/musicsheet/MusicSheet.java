@@ -1112,7 +1112,7 @@ public class MusicSheet extends AppCompatActivity {
         ArrayList<RelativeLayout.LayoutParams> keySigParamses
           = new ArrayList<>();
 
-        // TODO: instantiate and draw accidental images for time signatures.
+        // TODO: adjust accidental placement.
         /* By key:
          * -7: Bb, Eb, Ab, Db, Gb, Cb, Fb
          * -6: Bb, Eb, Ab, Db, Gb, Cb
