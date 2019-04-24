@@ -1133,7 +1133,20 @@ public class MusicSheet extends AppCompatActivity {
         if (!keySigImages.isEmpty())
             keySigImages.clear();
 
-        int workingKey = (track.getTransposition() * -5) % 8 + track.getKey();
+        int workingKey = track.getKey();
+
+        if (track.getTransposition() < 0)
+            for (int i = 0; i > track.getTransposition() % 12; --i) {
+                workingKey -= 5;
+                if (workingKey < -7)
+                    workingKey += 12;
+            }
+        else if (track.getTransposition() > 0)
+            for (int i = 0; i < track.getTransposition() % 12; ++i) {
+                workingKey += 5;
+                if (workingKey > 7)
+                    workingKey -= 12;
+            }
 
         int accidentalCount = workingKey > 0 ? workingKey : -workingKey;
         boolean sharp = workingKey > 0;
