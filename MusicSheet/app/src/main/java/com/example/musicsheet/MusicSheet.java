@@ -1231,14 +1231,14 @@ public class MusicSheet extends AppCompatActivity {
             image.setImageResource(R.drawable.ic_media_pause);
         } else {
             score.pause();
-            image.setImageResource(R.drawable.ic_media_play);
+            image.setImageResource(R.drawable.play);
         }
     }
 
     public void resetPlayButton() {
         ImageView image = findViewById(R.id.play_button);
 
-        image.setImageResource(R.drawable.ic_media_play);
+        image.setImageResource(R.drawable.play);
     }
 
     public void restart(View view) {
