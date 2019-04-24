@@ -1147,7 +1147,14 @@ public class MusicSheet extends AppCompatActivity {
                 (int)(100 * adjustment),
                 (int)(100 * adjustment)));
             keySigParamses.get(i).leftMargin = 100 + i * 50;
+
             int height = sharp ? heights[i] : heights[6 - i];
+
+            if (track.getClef() == Track.Clef.ALTO)
+                height += 21;
+            else if (track.getClef() == Track.Clef.BASS)
+                height += 42;
+
             keySigParamses.get(i).topMargin = (int)(height * adjustment);
             keySigImages.get(i).setLayoutParams(keySigParamses.get(i));
             keySigImages.get(i).setImageResource(sharp ? R.drawable.sharp
