@@ -1083,13 +1083,13 @@ public class MusicSheet extends AppCompatActivity {
         }
         rl.addView(clefIv);
 
-        clefParams.leftMargin = (int)(-30 * adjustment);
+        clefParams.leftMargin = (int)(-60 * adjustment);
         clefParams.width = (int)(298 * adjustment);
         clefParams.height = (int)(298 * adjustment); //200
 
         switch (track.getClef()) {
             case TREBLE:
-                clefParams.leftMargin = (int)(-60 * adjustment);
+                clefParams.leftMargin = (int)(-90 * adjustment);
                 clefParams.topMargin = (int)(18 * adjustment); //80
                 clefIv.setImageResource(R.drawable.treble_clef);
                 break;
@@ -1100,7 +1100,7 @@ public class MusicSheet extends AppCompatActivity {
                 clefIv.setImageResource(R.drawable.alto_clef);
                 break;
             case BASS:
-                clefParams.leftMargin = (int)(-60 * adjustment);
+                clefParams.leftMargin = (int)(-90 * adjustment);
                 clefParams.topMargin = (int)(1 * adjustment);
                 clefIv.setImageResource(R.drawable.bass_clef);
                 break;
@@ -1162,6 +1162,11 @@ public class MusicSheet extends AppCompatActivity {
             keySigParamses.get(i).leftMargin = 100 + i * 50;
 
             int height = sharp ? heights[i] : heights[6 - i];
+
+            if (sharp)
+                height -= 50;
+            else
+                height -= 74;
 
             if (track.getClef() == Track.Clef.ALTO)
                 height += 21;
