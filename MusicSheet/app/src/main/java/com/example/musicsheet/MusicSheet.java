@@ -996,7 +996,7 @@ public class MusicSheet extends AppCompatActivity {
                 break;
             case REST:
                 yActual = 82;
-                noteParams.leftMargin = (int)(xActual * adjustment);
+                noteParams.leftMargin = (int)((xActual - 20)* adjustment);
                 noteParams.topMargin = (int)(yActual * adjustment);
                 noteParams.width = (int)(100 * adjustment);
                 noteParams.height = (int)(100 * adjustment);
@@ -1075,6 +1075,7 @@ public class MusicSheet extends AppCompatActivity {
 
         switch (track.getClef()) {
             case TREBLE:
+                clefParams.leftMargin = (int)(-60 * adjustment);
                 clefParams.topMargin = (int)(18 * adjustment); //80
                 clefIv.setImageResource(R.drawable.treble_clef);
                 break;
@@ -1085,6 +1086,7 @@ public class MusicSheet extends AppCompatActivity {
                 clefIv.setImageResource(R.drawable.alto_clef);
                 break;
             case BASS:
+                clefParams.leftMargin = (int)(-60 * adjustment);
                 clefParams.topMargin = (int)(1 * adjustment);
                 clefIv.setImageResource(R.drawable.bass_clef);
                 break;
