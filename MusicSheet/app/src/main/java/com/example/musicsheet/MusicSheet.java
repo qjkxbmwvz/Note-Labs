@@ -634,6 +634,10 @@ public class MusicSheet extends AppCompatActivity {
                                       score.getTrack(score.getTrackCount() - 1)
                                            .setTransposition(
                                              seekBar.getProgress());
+                                      drawStaffHead(
+                                        Objects.requireNonNull(
+                                          measures.get(imageView)).first,
+                                        score.getTrack(measure.staff));
                                   }
                               });
 
@@ -982,21 +986,31 @@ public class MusicSheet extends AppCompatActivity {
                     accidentalParams.width = (int)(55 * adjustment);
                     accidentalParams.height = (int)(55 * adjustment);
 
-                    switch (n.getAccidental()) {
-                        // TODO: adjust by key so that, for
-                        // instance, a +1 accidental on a Bb
-                        // in F Major is rendered as a natural
+                    switch (n.getAccidental() + keys.get(key).get(
+                      posToPitch(xy.y) % 12)) {
+                        case -2:
+                            accidentalImage
+                              .setImageResource(R.drawable.double_flat);
+                            break;
                         case -1:
                             accidentalImage.setImageResource(R.drawable.flat);
                             break;
+                        case 0:
+                            accidentalImage
+                              .setImageResource(R.drawable.natural);
+                            break;
                         case 1:
                             accidentalImage.setImageResource(R.drawable.sharp);
+                            break;
+                        case 2:
+                            accidentalImage
+                              .setImageResource(R.drawable.double_sharp_temp);
                     }
                 }
                 break;
             case REST:
                 yActual = 82;
-                noteParams.leftMargin = (int)((xActual - 20)* adjustment);
+                noteParams.leftMargin = (int)((xActual - 20) * adjustment);
                 noteParams.topMargin = (int)(yActual * adjustment);
                 noteParams.width = (int)(100 * adjustment);
                 noteParams.height = (int)(100 * adjustment);
@@ -1060,7 +1074,7 @@ public class MusicSheet extends AppCompatActivity {
         if (clefIv == null) {
             clefIv = new ImageView(getApplicationContext());
             clefParams = new RelativeLayout.LayoutParams(
-              (int)(100 * adjustment), (int)(200 * adjustment));
+              (int)(100 * adjustment), (int)(100 * adjustment));
             track.setClefImage(clefIv);
             track.getClefImage().setLayoutParams(clefParams);
         } else {
@@ -1095,7 +1109,8 @@ public class MusicSheet extends AppCompatActivity {
         }
 
         ArrayList<ImageView> keySigImages = track.getKeySigImages();
-        RelativeLayout.LayoutParams[] keySigParamses;
+        ArrayList<RelativeLayout.LayoutParams> keySigParamses
+          = new ArrayList<>();
 
         // TODO: instantiate and draw accidental images for time signatures.
         /* By key:
@@ -1115,10 +1130,29 @@ public class MusicSheet extends AppCompatActivity {
          * +6: F#, C#, G#, D#, A#, E#
          * +7: F#, C#, G#, D#, A#, E#, B#
          */
-        if (keySigImages.isEmpty()) {
+        if (!keySigImages.isEmpty())
+            keySigImages.clear();
 
-        } else {
+        int workingKey = (track.getTransposition() * -5) % 8 + track.getKey();
 
+        int accidentalCount = workingKey > 0 ? workingKey : -workingKey;
+        boolean sharp = workingKey > 0;
+
+        int[] heights = { 82, 145, 61, 124, 187, 103, 166 };
+
+        for (int i = 0; i < accidentalCount; ++i) {
+            keySigImages.add(new ImageView(getApplicationContext()));
+            keySigParamses.add(
+              new RelativeLayout.LayoutParams(
+                (int)(100 * adjustment),
+                (int)(100 * adjustment)));
+            keySigParamses.get(i).leftMargin = 100 + i * 50;
+            int height = sharp ? heights[i] : heights[6 - i];
+            keySigParamses.get(i).topMargin = (int)(height * adjustment);
+            keySigImages.get(i).setLayoutParams(keySigParamses.get(i));
+            keySigImages.get(i).setImageResource(sharp ? R.drawable.sharp
+                                                       : R.drawable.flat);
+            rl.addView(keySigImages.get(i));
         }
     }
 
