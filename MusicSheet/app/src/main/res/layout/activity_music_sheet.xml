@@ -31,11 +31,13 @@
 
         <ImageButton
             android:id="@+id/play_button"
-            android:layout_width="wrap_content"
+            android:layout_width="75dp"
             android:layout_height="match_parent"
+
             android:contentDescription="@string/todo"
+            android:scaleType="fitCenter"
             android:onClick="play"
-            app:srcCompat="@android:drawable/ic_media_play"
+            app:srcCompat="@drawable/play"
             tools:layout_editor_absoluteX="124dp"
             tools:layout_editor_absoluteY="514dp"/>
 
@@ -46,7 +48,8 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             android:onClick="restart"
-            app:srcCompat="@android:drawable/ic_media_previous"/>
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/back_to_beginning"/>
 
         <ImageButton
             android:id="@+id/add_stuff_button"
@@ -55,7 +58,8 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             android:onClick="addStuff"
-            app:srcCompat="@android:drawable/ic_menu_add"/>
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/addition"/>
 
         <ImageButton
             android:id="@+id/undo_button"
@@ -64,7 +68,8 @@
             android:layout_weight="1"
             android:contentDescription="@string/todo"
             android:onClick="undo"
-            app:srcCompat="@android:drawable/ic_menu_revert"/>
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/undo"/>
 
         <ImageButton
             android:id="@+id/accident_button"
@@ -115,10 +120,10 @@
             android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:layout_margin="3dp"
             android:contentDescription="@string/todo"
             android:onClick="save"
             android:scaleType="fitCenter"
-
             app:srcCompat="@drawable/save_icon"/>
 
         <LinearLayout
