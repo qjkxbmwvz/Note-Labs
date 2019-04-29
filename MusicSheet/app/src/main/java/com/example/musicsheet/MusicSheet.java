@@ -231,10 +231,13 @@ public class MusicSheet extends AppCompatActivity {
                         reverseKeys.get(score.getTrack(staffNum).getKey()))
                       .get(n.getPitch() % 12));
                     drawNote(relativeLayout,
-                             new XYCoord(p.first, pitchToPos.get(pitch + Objects
-                               .requireNonNull(reverseClefMods.get(
-                                 score.getTrackClef(staffNum)))
-                               .get(pitch % 12))), n, noteDur, dotted,
+                             new XYCoord(p.first, pitchToPos.get(
+                               pitch + reverseKeys
+                                 .get(trackWorkingKey(score.getTrack(staffNum)))
+                                 .get(pitch % 12) + Objects
+                                 .requireNonNull(reverseClefMods.get(
+                                   score.getTrackClef(staffNum)))
+                                 .get(pitch % 12))), n, noteDur, dotted,
                              score.getTrack(staffNum).getKey(), measure);
                 }
             }
@@ -328,12 +331,13 @@ public class MusicSheet extends AppCompatActivity {
                             case MotionEvent.ACTION_DOWN: {
                                 v.getParent()
                                  .requestDisallowInterceptTouchEvent((true));
-                                byte nominalPitch = (byte)(p + Objects
-                                  .requireNonNull(keys.get(
-                                    score.getTrack(measure.staff).getKey()))
-                                  .get(p % 12) + Objects.requireNonNull(
-                                  clefMods.get(score.getTrackClef(
-                                    measure.staff))).get(p % 12));
+                                byte nominalPitch = (byte)(
+                                  p + keys.get(
+                                    trackWorkingKey(
+                                      score.getTrack(measure.staff)))
+                                          .get(p % 12) + Objects.requireNonNull(
+                                    clefMods.get(score.getTrackClef(
+                                      measure.staff))).get(p % 12));
 
                                 player
                                   .directWrite((byte)(0x90 | measure.staff),
@@ -347,20 +351,7 @@ public class MusicSheet extends AppCompatActivity {
                                   resting ? Note.NoteType.REST
                                           : Note.NoteType.MELODIC,
                                   gottenDur == 0 ? duration : gottenDur,
-                                  resting ? (byte)0
-                                          : (byte)(
-                                            p
-                                            + Objects
-                                              .requireNonNull(keys.get(
-                                                score.getTrack(measure.staff)
-                                                     .getKey()))
-                                              .get(p % 12)
-                                            + Objects.requireNonNull(
-                                              clefMods.get(score.getTrackClef(
-                                                measure.staff))).get(p % 12)
-                                            + score
-                                              .getTrack(measure.staff)
-                                              .getTransposition()),
+                                  resting ? 0 : nominalPitch,
                                   accidental, (byte)127);
 
                                 drawNote(rl, new XYCoord(imageX, imageY),
@@ -375,38 +366,35 @@ public class MusicSheet extends AppCompatActivity {
                                 if (lastTouchPointY != imageY
                                     || lastTouchPointX != imageX) {
                                     byte nominalPitch = (byte)(
-                                      p + Objects.requireNonNull(keys.get(
-                                        score.getTrack(measure.staff).getKey()))
-                                                 .get(p % 12)
-                                      + Objects.requireNonNull(clefMods.get(
-                                        score.getTrackClef(measure.staff)))
-                                               .get(p % 12));
+                                      p + keys.get(
+                                        trackWorkingKey(
+                                          score.getTrack(measure.staff)))
+                                              .get(p % 12)
+                                      + Objects.requireNonNull(
+                                        clefMods.get(score.getTrackClef(
+                                          measure.staff))).get(p % 12));
                                     byte oldNominalPitch = (byte)(
-                                      lP + Objects
-                                        .requireNonNull(keys.get(
-                                          score.getTrack(measure.staff)
-                                               .getKey()))
-                                        .get(lP % 12)
-                                      + Objects
-                                        .requireNonNull(clefMods.get(
-                                          score.getTrackClef(measure.staff)))
-                                        .get(lP % 12));
+                                      lP + keys.get(
+                                        trackWorkingKey(
+                                          score.getTrack(measure.staff)))
+                                               .get(p % 12) + Objects
+                                        .requireNonNull(
+                                          clefMods.get(score.getTrackClef(
+                                            measure.staff))).get(p % 12));
 
                                     player.directWrite(
                                       (byte)(0x80 | measure.staff),
                                       (byte)(oldNominalPitch + accidental
-                                             + score.getTrack(measure.staff)
-                                                    .getTransposition()),
+                                             + score
+                                               .getTrack(measure.staff)
+                                               .getTransposition()),
                                       (byte)127, (byte)(0x90 | measure.staff),
                                       (byte)(nominalPitch + accidental + score
                                         .getTrack(measure.staff)
                                         .getTransposition()),
                                       (byte)127);
 
-                                    tempNote
-                                      .setPitch((byte)(nominalPitch + score
-                                        .getTrack(measure.staff)
-                                        .getTransposition()));
+                                    tempNote.setPitch(nominalPitch);
                                     if (gottenDur != 0)
                                         tempNote.setDuration(gottenDur);
 
@@ -420,12 +408,13 @@ public class MusicSheet extends AppCompatActivity {
                                 }
                                 break;
                             case MotionEvent.ACTION_UP: {
-                                byte nominalPitch = (byte)(p + Objects
-                                  .requireNonNull(keys.get(
-                                    score.getTrack(measure.staff).getKey()))
-                                  .get(p % 12) + Objects.requireNonNull(
-                                  clefMods.get(score.getTrackClef(
-                                    measure.staff))).get(p % 12));
+                                byte nominalPitch = (byte)(
+                                  p + keys.get(
+                                    trackWorkingKey(
+                                      score.getTrack(measure.staff)))
+                                          .get(p % 12) + Objects.requireNonNull(
+                                    clefMods.get(score.getTrackClef(
+                                      measure.staff))).get(p % 12));
 
                                 player
                                   .directWrite((byte)(0x80 | measure.staff),
@@ -479,12 +468,13 @@ public class MusicSheet extends AppCompatActivity {
                                 break;
                             }
                             case MotionEvent.ACTION_CANCEL:
-                                byte nominalPitch = (byte)(p + Objects
-                                  .requireNonNull(keys.get(
+                                byte nominalPitch = (byte)(
+                                  p + Objects.requireNonNull(keys.get(
                                     score.getTrack(measure.staff).getKey()))
-                                  .get(p % 12) + Objects.requireNonNull(
-                                  clefMods.get(score.getTrackClef(
-                                    measure.staff))).get(p % 12));
+                                             .get(p % 12)
+                                  + Objects.requireNonNull(clefMods.get(
+                                    score.getTrackClef(measure.staff)))
+                                           .get(p % 12));
 
                                 player
                                   .directWrite((byte)(0x80 | measure.staff),
@@ -580,7 +570,7 @@ public class MusicSheet extends AppCompatActivity {
                                   public void onItemSelected(
                                     AdapterView<?> adapterView,
                                     View view, int i, long l) {
-                                      score.getTrack(score.getTrackCount() - 1)
+                                      score.getTrack(measure.staff)
                                            .setKey(i - 7);
 
                                       drawStaffHead(
@@ -589,7 +579,7 @@ public class MusicSheet extends AppCompatActivity {
                                             .getTrack(measure.staff)
                                             .getClefImage().getParent()),
                                         score
-                                          .getTrack(score.getTrackCount() - 1));
+                                          .getTrack(measure.staff));
                                   }
 
                                   @Override
@@ -631,7 +621,7 @@ public class MusicSheet extends AppCompatActivity {
                                   @Override
                                   public void onStopTrackingTouch(
                                     SeekBar seekBar) {
-                                      score.getTrack(score.getTrackCount() - 1)
+                                      score.getTrack(measure.staff)
                                            .setTransposition(
                                              seekBar.getProgress());
                                       drawStaffHead(
@@ -664,6 +654,24 @@ public class MusicSheet extends AppCompatActivity {
         });
         relativeLayout.addView(imageView);
         tableRow.addView(relativeLayout);
+    }
+
+    private int trackWorkingKey(Track track) {
+        int workingKey = track.getKey();
+
+        if (track.getTransposition() < 0)
+            for (int i = 0; i > track.getTransposition() % 12; --i) {
+                workingKey -= 5;
+                if (workingKey < -7)
+                    workingKey += 12;
+            }
+        else if (track.getTransposition() > 0)
+            for (int i = 0; i < track.getTransposition() % 12; ++i) {
+                workingKey += 5;
+                if (workingKey > 7)
+                    workingKey -= 12;
+            }
+        return workingKey;
     }
 
     // Hard codes values into data structure, mathematical approach produces
@@ -1133,25 +1141,12 @@ public class MusicSheet extends AppCompatActivity {
         if (!keySigImages.isEmpty())
             keySigImages.clear();
 
-        int workingKey = track.getKey();
-
-        if (track.getTransposition() < 0)
-            for (int i = 0; i > track.getTransposition() % 12; --i) {
-                workingKey -= 5;
-                if (workingKey < -7)
-                    workingKey += 12;
-            }
-        else if (track.getTransposition() > 0)
-            for (int i = 0; i < track.getTransposition() % 12; ++i) {
-                workingKey += 5;
-                if (workingKey > 7)
-                    workingKey -= 12;
-            }
+        int workingKey = trackWorkingKey(track);
 
         int accidentalCount = workingKey > 0 ? workingKey : -workingKey;
         boolean sharp = workingKey > 0;
 
-        int[] heights = { 82, 145, 61, 124, 187, 103, 166 };
+        int[] heights = {82, 145, 61, 124, 187, 103, 166};
 
         for (int i = 0; i < accidentalCount; ++i) {
             keySigImages.add(new ImageView(getApplicationContext()));
@@ -1249,14 +1244,14 @@ public class MusicSheet extends AppCompatActivity {
             image.setImageResource(R.drawable.ic_media_pause);
         } else {
             score.pause();
-            image.setImageResource(R.drawable.play);
+            image.setImageResource(R.drawable.ic_media_play);
         }
     }
 
     public void resetPlayButton() {
         ImageView image = findViewById(R.id.play_button);
 
-        image.setImageResource(R.drawable.play);
+        image.setImageResource(R.drawable.ic_media_play);
     }
 
     public void restart(View view) {

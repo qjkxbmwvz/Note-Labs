@@ -39,4 +39,8 @@ class NoteEvent {
 
         midiDriver.write(event);
     }
+
+    byte getPitch() { return pitch; }
+
+    void setPitch(byte pitch) { this.pitch = pitch; }
 }

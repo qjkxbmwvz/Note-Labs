@@ -50,15 +50,21 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
                                 times.put(t + n.getDuration(),
                                           new TimePosition(
                                             t + n.getDuration()));
-                            Objects.requireNonNull(times.get(t)).addNote(
-                              new NoteEvent(midiDriver,
-                                            NoteEvent.EventType.START, i,
-                                            n));
+
+                            NoteEvent ne1 = new NoteEvent(
+                              midiDriver, NoteEvent.EventType.START, i, n);
+                            ne1.setPitch((byte)(ne1.getPitch()
+                                                + tracks.get(i)
+                                                        .getTransposition()));
+                            Objects.requireNonNull(times.get(t)).addNote(ne1);
+
+                            NoteEvent ne2 = new NoteEvent(
+                              midiDriver, NoteEvent.EventType.STOP, i, n);
+                            ne2.setPitch((byte)(ne2.getPitch()
+                                                + tracks.get(i)
+                                                        .getTransposition()));
                             Objects.requireNonNull(
-                              times.get(t + n.getDuration())).addNote(
-                              new NoteEvent(midiDriver,
-                                            NoteEvent.EventType.STOP, i,
-                                            n));
+                              times.get(t + n.getDuration())).addNote(ne2);
                             break;
                         case REST:
                             break;
