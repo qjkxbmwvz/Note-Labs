@@ -146,7 +146,7 @@ public class MusicSheet extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                             WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         newScore = true;
@@ -751,27 +751,49 @@ public class MusicSheet extends AppCompatActivity {
     }
 
     void redrawScore(int oldMeasureCount) {
-        if (score.getMeasureCount() > oldMeasureCount)
+        if (score.getMeasureCount() > oldMeasureCount) {
+            for (int i = 0; i < oldMeasureCount; ++i) {
+                for (int j = 0; j < score.getTrackCount(); ++j) {
+                    int h = (i + 1) / 2;
+                    drawMeasure(j, i,
+                                (RelativeLayout)((TableRow)(
+                                  tableLayout.getChildAt((h + j * (h + 1)))))
+                                  .getVirtualChildAt(((i + 1) % 2)));
+                }
+            }
             while (oldMeasureCount < score.getMeasureCount()) {
                 for (int i = 0; i < score.getTrackCount(); ++i) {
                     TableRow tr;
-                    if (oldMeasureCount % 2 == 0) {
+                    if ((oldMeasureCount + 1) % 2 == 0) {
                         tr = new TableRow(getApplicationContext());
                         tr.setLayoutParams(new TableRow.LayoutParams(
                           TableRow.LayoutParams.MATCH_PARENT));
-                    } else
+                        tableLayout.addView(tr,
+                                            (i
+                                             + (oldMeasureCount + 1) / 2 * score
+                                              .getTrackCount()));
+                    } else {
                         tr = (TableRow)tableLayout
-                          .getChildAt((i + oldMeasureCount * (i + 1)));
+                          .getChildAt(
+                            (i + (oldMeasureCount + 1) / 2 * score
+                              .getTrackCount()));
+                    }
                     addMeasure(i, oldMeasureCount++, tr);
-
-                    tableLayout.addView(tr, (i + i * (i + 1)));
                 }
             }
-        else if (score.getMeasureCount() < oldMeasureCount) {
-            while (oldMeasureCount > score.getMeasureCount())
-                for (int i = 0; i < score.getTrackCount(); ++i) {
-//                    TableRow tr =
+        } else if (score.getMeasureCount() < oldMeasureCount) {
+            for (int i = 0; i < score.getMeasureCount(); ++i) {
+                for (int j = 0; j < score.getTrackCount(); ++j) {
+                    int h = (i + 1) / 2;
+                    drawMeasure(j, i,
+                                (RelativeLayout)((TableRow)(
+                                  tableLayout.getChildAt((h + j * (h + 1)))))
+                                  .getVirtualChildAt(((i + 1) % 2)));
                 }
+            }
+            while (oldMeasureCount > score.getMeasureCount())
+                for (int i = 0; i < score.getTrackCount(); ++i)
+                    tableLayout.removeViewAt((i + oldMeasureCount * (i + 1)));
         }
     }
 

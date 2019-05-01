@@ -61,7 +61,7 @@ class Score {
             for (int i = 0; i < oldMeasureCount * oldMeasureLength;
                  i += oldMeasureLength) {
                 Note rest = track.getNote(i, (byte)0);
-                if (rest.getNoteType() == Note.NoteType.REST
+                if (rest != null && rest.getNoteType() == Note.NoteType.REST
                     && rest.getDuration() == oldMeasureLength
                                              - rest.getDuration()
                                                % oldMeasureLength)
