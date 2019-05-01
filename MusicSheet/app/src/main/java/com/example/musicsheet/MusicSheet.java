@@ -673,6 +673,7 @@ public class MusicSheet extends AppCompatActivity {
                                           measures.get(imageView)).first,
                                         score.getTrack(measure.staff));
                                       score.setTimeSignature(timeSignature);
+                                      //TODO: redraw entire score
                                   }
                               });
 
@@ -712,6 +713,7 @@ public class MusicSheet extends AppCompatActivity {
                                           measures.get(imageView)).first,
                                         score.getTrack(measure.staff));
                                       score.setTimeSignature(timeSignature);
+                                      //TODO: redraw entire score
                                   }
                               });
 
@@ -1246,6 +1248,7 @@ public class MusicSheet extends AppCompatActivity {
         RelativeLayout.LayoutParams numParams;
         RelativeLayout.LayoutParams denParams;
 
+        //TODO: adjust the numbers' sizes and positions
         if (numImage == null) {
             numImage = new ImageView(getApplicationContext());
             numParams = new RelativeLayout.LayoutParams(
