@@ -126,19 +126,15 @@ class Track {
         this.clefImage = clefImage;
     }
 
-    public ImageView getNumImage()              { return numImage; }
+    ImageView getNumImage()                { return numImage; }
 
-    public void setNumImage(ImageView numImage) { this.numImage = numImage; }
+    void setNumImage(ImageView numImage)   { this.numImage = numImage; }
 
-    public ImageView getDenImage()              { return denImage; }
+    ImageView getDenImage()                { return denImage; }
 
-    public void setDenImage(ImageView denImage) { this.denImage = denImage; }
+    void setDenImage(ImageView denImage)   { this.denImage = denImage; }
 
-    ArrayList<ImageView> getKeySigImages()      { return keySigImages; }
-
-    public void setKeySigImages(ArrayList<ImageView> keySigImages) {
-        this.keySigImages = keySigImages;
-    }
+    ArrayList<ImageView> getKeySigImages() { return keySigImages; }
 
     void hideHead() {
         if (clefImage != null)

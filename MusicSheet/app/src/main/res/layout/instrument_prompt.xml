@@ -53,8 +53,46 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="8dp"
+        android:max="24"
+        android:min="-24"/>
+
+    <TextView
+        android:id="@+id/numerator_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:min="-24"
-        android:max="24"/>
+        android:layout_marginBottom="8dp"/>
+
+    <SeekBar
+        android:id="@+id/numerator_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="8dp"
+        android:max="8"
+        android:min="1"/>
+
+    <TextView
+        android:id="@+id/denominator_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"/>
+
+    <SeekBar
+        android:id="@+id/denominator_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="8dp"
+        android:max="8"
+        android:min="1"/>
 </LinearLayout>

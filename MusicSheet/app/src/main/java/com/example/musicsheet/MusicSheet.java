@@ -93,6 +93,7 @@ public class MusicSheet extends AppCompatActivity {
 
     private ScrollView scrollView;
     private TableLayout tableLayout;
+    Fraction timeSignature;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,11 +148,11 @@ public class MusicSheet extends AppCompatActivity {
         if (extras != null) {
             score.load(extras.getString("filename"));
             newScore = false;
+            timeSignature = score.getTimeSignature();
+        } else {
+            timeSignature = new Fraction(4, 4);
+            score.setTimeSignature(timeSignature);
         }
-
-        Fraction timeSignature = new Fraction(4, 4);
-
-        score.setMeasureLength(192 * timeSignature.num / timeSignature.den);
 
         int trackCount = 1;
         int measureCount = 4;
@@ -173,7 +174,7 @@ public class MusicSheet extends AppCompatActivity {
     void addStaff(int staffNum, int measureCount) {
         int count = -1;
         boolean odd = (measureCount + 1) % 2 != 0;
-        int height = measureCount / 2 + (odd ? 1 : 0);
+        int height = measureCount / 2 + 1;
         Context context = getApplicationContext();
 
         for (int i = 0; i < height; ++i) {
@@ -187,6 +188,35 @@ public class MusicSheet extends AppCompatActivity {
                 addMeasure(staffNum, count++, tableRow);
 
             tableLayout.addView(tableRow, (staffNum + i * (staffNum + 1)));
+        }
+    }
+
+    private void drawMeasure(int staffNum, int count,
+                             RelativeLayout relativeLayout) {
+        ArrayList<Pair<Integer, LinkedList<Note>>> measure = score
+          .getMeasure(staffNum, count);
+        for (Pair<Integer, LinkedList<Note>> p : measure) {
+            Pair<NoteDur, Boolean> durAndDot = numToDurAndDot(
+              p.second.getFirst().getDuration());
+
+            NoteDur noteDur = durAndDot.first;
+            boolean dotted = durAndDot.second;
+
+            for (Note n : p.second) {
+                byte pitch = (byte)(n.getPitch() + Objects
+                  .requireNonNull(
+                    reverseKeys.get(score.getTrack(staffNum).getKey()))
+                  .get(n.getPitch() % 12));
+                drawNote(relativeLayout,
+                         new XYCoord(p.first, pitchToPos.get(
+                           pitch + reverseKeys
+                             .get(trackWorkingKey(score.getTrack(staffNum)))
+                             .get(pitch % 12) + Objects
+                             .requireNonNull(reverseClefMods.get(
+                               score.getTrackClef(staffNum)))
+                             .get(pitch % 12))), n, noteDur, dotted,
+                         score.getTrack(staffNum).getKey(), measure);
+            }
         }
     }
 
@@ -215,33 +245,8 @@ public class MusicSheet extends AppCompatActivity {
 
         if (count == -1)
             drawStaffHead(relativeLayout, score.getTrack(staffNum));
-        else if (count < score.getMeasureCount()) {
-            ArrayList<Pair<Integer, LinkedList<Note>>> measure = score
-              .getMeasure(staffNum, count);
-            for (Pair<Integer, LinkedList<Note>> p : measure) {
-                Pair<NoteDur, Boolean> durAndDot = numToDurAndDot(
-                  p.second.getFirst().getDuration());
-
-                NoteDur noteDur = durAndDot.first;
-                boolean dotted = durAndDot.second;
-
-                for (Note n : p.second) {
-                    byte pitch = (byte)(n.getPitch() + Objects
-                      .requireNonNull(
-                        reverseKeys.get(score.getTrack(staffNum).getKey()))
-                      .get(n.getPitch() % 12));
-                    drawNote(relativeLayout,
-                             new XYCoord(p.first, pitchToPos.get(
-                               pitch + reverseKeys
-                                 .get(trackWorkingKey(score.getTrack(staffNum)))
-                                 .get(pitch % 12) + Objects
-                                 .requireNonNull(reverseClefMods.get(
-                                   score.getTrackClef(staffNum)))
-                                 .get(pitch % 12))), n, noteDur, dotted,
-                             score.getTrack(staffNum).getKey(), measure);
-                }
-            }
-        }
+        else if (count < score.getMeasureCount())
+            drawMeasure(staffNum, count, relativeLayout);
 
         measures.put(imageView,
                      new Pair<>(relativeLayout, new Measure(staffNum, count)));
@@ -574,10 +579,9 @@ public class MusicSheet extends AppCompatActivity {
                                            .setKey(i - 7);
 
                                       drawStaffHead(
-                                        Objects
-                                          .requireNonNull((RelativeLayout)score
-                                            .getTrack(measure.staff)
-                                            .getClefImage().getParent()),
+                                        Objects.requireNonNull(
+                                          (RelativeLayout)imageView
+                                            .getParent()),
                                         score
                                           .getTrack(measure.staff));
                                   }
@@ -600,7 +604,8 @@ public class MusicSheet extends AppCompatActivity {
                               .setText(getString(R.string.transposition_text,
                                                  score.getTrack(measure.staff)
                                                       .getTransposition()));
-                            transpositionBar.setProgress(0);
+                            transpositionBar.setProgress(
+                              score.getTrack(measure.staff).getTransposition());
 
                             transpositionBar.setOnSeekBarChangeListener(
                               new SeekBar.OnSeekBarChangeListener() {
@@ -628,6 +633,84 @@ public class MusicSheet extends AppCompatActivity {
                                         Objects.requireNonNull(
                                           measures.get(imageView)).first,
                                         score.getTrack(measure.staff));
+                                  }
+                              });
+
+                            final TextView numeratorText = promptView
+                              .findViewById(R.id.numerator_text);
+
+                            final SeekBar numeratorBar = promptView
+                              .findViewById(R.id.numerator_bar);
+
+                            numeratorText
+                              .setText(getString(R.string.numerator_text,
+                                                 timeSignature.num));
+                            numeratorBar.setProgress(timeSignature.num);
+
+                            numeratorBar.setOnSeekBarChangeListener(
+                              new SeekBar.OnSeekBarChangeListener() {
+                                  @Override
+                                  public void onProgressChanged(SeekBar seekBar,
+                                                                int i,
+                                                                boolean b) {
+                                      if (b)
+                                          numeratorText.setText(
+                                            getString(
+                                              R.string.numerator_text, i));
+                                  }
+
+                                  @Override
+                                  public void onStartTrackingTouch(
+                                    SeekBar seekBar) {}
+
+                                  @Override
+                                  public void onStopTrackingTouch(
+                                    SeekBar seekBar) {
+                                      timeSignature.num = seekBar.getProgress();
+                                      drawStaffHead(
+                                        Objects.requireNonNull(
+                                          measures.get(imageView)).first,
+                                        score.getTrack(measure.staff));
+                                      score.setTimeSignature(timeSignature);
+                                  }
+                              });
+
+                            final TextView denominatorText = promptView
+                              .findViewById(R.id.denominator_text);
+
+                            final SeekBar denominatorBar = promptView
+                              .findViewById(R.id.denominator_bar);
+
+                            denominatorText
+                              .setText(getString(R.string.denominator_text,
+                                                 timeSignature.den));
+                            denominatorBar.setProgress(timeSignature.den);
+
+                            denominatorBar.setOnSeekBarChangeListener(
+                              new SeekBar.OnSeekBarChangeListener() {
+                                  @Override
+                                  public void onProgressChanged(SeekBar seekBar,
+                                                                int i,
+                                                                boolean b) {
+                                      if (b)
+                                          denominatorText.setText(
+                                            getString(
+                                              R.string.denominator_text, i));
+                                  }
+
+                                  @Override
+                                  public void onStartTrackingTouch(
+                                    SeekBar seekBar) {}
+
+                                  @Override
+                                  public void onStopTrackingTouch(
+                                    SeekBar seekBar) {
+                                      timeSignature.den = seekBar.getProgress();
+                                      drawStaffHead(
+                                        Objects.requireNonNull(
+                                          measures.get(imageView)).first,
+                                        score.getTrack(measure.staff));
+                                      score.setTimeSignature(timeSignature);
                                   }
                               });
 
@@ -1066,7 +1149,6 @@ public class MusicSheet extends AppCompatActivity {
             dotParams.width = (int)(35 * adjustment);
             dotParams.height = (int)(35 * adjustment);
 
-
             dottedImage.setImageResource(R.drawable.dot);
         }
     }
@@ -1120,24 +1202,6 @@ public class MusicSheet extends AppCompatActivity {
         ArrayList<RelativeLayout.LayoutParams> keySigParamses
           = new ArrayList<>();
 
-        // TODO: adjust accidental placement.
-        /* By key:
-         * -7: Bb, Eb, Ab, Db, Gb, Cb, Fb
-         * -6: Bb, Eb, Ab, Db, Gb, Cb
-         * -5: Bb, Eb, Ab, Db, Gb
-         * -4: Bb, Eb, Ab, Db
-         * -3: Bb, Eb, Ab
-         * -2: Bb, Eb
-         * -1: Bb
-         *  0: -
-         * +1: F#
-         * +2: F#, C#
-         * +3: F#, C#, G#
-         * +4: F#, C#, G#, D#
-         * +5: F#, C#, G#, D#, A#
-         * +6: F#, C#, G#, D#, A#, E#
-         * +7: F#, C#, G#, D#, A#, E#, B#
-         */
         if (!keySigImages.isEmpty())
             keySigImages.clear();
 
@@ -1154,7 +1218,7 @@ public class MusicSheet extends AppCompatActivity {
               new RelativeLayout.LayoutParams(
                 (int)(100 * adjustment),
                 (int)(100 * adjustment)));
-            keySigParamses.get(i).leftMargin = 100 + i * 50;
+            keySigParamses.get(i).leftMargin = 100 + i * 45;
 
             int height = sharp ? heights[i] : heights[6 - i];
 
@@ -1173,6 +1237,63 @@ public class MusicSheet extends AppCompatActivity {
             keySigImages.get(i).setImageResource(sharp ? R.drawable.sharp
                                                        : R.drawable.flat);
             rl.addView(keySigImages.get(i));
+        }
+
+        ImageView numImage = track.getNumImage();
+        ImageView denImage = track.getDenImage();
+
+        RelativeLayout.LayoutParams numParams;
+        RelativeLayout.LayoutParams denParams;
+
+        if (numImage == null) {
+            numImage = new ImageView(getApplicationContext());
+            numParams = new RelativeLayout.LayoutParams(
+              (int)(800 * adjustment), (int)(800 * adjustment));
+            track.setNumImage(numImage);
+            track.getNumImage().setLayoutParams(numParams);
+        } else
+            numParams = (RelativeLayout.LayoutParams)numImage.getLayoutParams();
+        if (denImage == null) {
+            denImage = new ImageView(getApplicationContext());
+            denParams = new RelativeLayout.LayoutParams(
+              (int)(800 * adjustment), (int)(800 * adjustment));
+            track.setDenImage(denImage);
+            track.getDenImage().setLayoutParams(denParams);
+        } else
+            denParams = (RelativeLayout.LayoutParams)denImage.getLayoutParams();
+
+        rl.addView(numImage);
+        rl.addView(denImage);
+
+        numParams.leftMargin = (int)(400 * adjustment);
+        denParams.leftMargin = (int)(400 * adjustment);
+        numParams.topMargin = (int)(50 * adjustment);
+        denParams.topMargin = (int)(100 * adjustment);
+
+        numImage.setImageResource(timeSignatureResource(timeSignature.num));
+        denImage.setImageResource(timeSignatureResource(timeSignature.den));
+    }
+
+    int timeSignatureResource(int i) {
+        switch (i) {
+            case 1:
+                return R.drawable.time_signature_1;
+            case 2:
+                return R.drawable.time_signature_2;
+            case 3:
+                return R.drawable.time_signature_3;
+            case 4:
+                return R.drawable.time_signature_4;
+            case 5:
+                return R.drawable.time_signature_5;
+            case 6:
+                return R.drawable.time_signature_6;
+            case 7:
+                return R.drawable.time_signature_7;
+            case 8:
+                return R.drawable.time_signature_8;
+            default:
+                return 0;
         }
     }
 
@@ -1254,7 +1375,9 @@ public class MusicSheet extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                image.setImageResource(R.drawable.play); //crash fixed; image updates BG thread, needs to update main thread
+                image.setImageResource(
+                  R.drawable.play); //crash fixed; image updates BG thread,
+                // needs to update main thread
             }
         });
     }

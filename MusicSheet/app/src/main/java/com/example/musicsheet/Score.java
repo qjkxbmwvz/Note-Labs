@@ -21,6 +21,7 @@ class Score {
     private Player player;
     private Thread playerThread;
     private int measureLength;
+    private Fraction timeSignature;
 
     Score(Player player) {
         tempo = 120;
@@ -37,13 +38,28 @@ class Score {
 
     int getMeasureLength()   { return measureLength; }
 
-    void setMeasureLength(int measureLength) {
-        this.measureLength = measureLength;
+    void setTimeSignature(Fraction timeSignature) {
+        int oldMeasureLength = measureLength;
+
+        if (this.timeSignature != null)
+            measureCount =
+              measureCount * this.timeSignature.num * timeSignature.den
+              / this.timeSignature.den / timeSignature.num;
+        this.timeSignature = timeSignature;
+        measureLength = 192 * timeSignature.num / timeSignature.den;
+        for (Track track : tracks) {
+            for (int i = 0; i < measureCount * measureLength;
+                 i += measureLength)
+                track.addNote(i, new Note(Note.NoteType.REST, measureLength,
+                                          (byte)0, (byte)0, (byte)0));
+        }
     }
 
-    Track getTrack(int track) { return tracks.get(track); }
+    Fraction getTimeSignature() { return timeSignature; }
 
-    int getTrackCount()       { return tracks.size(); }
+    Track getTrack(int track)   { return tracks.get(track); }
+
+    int getTrackCount()         { return tracks.size(); }
 
     void setTrackClef(int track, Track.Clef clef) {
         tracks.get(track).setClef(clef);
@@ -184,6 +200,8 @@ class Score {
               new FileOutputStream(out, (false)));
 
             os.writeInt(tempo);
+            os.writeByte(timeSignature.num);
+            os.writeByte(timeSignature.den);
             os.writeByte((byte)tracks.size());
             for (Track track : tracks) {
                 os.writeInt(track.getClef().ordinal());
@@ -224,6 +242,8 @@ class Score {
             int maxTime = 0;
 
             tempo = is.readInt();
+            int num = is.readByte();
+            int den = is.readByte();
             byte il = is.readByte();
             tracks = new ArrayList<>(il);
             for (int i = 0; i < il; ++i) {
@@ -259,9 +279,10 @@ class Score {
                 }
             }
             is.close();
-            measureCount = maxTime / 192;
-            if (maxTime % 192 != 0)
+            measureCount = maxTime * den / 192 / num;
+            if (maxTime % 192 * num / den != 0)
                 ++measureCount;
+            setTimeSignature(new Fraction(num, den));
         } catch (Exception ignored) {}
     }
 }

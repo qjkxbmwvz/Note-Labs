@@ -158,6 +158,8 @@
     </string-array>
     <string name="tempo_text">Tempo: %d</string>
     <string name="transposition_text">Transposition: %d</string>
+    <string name="numerator_text">Time signature numerator: %d</string>
+    <string name="denominator_text">Time signature denominator: %d</string>
     <string name="add_staff">Add Staff</string>
     <string name="add_measures">Add Measures</string>
     <string name="staff_properties">Staff Properties</string>
