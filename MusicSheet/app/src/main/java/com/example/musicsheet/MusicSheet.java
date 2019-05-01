@@ -672,8 +672,11 @@ public class MusicSheet extends AppCompatActivity {
                                         Objects.requireNonNull(
                                           measures.get(imageView)).first,
                                         score.getTrack(measure.staff));
+                                      int oldMeasureCount = score
+                                        .getMeasureCount();
                                       score.setTimeSignature(timeSignature);
                                       //TODO: redraw entire score
+                                      redrawScore(oldMeasureCount);
                                   }
                               });
 
@@ -740,6 +743,31 @@ public class MusicSheet extends AppCompatActivity {
         });
         relativeLayout.addView(imageView);
         tableRow.addView(relativeLayout);
+    }
+
+    void redrawScore(int oldMeasureCount) {
+        if (score.getMeasureCount() > oldMeasureCount)
+            while (oldMeasureCount < score.getMeasureCount()) {
+                for (int i = 0; i < score.getTrackCount(); ++i) {
+                    TableRow tr;
+                    if (oldMeasureCount % 2 == 0) {
+                        tr = new TableRow(getApplicationContext());
+                        tr.setLayoutParams(new TableRow.LayoutParams(
+                          TableRow.LayoutParams.MATCH_PARENT));
+                    } else
+                        tr = (TableRow)tableLayout
+                          .getChildAt((i + oldMeasureCount * (i + 1)));
+                    addMeasure(i, oldMeasureCount++, tr);
+
+                    tableLayout.addView(tr, (i + i * (i + 1)));
+                }
+            }
+        else if (score.getMeasureCount() < oldMeasureCount) {
+            while (oldMeasureCount > score.getMeasureCount())
+                for (int i = 0; i < score.getTrackCount(); ++i) {
+//                    TableRow tr =
+                }
+        }
     }
 
     private int trackWorkingKey(Track track) {
