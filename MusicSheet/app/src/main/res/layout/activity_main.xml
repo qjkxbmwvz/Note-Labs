@@ -8,57 +8,67 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button2"
-        android:layout_width="130dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="116dp"
-        android:layout_marginTop="436dp"
-        android:layout_marginEnd="8dp"
+        android:id="@+id/LoadButton"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="460dp"
+        android:layout_marginEnd="5dp"
+        android:background="@android:color/black"
         android:onClick="openExisting"
         android:text="LOAD"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/button"
-        app:layout_constraintTop_toTopOf="@+id/imageView" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/NewButton"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="130dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="444dp"
+        android:id="@+id/NewButton"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="460dp"
+        android:background="@android:color/black"
         android:onClick="openNew"
         android:text="@string/new_button"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toStartOf="@+id/LoadButton"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="120dp"
-        android:layout_marginLeft="120dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="28dp"
+        android:layout_marginEnd="30dp"
         android:text="@string/note_lab_title"
+        android:textColor="@android:color/black"
         android:textSize="36sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="424dp"
-        android:layout_height="350dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="387dp"
+        android:layout_height="320dp"
+        android:layout_marginTop="45dp"
+        android:layout_marginBottom="32dp"
+        android:contentDescription="TODO"
+        app:layout_constraintBottom_toTopOf="@+id/NewButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:srcCompat="@drawable/notelablogo"
-        android:contentDescription="TODO" />
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/notelablogo" />
 
 </android.support.constraint.ConstraintLayout>
