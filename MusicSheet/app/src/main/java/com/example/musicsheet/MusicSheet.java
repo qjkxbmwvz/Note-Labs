@@ -1244,14 +1244,19 @@ public class MusicSheet extends AppCompatActivity {
             image.setImageResource(R.drawable.ic_media_pause);
         } else {
             score.pause();
-            image.setImageResource(R.drawable.ic_media_play);
+            image.setImageResource(R.drawable.play);
         }
     }
 
     public void resetPlayButton() {
-        ImageView image = findViewById(R.id.play_button);
+        final ImageView image = findViewById(R.id.play_button); //need final?
 
-        image.setImageResource(R.drawable.ic_media_play);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                image.setImageResource(R.drawable.play); //crash fixed; image updates BG thread, needs to update main thread
+            }
+        });
     }
 
     public void restart(View view) {
