@@ -76,8 +76,12 @@ class Track {
                 Objects.requireNonNull(notes.get(time)).getFirst()
                        .setNoteType(Note.NoteType.REST);
             else
-                Objects.requireNonNull(notes.get(time)).remove(note);
+                removeNoteHardcore(time, note);
         }
+    }
+
+    void removeNoteHardcore(int time, Note note) {
+        Objects.requireNonNull(notes.get(time)).remove(note);
     }
 
     boolean noteAtPosition(int time) { return notes.containsKey(time); }

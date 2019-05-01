@@ -148,7 +148,8 @@ public class MusicSheet extends AppCompatActivity {
         if (extras != null) {
             score.load(extras.getString("filename"));
             newScore = false;
-            timeSignature = score.getTimeSignature();
+            Fraction ts = score.getTimeSignature();
+            timeSignature = new Fraction(ts.num, ts.den);
         } else {
             timeSignature = new Fraction(4, 4);
             score.setTimeSignature(timeSignature);

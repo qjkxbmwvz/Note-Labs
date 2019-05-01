@@ -25,7 +25,7 @@ class Score {
 
     Score(Player player) {
         tempo = 120;
-        measureLength = 192;
+        measureLength = 0;
         startTime = 0;
         measureCount = 0;
         tracks = new ArrayList<>();
@@ -40,14 +40,33 @@ class Score {
 
     void setTimeSignature(Fraction timeSignature) {
         int oldMeasureLength = measureLength;
+        int oldMeasureCount = measureCount;
 
-        if (this.timeSignature != null)
+        if (this.timeSignature != null) {
             measureCount =
               measureCount * this.timeSignature.num * timeSignature.den
               / this.timeSignature.den / timeSignature.num;
-        this.timeSignature = timeSignature;
+            this.timeSignature.num = timeSignature.num;
+            this.timeSignature.den = timeSignature.den;
+        } else
+            this.timeSignature = timeSignature;
         measureLength = 192 * timeSignature.num / timeSignature.den;
+
+        if (oldMeasureCount != 0)
+            if (measureCount * measureLength
+                < oldMeasureCount * oldMeasureLength)
+                ++measureCount;
+
         for (Track track : tracks) {
+            for (int i = 0; i < oldMeasureCount * oldMeasureLength;
+                 i += oldMeasureLength) {
+                Note rest = track.getNote(i, (byte)0);
+                if (rest.getNoteType() == Note.NoteType.REST
+                    && rest.getDuration() == oldMeasureLength
+                                             - rest.getDuration()
+                                               % oldMeasureLength)
+                    track.removeNoteHardcore(i, rest);
+            }
             for (int i = 0; i < measureCount * measureLength;
                  i += measureLength)
                 track.addNote(i, new Note(Note.NoteType.REST, measureLength,
