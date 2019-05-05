@@ -785,15 +785,23 @@ public class MusicSheet extends AppCompatActivity {
             for (int i = 0; i < score.getMeasureCount(); ++i) {
                 for (int j = 0; j < score.getTrackCount(); ++j) {
                     int h = (i + 1) / 2;
+
                     drawMeasure(j, i,
                                 (RelativeLayout)((TableRow)(
                                   tableLayout.getChildAt((h + j * (h + 1)))))
                                   .getVirtualChildAt(((i + 1) % 2)));
                 }
             }
-            while (oldMeasureCount > score.getMeasureCount())
-                for (int i = 0; i < score.getTrackCount(); ++i)
-                    tableLayout.removeViewAt((i + oldMeasureCount * (i + 1)));
+            while (oldMeasureCount > score.getMeasureCount()) {
+                for (int i = score.getTrackCount() - 1; i >= 0; --i) {
+                    //TODO: remove individual measures from rows.
+                    int ind = (i + (oldMeasureCount + 1) / 2
+                                   * score.getTrackCount());
+                    if (oldMeasureCount % 2 == 0)
+                        tableLayout.removeViewAt(ind);
+                }
+                --oldMeasureCount;
+            }
         }
     }
 
@@ -1046,7 +1054,7 @@ public class MusicSheet extends AppCompatActivity {
           getApplicationContext().getResources()
                                  .getDisplayMetrics().density / 2.625;
 
-        int xActual = (xy.x * 125 / 48) + 30;
+        int xActual = (xy.x * 500 / score.getMeasureLength()) + 30;
         int yActual = xy.y - 85;
         ImageView noteIv;
         ImageView accidentalImage;

@@ -68,9 +68,59 @@ class Score {
                     track.removeNoteHardcore(i, rest);
             }
             for (int i = 0; i < measureCount * measureLength;
-                 i += measureLength)
-                track.addNote(i, new Note(Note.NoteType.REST, measureLength,
-                                          (byte)0, (byte)0, (byte)0));
+                 i += measureLength) {
+                int emptyLength = measureLength;
+                TreeSet<Pair<Integer, LinkedList<Note>>> measure
+                  = track.getMeasure((i / measureLength), measureLength);
+
+                if (measure.size() > 0) {
+                    Pair<Integer, LinkedList<Note>> first = measure.pollFirst();
+
+                    if (first.first == i) {
+                        if (measure.size() == 0 && first.second.size() == 1
+                            && first.second.getFirst().getNoteType()
+                               == Note.NoteType.REST)
+                            first.second.getFirst().setDuration(measureLength);
+                        emptyLength = 0;
+                    } else
+                        emptyLength = first.first - i;
+
+                    if (measure.size() > 0) {
+                        Pair<Integer, LinkedList<Note>> last
+                          = measure.pollLast();
+
+                        if (last.second.size() == 1)
+                            //TODO: split notes with tie bars
+                            if (last.second.getFirst().getNoteType()
+                                == Note.NoteType.REST)
+                                if (last.first + last.second.getFirst()
+                                                            .getDuration()
+                                    > i + measureLength)
+                                    last.second.getFirst().setDuration(
+                                      i + measureLength - last.first);
+                        if (last.first + last.second.getFirst().getDuration()
+                            < i + measureLength)
+                            track
+                              .addNote((last.first + last.second.getFirst()
+                                                                .getDuration()),
+                                       new Note(Note.NoteType.REST,
+                                                (i + measureLength - last.first
+                                                 - last.second.getFirst()
+                                                              .getDuration()),
+                                                (byte)0, (byte)0, (byte)0));
+                    } else if (first.second.getFirst().getDuration()
+                               < measureLength)
+                        track
+                          .addNote((i + first.second.getFirst().getDuration()),
+                                   new Note(Note.NoteType.REST,
+                                            (measureLength - first.second
+                                              .getFirst().getDuration()),
+                                            (byte)0, (byte)0, (byte)0));
+                }
+                if (emptyLength > 0)
+                    track.addNote(i, new Note(Note.NoteType.REST, emptyLength,
+                                              (byte)0, (byte)0, (byte)0));
+            }
         }
     }
 
