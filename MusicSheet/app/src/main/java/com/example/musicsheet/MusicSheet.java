@@ -123,7 +123,8 @@ public class MusicSheet extends AppCompatActivity {
         noteButton = findViewById(R.id.note_button);
         saveButton = findViewById(R.id.save_button);
 
-        cycleButtons(null);
+        //No Longer Have to Cycle Buttons, but Edit Button must keep its ability to toggle Zoom
+        //cycleButtons(null);
 
         linePaint = setUpPaint();
 
@@ -1533,23 +1534,23 @@ public class MusicSheet extends AppCompatActivity {
         ToggleButton editButton = findViewById(R.id.edit_button);
 
         if (editButton.isChecked()) {
-            playButton.setVisibility(View.GONE);
-            restartButton.setVisibility(View.GONE);
+            //playButton.setVisibility(View.GONE);
+            //restartButton.setVisibility(View.GONE);
             saveButton.setVisibility(View.GONE);
             addStuffButton.setVisibility(View.VISIBLE);
-            undoButton.setVisibility(View.VISIBLE);
+            //undoButton.setVisibility(View.VISIBLE);
             accidentButton.setVisibility(View.VISIBLE);
-            noteButton.setVisibility(View.VISIBLE);
+            //noteButton.setVisibility(View.VISIBLE);
             dotButton.setVisibility(View.VISIBLE);
             restButton.setVisibility(View.VISIBLE);
         } else {
-            playButton.setVisibility(View.VISIBLE);
-            restartButton.setVisibility(View.VISIBLE);
+            //playButton.setVisibility(View.VISIBLE);
+            //restartButton.setVisibility(View.VISIBLE);
             saveButton.setVisibility(View.VISIBLE);
             addStuffButton.setVisibility(View.GONE);
-            undoButton.setVisibility(View.GONE);
+            //undoButton.setVisibility(View.GONE);
             accidentButton.setVisibility(View.GONE);
-            noteButton.setVisibility(View.GONE);
+            //noteButton.setVisibility(View.GONE);
             dotButton.setVisibility(View.GONE);
             restButton.setVisibility(View.GONE);
         }
