@@ -1530,7 +1530,7 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    public void cycleButtons(View view) {
+    /*public void cycleButtons(View view) {
         ToggleButton editButton = findViewById(R.id.edit_button);
 
         if (editButton.isChecked()) {
@@ -1554,7 +1554,7 @@ public class MusicSheet extends AppCompatActivity {
             dotButton.setVisibility(View.GONE);
             restButton.setVisibility(View.GONE);
         }
-    }
+    }*/
 
     public void addStuff(View view) {
         LayoutInflater li = LayoutInflater.from(this);

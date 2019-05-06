@@ -89,6 +89,7 @@
             android:id="@+id/SideToolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center"
             android:orientation="vertical">
 
             <ToggleButton
@@ -96,7 +97,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="4dp"
-
                 android:layout_weight="1"
                 android:background="@drawable/rest_toggle"
                 android:textOff=""
@@ -106,7 +106,6 @@
                 android:id="@+id/dot_button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-
                 android:layout_margin="4dp"
                 android:layout_weight="1"
                 android:background="@drawable/dot_toggle"
@@ -131,7 +130,6 @@
                 android:layout_margin="4.5dp"
                 android:layout_weight="1"
                 android:background="@drawable/edit_toggle"
-                android:onClick="cycleButtons"
                 android:textOff=""
                 android:textOn="" />
 
