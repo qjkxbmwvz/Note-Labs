@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
@@ -99,6 +100,7 @@ public class MusicSheet extends AppCompatActivity {
 
     private ScrollView scrollView;
     private TableLayout tableLayout;
+    private SlidingPaneLayout slidePane;
     Fraction timeSignature;
 
     @Override
@@ -1363,8 +1365,7 @@ public class MusicSheet extends AppCompatActivity {
 
         if (clefIv == null) {
             clefIv = new ImageView(getApplicationContext());
-            clefParams = new RelativeLayout.LayoutParams(
-              (int)(100 * adjustment), (int)(100 * adjustment));
+            clefParams = new RelativeLayout.LayoutParams((int)(100 * adjustment), (int)(100 * adjustment));
             track.setClefImage(clefIv);
             track.getClefImage().setLayoutParams(clefParams);
         } else {
@@ -1448,16 +1449,14 @@ public class MusicSheet extends AppCompatActivity {
         //TODO: adjust the numbers' sizes and positions
         if (numImage == null) {
             numImage = new ImageView(getApplicationContext());
-            numParams = new RelativeLayout.LayoutParams(
-              (int)(800 * adjustment), (int)(800 * adjustment));
+            numParams = new RelativeLayout.LayoutParams((int)(500000000 * adjustment), (int)(500000000 * adjustment));
             track.setNumImage(numImage);
             track.getNumImage().setLayoutParams(numParams);
         } else
             numParams = (RelativeLayout.LayoutParams)numImage.getLayoutParams();
         if (denImage == null) {
             denImage = new ImageView(getApplicationContext());
-            denParams = new RelativeLayout.LayoutParams(
-              (int)(2000 * adjustment), (int)(2000 * adjustment));
+            denParams = new RelativeLayout.LayoutParams((int)(500000000 * adjustment), (int)(500000000 * adjustment));
             track.setDenImage(denImage);
             track.getDenImage().setLayoutParams(denParams);
         } else
@@ -1466,16 +1465,18 @@ public class MusicSheet extends AppCompatActivity {
         rl.addView(numImage);
         rl.addView(denImage);
 
-        numParams.leftMargin = (int)(300 * adjustment);
-        denParams.leftMargin = (int)(300 * adjustment);
+        numParams.leftMargin = (int)(450 * adjustment);
+        denParams.leftMargin = (int)(450 * adjustment);
         numParams.topMargin = (int)(-70 * adjustment);
         denParams.topMargin = (int)(70 * adjustment);
 
         numImage.setImageResource(timeSignatureResource(timeSignature.num));
         denImage.setImageResource(timeSignatureResource(timeSignature.den));
+
     }
 
-    int timeSignatureResource(int i) {
+    int timeSignatureResource(int i)
+    {
         switch (i) {
             case 1:
                 return R.drawable.time_signature_1;
@@ -2024,5 +2025,11 @@ public class MusicSheet extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
 
         alertDialog.show();
+    }
+
+    public void paneClosed(){
+        //if(!slidePane.isOpen()){
+            slidePane.setCoveredFadeColor(5);
+        //}
     }
 }
