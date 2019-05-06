@@ -612,6 +612,8 @@ public class MusicSheet extends AppCompatActivity {
                                             selectedNote.blacken();
                                             selectedNote = null;
                                             alreadySelected = false;
+                                            accidental = 0;
+                                            setAccidentalButtonImage();
                                         }
                                         break;
                                 }
@@ -1365,7 +1367,8 @@ public class MusicSheet extends AppCompatActivity {
 
         if (clefIv == null) {
             clefIv = new ImageView(getApplicationContext());
-            clefParams = new RelativeLayout.LayoutParams((int)(100 * adjustment), (int)(100 * adjustment));
+            clefParams = new RelativeLayout.LayoutParams(
+              (int)(100 * adjustment), (int)(100 * adjustment));
             track.setClefImage(clefIv);
             track.getClefImage().setLayoutParams(clefParams);
         } else {
@@ -1449,14 +1452,16 @@ public class MusicSheet extends AppCompatActivity {
         //TODO: adjust the numbers' sizes and positions
         if (numImage == null) {
             numImage = new ImageView(getApplicationContext());
-            numParams = new RelativeLayout.LayoutParams((int)(500000000 * adjustment), (int)(500000000 * adjustment));
+            numParams = new RelativeLayout.LayoutParams(
+              (int)(500000000 * adjustment), (int)(500000000 * adjustment));
             track.setNumImage(numImage);
             track.getNumImage().setLayoutParams(numParams);
         } else
             numParams = (RelativeLayout.LayoutParams)numImage.getLayoutParams();
         if (denImage == null) {
             denImage = new ImageView(getApplicationContext());
-            denParams = new RelativeLayout.LayoutParams((int)(500000000 * adjustment), (int)(500000000 * adjustment));
+            denParams = new RelativeLayout.LayoutParams(
+              (int)(500000000 * adjustment), (int)(500000000 * adjustment));
             track.setDenImage(denImage);
             track.getDenImage().setLayoutParams(denParams);
         } else
@@ -1475,8 +1480,7 @@ public class MusicSheet extends AppCompatActivity {
 
     }
 
-    int timeSignatureResource(int i)
-    {
+    int timeSignatureResource(int i) {
         switch (i) {
             case 1:
                 return R.drawable.time_signature_1;
@@ -1604,13 +1608,28 @@ public class MusicSheet extends AppCompatActivity {
                     RelativeLayout rl = (RelativeLayout)n.getImageView()
                                                          .getParent();
 
-                    drawNote(rl, new XYCoord(
-                               (lastEdit.time % score.getMeasureLength()),
-                               (0)), n,
-                             score.getTrack(lastEdit.staff).getKey(), score
-                               .getMeasure(lastEdit.staff,
-                                           (lastEdit.time / score
-                                             .getMeasureLength())));
+                    ArrayList<Pair<Integer, LinkedList<Note>>> m = score
+                      .getMeasure(lastEdit.staff, (lastEdit.time / score
+                        .getMeasureLength()));
+
+                    for (Pair<Integer, LinkedList<Note>> p : m) {
+                        if (p.first == lastEdit.time % score.getMeasureLength()
+                                       - (lastEdit.time / score
+                          .getMeasureLength()) * score.getMeasureLength())
+                            if (p.second.getFirst().getNoteType()
+                                == Note.NoteType.REST) {
+                                drawNote(rl, new XYCoord(
+                                           (lastEdit.time
+                                            % score.getMeasureLength()),
+                                           (0)), n,
+                                         score.getTrack(lastEdit.staff)
+                                              .getKey(), score
+                                           .getMeasure(lastEdit.staff,
+                                                       (lastEdit.time / score
+                                                         .getMeasureLength())));
+                                break;
+                            }
+                    }
                     break;
                 case REMOVE:
                     score.addNote(lastEdit.staff, lastEdit.time, lastEdit.note);
@@ -2027,9 +2046,9 @@ public class MusicSheet extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void paneClosed(){
+    public void paneClosed() {
         //if(!slidePane.isOpen()){
-            slidePane.setCoveredFadeColor(5);
+        slidePane.setCoveredFadeColor(5);
         //}
     }
 }

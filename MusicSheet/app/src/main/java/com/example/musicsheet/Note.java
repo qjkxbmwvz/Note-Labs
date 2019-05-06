@@ -59,12 +59,13 @@ class Note {
     }
 
     void hide() {
-        if (imageView != null)
+        if (imageView != null && imageView.getParent() != null)
             ((RelativeLayout)imageView.getParent()).removeView(imageView);
-        if (accidentalImageView != null)
+        if (accidentalImageView != null
+            && accidentalImageView.getParent() != null)
             ((RelativeLayout)accidentalImageView.getParent())
               .removeView(accidentalImageView);
-        if (dotImageView != null)
+        if (dotImageView != null && dotImageView.getParent() != null)
             ((RelativeLayout)dotImageView.getParent()).removeView(dotImageView);
     }
 

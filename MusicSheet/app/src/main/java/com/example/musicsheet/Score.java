@@ -196,8 +196,6 @@ class Score {
         Edit ret = new Edit(tracks.get(track).getNote(timePosition, pitch),
                             timePosition, track, Edit.EditType.REMOVE);
 
-        //ret.note.hide();
-
         tracks.get(track).removeNote(timePosition, ret.note);
 
         return ret;
