@@ -67,6 +67,8 @@ public class MusicSheet extends AppCompatActivity {
     private NoteDur selectedNoteDur;
     private Note tempNote;
     Note selectedNote;
+    int selectedNoteTime;
+    int selectedNoteStaff;
     boolean alreadySelected;
     boolean changed;
     private Stack<Edit> editHistory;
@@ -304,16 +306,28 @@ public class MusicSheet extends AppCompatActivity {
                                               verticalOffset);
 
 
-
-                        Note tempSelected = score.getNote(measure.staff, imageX,
+                        Note tempSelected = score.getNote(measure.staff,
+                                                          (measure.number
+                                                           * score
+                                                             .getMeasureLength()
+                                                           + imageX),
                                                           posToPitch(imageY));
 
-                        if (!alreadySelected)
+                        if (!alreadySelected) {
                             selectedNote = tempSelected;
-                        else if (tempSelected != selectedNote) {
+                            selectedNoteTime = (
+                              measure.number * score.getMeasureLength()
+                              + imageX);
+                            selectedNoteStaff = measure.staff;
+                        } else if (tempSelected != selectedNote) {
                             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                                selectedNote.blacken();
+                                if (selectedNote != null)
+                                    selectedNote.blacken();
                                 selectedNote = tempSelected;
+                                selectedNoteTime = (
+                                  measure.number * score.getMeasureLength()
+                                  + imageX);
+                                selectedNoteStaff = measure.staff;
                             }
                         }
 
@@ -511,9 +525,11 @@ public class MusicSheet extends AppCompatActivity {
                                                             .getTransposition()),
                                                    (byte)127);
 
-                                    if (tempNote != null)
+                                    if (tempNote != null) {
                                         tempNote.hide();
-                                    break;
+                                        tempNote = null;
+                                    }
+                                    return false;
                             }
                             lastTouchPointX = imageX;
                         } else { // We're in note selection land now!
@@ -604,6 +620,8 @@ public class MusicSheet extends AppCompatActivity {
                                     alreadySelected = true;
                                     changed = false;
                                     selectedNote.bluify();
+                                    accidental = selectedNote.getAccidental();
+                                    setAccidentalButtonImage();
                                 }
                             }
                         }
@@ -1189,6 +1207,7 @@ public class MusicSheet extends AppCompatActivity {
 
         switch (n.getNoteType()) {
             case MELODIC:
+            case PERCUSSIVE:
                 noteParams.leftMargin = (int)(xActual * adjustment);
                 noteParams.topMargin = (int)(yActual * adjustment);
                 noteParams.width = (int)(100 * adjustment);
@@ -1197,6 +1216,7 @@ public class MusicSheet extends AppCompatActivity {
                 switch (dur) {
                     case WHOLE:
                         noteIv.setImageResource(R.drawable.whole_note);
+                        noteIv.setTag(1);
                         noteParams.leftMargin += (int)(20 * adjustment);
                         noteParams.topMargin += (int)(67 * adjustment);
                         noteParams.height = (int)(40 * adjustment);
@@ -1204,21 +1224,26 @@ public class MusicSheet extends AppCompatActivity {
                         break;
                     case HALF:
                         noteIv.setImageResource(R.drawable.half_note);
+                        noteIv.setTag(2);
                         break;
                     case QUARTER:
                         noteIv.setImageResource(R.drawable.quarter_note);
+                        noteIv.setTag(3);
                         break;
                     case EIGHTH: {
                         for (int i = 0; i < measure.size(); ++i) {
                             if (measure.get(i).first == xy.x) {
                                 if (
                                   measure.get(i).second.getFirst().getNoteType()
-                                  != Note.NoteType.REST)
+                                  != Note.NoteType.REST) {
                                     noteIv.setImageResource(
                                       R.drawable.quarter_note);
-                                else
+                                    noteIv.setTag(3);
+                                } else {
                                     noteIv
                                       .setImageResource(R.drawable.eighth_note);
+                                    noteIv.setTag(4);
+                                }
                                 break;
                             }
                         }
@@ -1615,13 +1640,8 @@ public class MusicSheet extends AppCompatActivity {
         }
     }
 
-    public void cycleAccidental(View view) {
+    public void setAccidentalButtonImage() {
         ImageView image = findViewById(R.id.accident_button);
-
-        ++accidental;
-
-        if (accidental == 2)
-            accidental = -1;
 
         switch (accidental) {
             case 0:
@@ -1633,6 +1653,27 @@ public class MusicSheet extends AppCompatActivity {
             case -1:
                 image.setImageResource(R.drawable.flat);
         }
+    }
+
+    public void cycleAccidental(View view) {
+        ++accidental;
+
+        if (accidental == 2)
+            accidental = -1;
+
+        if (selectedNote != null) {
+            selectedNote.setAccidental(accidental);
+            drawNote((RelativeLayout)selectedNote.getImageView().getParent(),
+                     new XYCoord(
+                       (selectedNoteTime % score.getMeasureLength()),
+                       pitchToPos.get(selectedNote.getPitch())), selectedNote,
+                     score.getTrack(selectedNoteStaff).getKey(), score
+                       .getMeasure(selectedNoteStaff,
+                                   (selectedNoteTime / score
+                                     .getMeasureLength())));
+        }
+
+        setAccidentalButtonImage();
     }
 
     /*public void cycleButtons(View view) {

@@ -91,7 +91,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"/>
 
         <LinearLayout
             android:id="@+id/SideToolbar"
@@ -108,7 +108,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/rest_toggle"
                 android:textOff=""
-                android:textOn="" />
+                android:textOn=""/>
 
             <ToggleButton
                 android:id="@+id/dot_button"
@@ -118,7 +118,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/dot_toggle"
                 android:textOff=""
-                android:textOn="" />
+                android:textOn=""/>
 
             <ImageButton
                 android:id="@+id/accident_button"
@@ -131,7 +131,7 @@
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:background="@color/white"
-                app:srcCompat="@drawable/natural" />
+                app:srcCompat="@drawable/natural"/>
 
 
             <ToggleButton
@@ -142,7 +142,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/edit_toggle"
                 android:textOff=""
-                android:textOn="" />
+                android:textOn=""/>
 
             <ImageButton
                 android:id="@+id/add_stuff_button"
@@ -153,7 +153,7 @@
                 android:onClick="addStuff"
                 android:scaleType="fitCenter"
                 android:background="@color/white"
-                app:srcCompat="@drawable/addition" />
+                app:srcCompat="@drawable/addition"/>
 
             <ImageButton
                 android:id="@+id/save_button"
@@ -165,10 +165,7 @@
                 android:onClick="save"
                 android:scaleType="fitCenter"
                 android:background="@color/white"
-                app:srcCompat="@drawable/save_icon" />
-
+                app:srcCompat="@drawable/save_icon"/>
         </LinearLayout>
-
     </android.support.v4.widget.SlidingPaneLayout>
-
 </FrameLayout>

@@ -1,7 +1,5 @@
 package com.example.musicsheet;
 
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -73,18 +71,15 @@ class Note {
     //TODO: make it use blue images once those exist.
     void bluify() {
         if (imageView != null) {
-            switch (duration) {
-                case 288:
-                case 192:
+            Object tag = imageView.getTag();
+            switch ((int)tag) {
+                case 1:
                     break;
-                case 144:
-                case  96:
+                case 2:
                     break;
-                case 72:
-                case 48:
+                case 3:
                     break;
-                case 36:
-                case 24:
+                case 4:
                     break;
             }
         }
@@ -92,9 +87,9 @@ class Note {
 
     void blacken() {
         if (imageView != null) {
-            switch (duration) {
-                case 288:
-                case 192:
+            Object tag = imageView.getTag();
+            switch ((int)tag) {
+                case 1:
                     switch (noteType) {
                         case MELODIC:
                         case PERCUSSIVE:
@@ -105,8 +100,7 @@ class Note {
                             break;
                     }
                     break;
-                case 144:
-                case  96:
+                case 2:
                     switch (noteType) {
                         case MELODIC:
                         case PERCUSSIVE:
@@ -117,8 +111,7 @@ class Note {
                             break;
                     }
                     break;
-                case 72:
-                case 48:
+                case 3:
                     switch (noteType) {
                         case MELODIC:
                         case PERCUSSIVE:
@@ -129,8 +122,7 @@ class Note {
                             break;
                     }
                     break;
-                case 36:
-                case 24:
+                case 4:
                     switch (noteType) {
                         case MELODIC:
                         case PERCUSSIVE:
