@@ -1,5 +1,4 @@
 <resources>
-    <color name="light_gray">#939393</color>
     <string name="app_name">NoteLabs</string>
     <string name="title_activity_projects_page">ProjectsPage</string>
     <string name="title_activity_music_sheet">MusicSheet</string>

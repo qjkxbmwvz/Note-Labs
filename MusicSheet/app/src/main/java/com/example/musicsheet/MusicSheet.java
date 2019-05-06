@@ -1324,7 +1324,7 @@ public class MusicSheet extends AppCompatActivity {
         if (denImage == null) {
             denImage = new ImageView(getApplicationContext());
             denParams = new RelativeLayout.LayoutParams(
-              (int)(800 * adjustment), (int)(800 * adjustment));
+              (int)(2000 * adjustment), (int)(2000 * adjustment));
             track.setDenImage(denImage);
             track.getDenImage().setLayoutParams(denParams);
         } else
@@ -1333,10 +1333,10 @@ public class MusicSheet extends AppCompatActivity {
         rl.addView(numImage);
         rl.addView(denImage);
 
-        numParams.leftMargin = (int)(400 * adjustment);
-        denParams.leftMargin = (int)(400 * adjustment);
-        numParams.topMargin = (int)(50 * adjustment);
-        denParams.topMargin = (int)(100 * adjustment);
+        numParams.leftMargin = (int)(300 * adjustment);
+        denParams.leftMargin = (int)(300 * adjustment);
+        numParams.topMargin = (int)(-70 * adjustment);
+        denParams.topMargin = (int)(70 * adjustment);
 
         numImage.setImageResource(timeSignatureResource(timeSignature.num));
         denImage.setImageResource(timeSignatureResource(timeSignature.den));
