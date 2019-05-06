@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
@@ -97,6 +98,7 @@ public class MusicSheet extends AppCompatActivity {
 
     private ScrollView scrollView;
     private TableLayout tableLayout;
+    private SlidingPaneLayout slidePane;
     Fraction timeSignature;
 
     @Override
@@ -1983,5 +1985,11 @@ public class MusicSheet extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
 
         alertDialog.show();
+    }
+
+    public void paneClosed(){
+        //if(!slidePane.isOpen()){
+            slidePane.setCoveredFadeColor(5);
+        //}
     }
 }
