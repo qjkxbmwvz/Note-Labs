@@ -75,12 +75,16 @@ class Note {
             Object tag = imageView.getTag();
             switch ((int)tag) {
                 case 1:
+                    imageView.setImageResource(R.drawable.blue_whole);
                     break;
                 case 2:
+                    imageView.setImageResource(R.drawable.blue_half);
                     break;
                 case 3:
+                    imageView.setImageResource(R.drawable.blue_quarter);
                     break;
                 case 4:
+                    imageView.setImageResource(R.drawable.blue_eighth);
                     break;
             }
         }
