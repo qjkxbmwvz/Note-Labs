@@ -345,6 +345,8 @@ public class MusicSheet extends AppCompatActivity {
                                + imageX));
                             int duration;
 
+                            alreadySelected = false;
+
                             switch (selectedNoteDur) {
                                 case WHOLE:
                                     duration = 192;
@@ -587,6 +589,7 @@ public class MusicSheet extends AppCompatActivity {
                                                        .getMeasure(
                                                          measure.staff,
                                                          measure.number));
+                                            selectedNote.bluify();
                                             changed = true;
                                         }
                                         break;
@@ -809,7 +812,6 @@ public class MusicSheet extends AppCompatActivity {
                                       int oldMeasureCount = score
                                         .getMeasureCount();
                                       score.setTimeSignature(timeSignature);
-                                      //TODO: redraw entire score
                                       redrawScore(oldMeasureCount);
                                   }
                               });
@@ -849,8 +851,10 @@ public class MusicSheet extends AppCompatActivity {
                                         Objects.requireNonNull(
                                           measures.get(imageView)).first,
                                         score.getTrack(measure.staff));
+                                      int oldMeasureCount = score
+                                        .getMeasureCount();
                                       score.setTimeSignature(timeSignature);
-                                      //TODO: redraw entire score
+                                      redrawScore(oldMeasureCount);
                                   }
                               });
 
@@ -1691,6 +1695,7 @@ public class MusicSheet extends AppCompatActivity {
                        .getMeasure(selectedNoteStaff,
                                    (selectedNoteTime / score
                                      .getMeasureLength())));
+            selectedNote.bluify();
         }
 
         setAccidentalButtonImage();

@@ -69,7 +69,6 @@ class Note {
             ((RelativeLayout)dotImageView.getParent()).removeView(dotImageView);
     }
 
-    //TODO: make it use blue images once those exist.
     void bluify() {
         if (imageView != null) {
             Object tag = imageView.getTag();
