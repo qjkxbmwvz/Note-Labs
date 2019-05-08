@@ -161,6 +161,20 @@ class Score {
     LinkedList<Note> addNote(int track, int timePosition, Note note) {
         tracks.get(track).addNote(timePosition, note);
 
+        Iterator<Integer> it = tracks.get(track).getTimeIterator();
+
+        while (it.hasNext()) {
+            int tp = it.next();
+            if (tp > timePosition && tp < timePosition + note.getDuration()) {
+                if (tracks.get(track).checkNote(tp).getFirst()
+                          .getNoteType() == Note.NoteType.REST) {
+                    tracks.get(track).checkNote(tp).getFirst().hide();
+                    it.remove();
+                } else
+                    break;
+            }
+        }
+
         timePosition += note.getDuration();
 
         LinkedList<Note> ret = new LinkedList<>();
@@ -222,6 +236,25 @@ class Score {
                          .getFirst().getDuration();
         else
             return 0;
+    }
+
+    int availableDuration(int track, int timePosition) {
+        Iterator<Integer> it = tracks.get(track).getTimeIterator();
+        boolean open = true;
+        int openDur = 0;
+
+        while (open && it.hasNext()) {
+            int tp = it.next();
+            if (tp >= timePosition) {
+                if (tracks.get(track).checkNote(timePosition).getFirst()
+                          .getNoteType() != Note.NoteType.REST) {
+                    open = false;
+                    openDur = tp - timePosition;
+                }
+            }
+        }
+
+        return openDur;
     }
 
     ArrayList<Pair<Integer, LinkedList<Note>>> getMeasure(int track,
