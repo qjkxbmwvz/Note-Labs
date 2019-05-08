@@ -1457,7 +1457,7 @@ public class MusicSheet extends AppCompatActivity {
         if (numImage == null) {
             numImage = new ImageView(getApplicationContext());
             numParams = new RelativeLayout.LayoutParams(
-              (int)(500000000 * adjustment), (int)(500000000 * adjustment));
+              (int)(82 * adjustment), (int)(82 * adjustment));
             track.setNumImage(numImage);
             track.getNumImage().setLayoutParams(numParams);
         } else
@@ -1465,7 +1465,7 @@ public class MusicSheet extends AppCompatActivity {
         if (denImage == null) {
             denImage = new ImageView(getApplicationContext());
             denParams = new RelativeLayout.LayoutParams(
-              (int)(500000000 * adjustment), (int)(500000000 * adjustment));
+              (int)(82 * adjustment), (int)(82 * adjustment));
             track.setDenImage(denImage);
             track.getDenImage().setLayoutParams(denParams);
         } else
@@ -1476,27 +1476,45 @@ public class MusicSheet extends AppCompatActivity {
 
         numParams.leftMargin = (int)(450 * adjustment);
         denParams.leftMargin = (int)(450 * adjustment);
-        numParams.topMargin = (int)(-70 * adjustment);
-        denParams.topMargin = (int)(70 * adjustment);
+        numParams.topMargin = (int)(81 * adjustment);
+        denParams.topMargin = (int)(165 * adjustment);
 
-        numImage.setImageResource(timeSignatureResource(timeSignature.num));
-        denImage.setImageResource(timeSignatureResource(timeSignature.den));
+        numImage.setImageResource(timeSignatureResource(timeSignature.num, numParams, denParams));
+        denImage.setImageResource(timeSignatureResource(timeSignature.den, numParams, denParams));
 
     }
 
-    int timeSignatureResource(int i) {
-        switch (i) {
+    int timeSignatureResource(int i, RelativeLayout.LayoutParams numParams, RelativeLayout.LayoutParams denParams)
+    {
+        double adjustment =
+                getApplicationContext().getResources()
+                        .getDisplayMetrics().density / 2.625;
+
+        switch (i)
+        {
             case 1:
+                numParams.width = (int)(89 * adjustment);
+                numParams.height = (int)(89 * adjustment);
+                denParams.width = (int)(89 * adjustment);
+                denParams.height = (int)(89 * adjustment);
+                numParams.topMargin -= 2;
+                denParams.topMargin -= 2;
                 return R.drawable.time_signature_1;
             case 2:
+                numParams.width = (int)(80 * adjustment);
+                numParams.height = (int)(80 * adjustment);
+                denParams.width = (int)(80 * adjustment);
+                denParams.height = (int)(80 * adjustment);
                 return R.drawable.time_signature_2;
             case 3:
+                numParams.topMargin += 1;
                 return R.drawable.time_signature_3;
             case 4:
                 return R.drawable.time_signature_4;
             case 5:
                 return R.drawable.time_signature_5;
             case 6:
+                numParams.topMargin += 1;
                 return R.drawable.time_signature_6;
             case 7:
                 return R.drawable.time_signature_7;
