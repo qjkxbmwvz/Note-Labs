@@ -344,10 +344,6 @@ public class MusicSheet extends AppCompatActivity {
                         byte p = posToPitch(imageY);
 
                         if (selectedNote == null) {
-                            int gottenDur = score.durationAtTime(
-                              measure.staff,
-                              (measure.number * score.getMeasureLength()
-                               + imageX));
                             int duration;
 
                             alreadySelected = false;
@@ -368,6 +364,19 @@ public class MusicSheet extends AppCompatActivity {
 
                             if (dotting)
                                 duration += duration >> 1;
+
+                            int availableDur = score
+                              .availableDuration(measure.staff,
+                                                 (measure.number * score
+                                                   .getMeasureLength()
+                                                  + imageX));
+                            int gottenDur = availableDur == 0 ? score
+                              .durationAtTime(
+                                measure.staff,
+                                (measure.number * score.getMeasureLength()
+                                 + imageX)) : availableDur > duration ? duration
+                                                                      :
+                                              availableDur;
 
                             switch (event.getAction()) {
                                 case MotionEvent.ACTION_DOWN: {
@@ -1436,7 +1445,7 @@ public class MusicSheet extends AppCompatActivity {
 
             int height = sharp ? heights[i] : heights[6 - i];
 
-            if (!sharp && i == 4)
+            if (!sharp && (i == 4 || i == 6))
                 height += 147;
 
             if (sharp)
