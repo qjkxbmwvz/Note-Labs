@@ -207,6 +207,7 @@ public class MusicSheet extends AppCompatActivity {
 
             tableLayout.addView(tableRow, (staffNum + i * (staffNum + 1)));
         }
+        scrollView.fullScroll(ScrollView.FOCUS_UP);
     }
 
     private void drawMeasure(int staffNum, int count,
@@ -326,6 +327,10 @@ public class MusicSheet extends AppCompatActivity {
                                 if (selectedNote != null)
                                     selectedNote.blacken();
                                 selectedNote = tempSelected;
+                                if (selectedNote == null)
+                                    alreadySelected = false;
+                                else
+                                    lastTouchPointX = imageX;
                                 selectedNoteTime = (
                                   measure.number * score.getMeasureLength()
                                   + imageX);
@@ -537,6 +542,7 @@ public class MusicSheet extends AppCompatActivity {
                             }
                             lastTouchPointX = imageX;
                         } else { // We're in note selection land now!
+                            selectedNote.bluify();
                             if (alreadySelected) {
                                 switch (event.getAction()) {
                                     case MotionEvent.ACTION_MOVE:
@@ -1430,6 +1436,9 @@ public class MusicSheet extends AppCompatActivity {
 
             int height = sharp ? heights[i] : heights[6 - i];
 
+            if (!sharp && i == 4)
+                height += 147;
+
             if (sharp)
                 height -= 50;
             else
@@ -1635,9 +1644,7 @@ public class MusicSheet extends AppCompatActivity {
                         .getMeasureLength()));
 
                     for (Pair<Integer, LinkedList<Note>> p : m) {
-                        if (p.first == lastEdit.time % score.getMeasureLength()
-                                       - (lastEdit.time / score
-                          .getMeasureLength()) * score.getMeasureLength())
+                        if (p.first == lastEdit.time % score.getMeasureLength())
                             if (p.second.getFirst().getNoteType()
                                 == Note.NoteType.REST) {
                                 drawNote(rl, new XYCoord(
@@ -1976,6 +1983,8 @@ public class MusicSheet extends AppCompatActivity {
                                              tableRow);
                               }
                           }
+                          if (toBeAdded > 0)
+                              scrollView.fullScroll(ScrollView.FOCUS_UP);
 
                           dialogInterface.dismiss();
                       }
