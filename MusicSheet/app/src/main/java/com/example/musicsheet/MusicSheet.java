@@ -19,6 +19,7 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -108,6 +109,9 @@ public class MusicSheet extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_music_sheet);
+
+        //Code for SlidePanes
+        SidePane();
 
         Context context = getApplicationContext();
         tableLayout = new TableLayout(context);
@@ -2078,9 +2082,17 @@ public class MusicSheet extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void paneClosed() {
-        //if(!slidePane.isOpen()){
-        slidePane.setCoveredFadeColor(5);
-        //}
+    public void SidePane() {
+        slidePane = findViewById(R.id.SlidingSideBar);
+        ViewGroup.LayoutParams params = slidePane.getLayoutParams();
+
+        if(slidePane.isOpen()){
+            //params.height = 175;
+        }
+        else{
+            params.height = 200;
+        }
+    // Changes the height and width to the specified *pixels*
+        slidePane.setLayoutParams(params);
     }
 }
