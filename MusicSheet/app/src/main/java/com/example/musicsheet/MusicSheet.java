@@ -1626,9 +1626,7 @@ public class MusicSheet extends AppCompatActivity {
                         .getMeasureLength()));
 
                     for (Pair<Integer, LinkedList<Note>> p : m) {
-                        if (p.first == lastEdit.time % score.getMeasureLength()
-                                       - (lastEdit.time / score
-                          .getMeasureLength()) * score.getMeasureLength())
+                        if (p.first == lastEdit.time % score.getMeasureLength())
                             if (p.second.getFirst().getNoteType()
                                 == Note.NoteType.REST) {
                                 drawNote(rl, new XYCoord(
