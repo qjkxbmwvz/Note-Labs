@@ -20,11 +20,10 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
     </ScrollView>
 
     <LinearLayout
-        android:id="@+id/MainBar"
+        android:id="@+id/main_bar"
         android:layout_width="412dp"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -65,10 +64,10 @@
             android:background="@color/white"
             android:contentDescription="@string/todo"
             android:onClick="cycleNoteType"
-            android:paddingBottom="20dp"
             android:paddingLeft="20dp"
-            android:paddingRight="20dp"
             android:paddingTop="20dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="20dp"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/quarter_note" />
 
@@ -86,12 +85,12 @@
 
 
     <android.support.v4.widget.SlidingPaneLayout
-        android:id="@+id/SlidingSideBar"
+        android:id="@+id/sliding_sidebar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="100dp"
         android:layout_marginStart="250dp"
         android:layout_marginTop="100dp"
+        android:layout_marginBottom="100dp"
         android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -120,7 +119,7 @@
                 app:srcCompat="@drawable/tab" />
 
             <LinearLayout
-                android:id="@+id/SideToolbar"
+                android:id="@+id/side_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -156,8 +155,8 @@
                     android:background="@color/white"
                     android:contentDescription="@string/todo"
                     android:onClick="cycleAccidental"
-                    android:paddingBottom="5dp"
                     android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/natural" />
 
@@ -194,10 +193,7 @@
                     android:onClick="save"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/save_icon" />
-
             </LinearLayout>
-
         </LinearLayout>
-
     </android.support.v4.widget.SlidingPaneLayout>
 </android.support.constraint.ConstraintLayout>

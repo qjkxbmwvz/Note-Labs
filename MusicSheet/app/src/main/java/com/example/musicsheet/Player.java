@@ -15,9 +15,11 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
     private TreeMap<Integer, TimePosition> times;
     private int tempo;
     private int startTime;
+    private int endTime;
     private byte[] instruments;
     boolean running;
     private MusicSheet musicSheet;
+    private int oldCoord;
 
     Player(MusicSheet musicSheet) {
         midiDriver = new MidiDriver();
@@ -65,18 +67,23 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
                                                         .getTransposition()));
                             Objects.requireNonNull(
                               times.get(t + n.getDuration())).addNote(ne2);
+                            endTime = t + n.getDuration();
                             break;
                         case REST:
+                            endTime += n.getDuration();
                             break;
                     }
                 }
             }
         }
         setAllInstruments();
+
+        oldCoord = musicSheet.getScrollCoord();
     }
 
     @Override
     public void run() {
+        int scrollRange = musicSheet.getScrollRange();
         running = true;
 
         Iterator<TimePosition> tpIt = times.values().iterator();
@@ -103,12 +110,27 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
             }
             Iterator<NoteEvent> neIt = tp.getNoteEventIterator();
 
-            while (neIt.hasNext())
-                neIt.next().play();
+            musicSheet.scrollToCoord(time * scrollRange / endTime);
+
+            while (neIt.hasNext()) {
+                NoteEvent ne = neIt.next();
+
+                ne.play();
+                switch (ne.getEventType()) {
+                    case START:
+                        musicSheet.bluifyNote(ne.getNote());
+                        break;
+                    case STOP:
+                        musicSheet.blackenNote(ne.getNote());
+                        break;
+                }
+            }
         }
         running = false;
         startTime = 0;
         musicSheet.resetPlayButton();
+
+        musicSheet.scrollToCoord(oldCoord);
     }
 
     @Override

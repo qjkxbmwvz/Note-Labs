@@ -111,7 +111,7 @@ public class MusicSheet extends AppCompatActivity {
         setContentView(R.layout.activity_music_sheet);
 
         //Code for SlidePanes
-        SidePane();
+        sidePane();
 
         Context context = getApplicationContext();
         tableLayout = new TableLayout(context);
@@ -1501,19 +1501,20 @@ public class MusicSheet extends AppCompatActivity {
         numParams.topMargin = (int)(81 * adjustment);
         denParams.topMargin = (int)(165 * adjustment);
 
-        numImage.setImageResource(timeSignatureResource(timeSignature.num, numParams, denParams));
-        denImage.setImageResource(timeSignatureResource(timeSignature.den, numParams, denParams));
+        numImage.setImageResource(
+          timeSignatureResource(timeSignature.num, numParams, denParams));
+        denImage.setImageResource(
+          timeSignatureResource(timeSignature.den, numParams, denParams));
 
     }
 
-    int timeSignatureResource(int i, RelativeLayout.LayoutParams numParams, RelativeLayout.LayoutParams denParams)
-    {
+    int timeSignatureResource(int i, RelativeLayout.LayoutParams numParams,
+                              RelativeLayout.LayoutParams denParams) {
         double adjustment =
-                getApplicationContext().getResources()
-                        .getDisplayMetrics().density / 2.625;
+          getApplicationContext().getResources()
+                                 .getDisplayMetrics().density / 2.625;
 
-        switch (i)
-        {
+        switch (i) {
             case 1:
                 numParams.width = (int)(89 * adjustment);
                 numParams.height = (int)(89 * adjustment);
@@ -2091,17 +2092,44 @@ public class MusicSheet extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void SidePane() {
-        slidePane = findViewById(R.id.SlidingSideBar);
+    //TODO: factor in adjustment, like everywhere else in the app.
+    public void sidePane() {
+        slidePane = findViewById(R.id.sliding_sidebar);
         ViewGroup.LayoutParams params = slidePane.getLayoutParams();
 
-        if(slidePane.isOpen()){
+        if (slidePane.isOpen()) {
             //params.height = 175;
-        }
-        else{
+        } else {
             params.height = 200;
         }
-    // Changes the height and width to the specified *pixels*
+        // Changes the height and width to the specified *pixels*
         slidePane.setLayoutParams(params);
     }
+
+    void bluifyNote(Note note) { note.bluify(); }
+
+    void blackenNote(Note note) {
+        if (note != selectedNote)
+            note.blacken();
+    }
+
+    int getScrollRange() {
+        int scrollRange = 0;
+
+        if (scrollView.getChildCount() > 0) {
+            View child = scrollView.getChildAt(0);
+
+            scrollRange = Math.max(0,
+                                   child.getHeight() - (scrollView.getHeight()
+                                                        - scrollView
+                                                          .getPaddingBottom()
+                                                        - scrollView
+                                                          .getPaddingTop()));
+        }
+        return scrollRange;
+    }
+
+    int getScrollCoord() { return scrollView.getScrollY(); }
+
+    void scrollToCoord(int y) { scrollView.smoothScrollTo(0, y); }
 }

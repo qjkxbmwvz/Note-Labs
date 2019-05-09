@@ -8,15 +8,13 @@ class NoteEvent {
     private MidiDriver midiDriver;
     private EventType eventType;
     private byte channel;
-    private byte pitch;
-    private byte velocity;
+    private Note note;
 
     NoteEvent(MidiDriver midiDriver, EventType eventType, byte channel, Note note) {
         this.midiDriver = midiDriver;
         this.eventType  = eventType;
         this.channel    = channel;
-        this.pitch      = (byte)(note.getPitch() + note.getAccidental());
-        this.velocity   = note.getVelocity();
+        this.note       = note;
     }
 
     void play() {
@@ -34,13 +32,17 @@ class NoteEvent {
         byte[] event = new byte[3];
 
         event[0] = (byte)(command | channel);
-        event[1] = pitch;
-        event[2] = velocity;
+        event[1] = (byte)(note.getPitch() + note.getAccidental());
+        event[2] = note.getVelocity();
 
         midiDriver.write(event);
     }
 
-    byte getPitch() { return pitch; }
+    EventType getEventType() { return eventType; }
 
-    void setPitch(byte pitch) { this.pitch = pitch; }
+    byte getPitch() { return note.getPitch(); }
+
+    void setPitch(byte pitch) { note.setPitch(pitch); }
+
+    Note getNote() { return note; }
 }
