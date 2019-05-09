@@ -1612,7 +1612,7 @@ public class MusicSheet extends AppCompatActivity {
         //redundant
         if (!player.running) {
             score.play();
-            image.setImageResource(R.drawable.ic_media_pause);
+            image.setImageResource(R.drawable.pause);
         } else {
             score.pause();
             image.setImageResource(R.drawable.play);
