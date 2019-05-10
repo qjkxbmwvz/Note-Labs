@@ -69,20 +69,21 @@ class Note {
             ((RelativeLayout)dotImageView.getParent()).removeView(dotImageView);
     }
 
+    //TODO: add flipped notes for the odd cases.
     void bluify() {
         if (imageView != null) {
             Object tag = imageView.getTag();
             switch ((int)tag) {
-                case 1:
+                case 0:
                     imageView.setImageResource(R.drawable.blue_whole);
                     break;
                 case 2:
                     imageView.setImageResource(R.drawable.blue_half);
                     break;
-                case 3:
+                case 4:
                     imageView.setImageResource(R.drawable.blue_quarter);
                     break;
-                case 4:
+                case 6:
                     imageView.setImageResource(R.drawable.blue_eighth);
                     break;
             }
@@ -93,49 +94,26 @@ class Note {
         if (imageView != null) {
             Object tag = imageView.getTag();
             switch ((int)tag) {
+                case 0:
+                    imageView.setImageResource(R.drawable.whole_note);
+                    break;
                 case 1:
-                    switch (noteType) {
-                        case MELODIC:
-                        case PERCUSSIVE:
-                            imageView.setImageResource(R.drawable.whole_note);
-                            break;
-                        case REST:
-                            imageView.setImageResource(R.drawable.whole_rest);
-                            break;
-                    }
+                    imageView.setImageResource(R.drawable.flipped_half_note);
                     break;
                 case 2:
-                    switch (noteType) {
-                        case MELODIC:
-                        case PERCUSSIVE:
-                            imageView.setImageResource(R.drawable.half_note);
-                            break;
-                        case REST:
-                            imageView.setImageResource(R.drawable.half_rest);
-                            break;
-                    }
+                    imageView.setImageResource(R.drawable.half_note);
                     break;
                 case 3:
-                    switch (noteType) {
-                        case MELODIC:
-                        case PERCUSSIVE:
-                            imageView.setImageResource(R.drawable.quarter_note);
-                            break;
-                        case REST:
-                            imageView.setImageResource(R.drawable.quarter_rest);
-                            break;
-                    }
+                    imageView.setImageResource(R.drawable.flipped_quarter_note);
                     break;
                 case 4:
-                    switch (noteType) {
-                        case MELODIC:
-                        case PERCUSSIVE:
-                            imageView.setImageResource(R.drawable.eighth_note);
-                            break;
-                        case REST:
-                            imageView.setImageResource(R.drawable.eighth_rest);
-                            break;
-                    }
+                    imageView.setImageResource(R.drawable.quarter_note);
+                    break;
+                case 5:
+                    imageView.setImageResource(R.drawable.flipped_eighth_note);
+                    break;
+                case 6:
+                    imageView.setImageResource(R.drawable.eighth_note);
                     break;
             }
         }

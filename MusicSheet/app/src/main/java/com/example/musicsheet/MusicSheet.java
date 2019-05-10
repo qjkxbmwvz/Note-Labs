@@ -975,8 +975,8 @@ public class MusicSheet extends AppCompatActivity {
         return workingKey;
     }
 
-    // Hard codes values into data structure, mathematical approach produces
-    // wrong values.
+    // Hard codes values into data structure,
+    // mathematical approach produces wrong values.
     private void setUpPitchToPos() {
         pitchToPos = new SparseIntArray();
         pitchToPos.put(83, 19);
@@ -1194,11 +1194,7 @@ public class MusicSheet extends AppCompatActivity {
         //update imageViews bitmap
         iv.setImageBitmap(bitmap);
     }
-
-    // TODO: rotate notes based on height, but make all notes in the
-    // same TimePosition have the same orientation.  Also, draw eighth
-    // notes as quarters unless they're the highest in the given
-    // TimePosition (if rightside-up) or the lowest (if upside-down).
+    
     private void drawNote(RelativeLayout rl, XYCoord xy, Note n, int key,
                           ArrayList<Pair<Integer, LinkedList<Note>>> measure) {
         Pair<NoteDur, Boolean> p = numToDurAndDot(n.getDuration());
@@ -1235,48 +1231,183 @@ public class MusicSheet extends AppCompatActivity {
         switch (n.getNoteType()) {
             case MELODIC:
             case PERCUSSIVE:
-                noteParams.leftMargin = (int)(xActual * adjustment);
-                noteParams.topMargin = (int)(yActual * adjustment);
+                noteParams.leftMargin = (int)((xActual - 10) * adjustment);
+                noteParams.topMargin = (int)((yActual - 4) * adjustment);
                 noteParams.width = (int)(100 * adjustment);
                 noteParams.height = (int)(100 * adjustment);
+
+                byte highest = posToPitch(n.getPitch());
+                byte lowest = highest;
+                double average = n.getPitch();
+                int i;
+
+                for (i = 0; i < measure.size(); ++i) {
+                    if (measure.get(i).first == xy.x) {
+                        double sum = average;
+                        double count = measure.get(i).second.size();
+                        boolean existent = false;
+
+                        for (Note note : measure.get(i).second) {
+                            if (note.getNoteType()
+                                == Note.NoteType.REST) {
+                                --count;
+                                break;
+                            }
+                            if (note.getPitch() > highest)
+                                highest = note.getPitch();
+                            else if (note.getPitch() < lowest)
+                                lowest = note.getPitch();
+                            if (note != n)
+                                sum += note.getPitch();
+                            else
+                                existent = true;
+                        }
+                        if (!existent)
+                            ++count;
+                        average = sum / count;
+                        break;
+                    }
+                }
+                boolean flipped = average >= 71;
+
+                if (flipped && dur != NoteDur.WHOLE) {
+                    noteParams.leftMargin -= (int)(20 * adjustment);
+                    noteParams.topMargin += (int)(76 * adjustment);
+                }
 
                 switch (dur) {
                     case WHOLE:
                         noteIv.setImageResource(R.drawable.whole_note);
-                        noteIv.setTag(1);
+                        noteIv.setTag(0);
                         noteParams.leftMargin += (int)(20 * adjustment);
-                        noteParams.topMargin += (int)(67 * adjustment);
+                        noteParams.topMargin += (int)(68 * adjustment);
                         noteParams.height = (int)(40 * adjustment);
                         noteParams.width = (int)(40 * adjustment);
                         break;
                     case HALF:
-                        noteIv.setImageResource(R.drawable.half_note);
-                        noteIv.setTag(2);
+                        if (flipped) {
+                            noteIv
+                              .setImageResource(
+                                R.drawable.flipped_half_note);
+                            noteIv.setTag(1);
+                        } else {
+                            noteIv
+                              .setImageResource(R.drawable.half_note);
+                            noteIv.setTag(2);
+                        }
+                        if (measure.get(i).first == xy.x) {
+                            for (Note note : measure.get(i).second) {
+                                if (note != n) {
+                                    if (note.getNoteType()
+                                        == Note.NoteType.REST)
+                                        break;
+                                    if (flipped && (int)note.getImageView()
+                                                            .getTag() == 2) {
+                                        note.getImageView().setImageResource(
+                                          R.drawable.flipped_half_note);
+                                        note.getImageView().setTag(1);
+                                    } else if (!flipped && (int)note
+                                      .getImageView().getTag() == 1) {
+                                        note.getImageView().setImageResource(
+                                          R.drawable.half_note);
+                                        note.getImageView().setTag(2);
+                                    }
+                                }
+                            }
+                        }
                         break;
                     case QUARTER:
-                        noteIv.setImageResource(R.drawable.quarter_note);
-                        noteIv.setTag(3);
+                        if (flipped) {
+                            noteIv.setImageResource(
+                              R.drawable.flipped_quarter_note);
+                            noteIv.setTag(3);
+                        } else {
+                            noteIv.setImageResource(R.drawable.quarter_note);
+                            noteIv.setTag(4);
+                        }
+                        if (measure.get(i).first == xy.x) {
+                            for (Note note : measure.get(i).second) {
+                                if (note != n) {
+                                    if (note.getNoteType()
+                                        == Note.NoteType.REST)
+                                        break;
+                                    if (flipped && (int)note.getImageView()
+                                                            .getTag() == 4) {
+                                        note.getImageView().setImageResource(
+                                          R.drawable.flipped_quarter_note);
+                                        note.getImageView().setTag(3);
+                                    } else if (!flipped && (int)note
+                                      .getImageView().getTag() == 3) {
+                                        note.getImageView().setImageResource(
+                                          R.drawable.quarter_note);
+                                        note.getImageView().setTag(4);
+                                    }
+                                }
+                            }
+                        }
                         break;
                     case EIGHTH: {
-                        for (int i = 0; i < measure.size(); ++i) {
-                            if (measure.get(i).first == xy.x) {
-                                if (
-                                  measure.get(i).second.getFirst().getNoteType()
-                                  != Note.NoteType.REST) {
-                                    noteIv.setImageResource(
-                                      R.drawable.quarter_note);
-                                    noteIv.setTag(3);
-                                } else {
-                                    noteIv
-                                      .setImageResource(R.drawable.eighth_note);
-                                    noteIv.setTag(4);
+                        if (flipped) {
+                            if (n.getPitch() == lowest) {
+                                noteIv.setImageResource(
+                                  R.drawable.flipped_eighth_note);
+                                noteIv.setTag(5);
+                            } else {
+                                noteIv.setImageResource(
+                                  R.drawable.flipped_quarter_note);
+                                noteIv.setTag(3);
+                            }
+                        } else {
+                            if (n.getPitch() == highest) {
+                                noteIv.setImageResource(
+                                  R.drawable.eighth_note);
+                                noteIv.setTag(6);
+                            } else {
+                                noteIv.setImageResource(
+                                  R.drawable.quarter_note);
+                                noteIv.setTag(4);
+                            }
+                        }
+                        if (measure.get(i).first == xy.x) {
+                            for (Note note : measure.get(i).second) {
+                                if (note != n) {
+                                    if (note.getNoteType()
+                                        == Note.NoteType.REST)
+                                        break;
+                                    if (flipped && (int)note
+                                      .getImageView().getTag() == 6) {
+                                        if (note.getPitch() == lowest) {
+                                            note.getImageView()
+                                                .setImageResource(
+                                                  R.drawable
+                                                    .flipped_eighth_note);
+                                            note.getImageView().setTag(5);
+                                        } else {
+                                            note.getImageView()
+                                                .setImageResource(
+                                                  R.drawable
+                                                    .flipped_quarter_note);
+                                            note.getImageView().setTag(3);
+                                        }
+                                    } else if (!flipped && (int)note
+                                      .getImageView().getTag() == 5) {
+                                        if (note.getPitch() == highest) {
+                                            note.getImageView()
+                                                .setImageResource(
+                                                  R.drawable.eighth_note);
+                                            note.getImageView().setTag(6);
+                                        } else {
+                                            note.getImageView()
+                                                .setImageResource(
+                                                  R.drawable.quarter_note);
+                                            note.getImageView().setTag(4);
+                                        }
+                                    }
                                 }
-                                break;
                             }
                         }
                     }
                 }
-
 
                 if (n.getAccidental() != 0) {
                     accidentalImage = n.getAccidentalImageView();
@@ -2129,7 +2260,7 @@ public class MusicSheet extends AppCompatActivity {
         return scrollRange;
     }
 
-    int getScrollCoord() { return scrollView.getScrollY(); }
+    int getScrollCoord()      { return scrollView.getScrollY(); }
 
     void scrollToCoord(int y) { scrollView.smoothScrollTo(0, y); }
 }
