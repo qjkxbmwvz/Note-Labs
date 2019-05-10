@@ -75,13 +75,11 @@ class Track {
 
     void removeNote(int time, Note note) {
         if (notes.containsKey(time)) {
-            if (Objects.requireNonNull(notes.get(time)).size() == 1) {
-                Objects.requireNonNull(notes.get(time)).getFirst()
-                       .setNoteType(Note.NoteType.REST);
-                Objects.requireNonNull(notes.get(time)).getFirst()
-                       .setPitch((byte)0);
-            } else
-                removeNoteHardcore(time, note);
+            if (Objects.requireNonNull(notes.get(time)).size() == 1)
+                Objects.requireNonNull(notes.get(time))
+                       .add(new Note(Note.NoteType.REST, note.getDuration(),
+                                     (byte)0, (byte)0, (byte)0));
+            removeNoteHardcore(time, note);
         }
     }
 

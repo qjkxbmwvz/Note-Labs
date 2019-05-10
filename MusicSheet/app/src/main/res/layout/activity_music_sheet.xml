@@ -151,7 +151,7 @@
                     android:id="@+id/accident_button"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight=".95"
+                    android:layout_weight="1"
                     android:background="@color/white"
                     android:contentDescription="@string/todo"
                     android:onClick="cycleAccidental"
@@ -159,7 +159,6 @@
                     android:paddingBottom="5dp"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/natural" />
-
 
                 <ToggleButton
                     android:id="@+id/edit_button"
@@ -169,6 +168,16 @@
                     android:layout_weight="1"
                     android:background="@drawable/edit_toggle"
                     android:textOff=""
+                    android:textOn="" />
+
+                <ImageButton
+                    android:id="@+id/delete_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4.5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/erase"
+                    android:onClick="deleteNote"
                     android:textOn="" />
 
                 <ImageButton

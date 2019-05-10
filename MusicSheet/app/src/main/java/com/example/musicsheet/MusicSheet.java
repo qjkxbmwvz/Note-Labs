@@ -156,6 +156,7 @@ public class MusicSheet extends AppCompatActivity {
 
         tempNote = null;
         selectedNote = null;
+        findViewById(R.id.delete_button).setVisibility(View.GONE);
         alreadySelected = false;
         changed = false;
 
@@ -331,9 +332,11 @@ public class MusicSheet extends AppCompatActivity {
                                 if (selectedNote != null)
                                     selectedNote.blacken();
                                 selectedNote = tempSelected;
-                                if (selectedNote == null)
+                                if (selectedNote == null) {
                                     alreadySelected = false;
-                                else
+                                    findViewById(R.id.delete_button)
+                                      .setVisibility(View.GONE);
+                                } else
                                     lastTouchPointX = imageX;
                                 selectedNoteTime = (
                                   measure.number * score.getMeasureLength()
@@ -556,6 +559,8 @@ public class MusicSheet extends AppCompatActivity {
                             lastTouchPointX = imageX;
                         } else { // We're in note selection land now!
                             selectedNote.bluify();
+                            findViewById(R.id.delete_button)
+                              .setVisibility(View.VISIBLE);
                             if (alreadySelected) {
                                 switch (event.getAction()) {
                                     case MotionEvent.ACTION_MOVE:
@@ -633,6 +638,8 @@ public class MusicSheet extends AppCompatActivity {
                                         if (changed) {
                                             selectedNote.blacken();
                                             selectedNote = null;
+                                            findViewById(R.id.delete_button)
+                                              .setVisibility(View.GONE);
                                             alreadySelected = false;
                                             accidental = 0;
                                             setAccidentalButtonImage();
@@ -1194,7 +1201,7 @@ public class MusicSheet extends AppCompatActivity {
         //update imageViews bitmap
         iv.setImageBitmap(bitmap);
     }
-    
+
     private void drawNote(RelativeLayout rl, XYCoord xy, Note n, int key,
                           ArrayList<Pair<Integer, LinkedList<Note>>> measure) {
         Pair<NoteDur, Boolean> p = numToDurAndDot(n.getDuration());
@@ -1776,17 +1783,17 @@ public class MusicSheet extends AppCompatActivity {
     public void undo(View view) {
         if (!editHistory.empty()) {
             Edit lastEdit = editHistory.pop();
+            ArrayList<Pair<Integer, LinkedList<Note>>> m = score
+              .getMeasure(lastEdit.staff,
+                          (lastEdit.time / score.getMeasureLength()));
+            RelativeLayout rl;
 
             switch (lastEdit.editType) {
                 case ADD:
-                    Note n = score.removeNote(lastEdit.staff, lastEdit.time,
-                                              lastEdit.note.getPitch()).note;
-                    RelativeLayout rl = (RelativeLayout)n.getImageView()
-                                                         .getParent();
-
-                    ArrayList<Pair<Integer, LinkedList<Note>>> m = score
-                      .getMeasure(lastEdit.staff, (lastEdit.time / score
-                        .getMeasureLength()));
+                    rl = (RelativeLayout)lastEdit.note.getImageView()
+                                                      .getParent();
+                    score.removeNote(lastEdit.staff, lastEdit.time,
+                                     lastEdit.note.getPitch());
 
                     for (Pair<Integer, LinkedList<Note>> p : m) {
                         if (p.first == lastEdit.time % score.getMeasureLength())
@@ -1795,7 +1802,7 @@ public class MusicSheet extends AppCompatActivity {
                                 drawNote(rl, new XYCoord(
                                            (lastEdit.time
                                             % score.getMeasureLength()),
-                                           (0)), n,
+                                           (0)), p.second.getFirst(),
                                          score.getTrack(lastEdit.staff)
                                               .getKey(), score
                                            .getMeasure(lastEdit.staff,
@@ -1806,7 +1813,25 @@ public class MusicSheet extends AppCompatActivity {
                     }
                     break;
                 case REMOVE:
+                    rl = (RelativeLayout)m.get(0).second.getFirst()
+                                                        .getImageView()
+                                                        .getParent();
                     score.addNote(lastEdit.staff, lastEdit.time, lastEdit.note);
+                    byte pitch = lastEdit.note.getPitch();
+
+                    drawNote(rl, new XYCoord(
+                               (lastEdit.time % score.getMeasureLength()),
+                               pitchToPos.get(pitch + reverseKeys
+                                 .get(trackWorkingKey(score.getTrack(lastEdit.staff)))
+                                 .get(pitch % 12) + Objects
+                                                .requireNonNull(reverseClefMods.get(
+                                                  score.getTrackClef(lastEdit.staff)))
+                                                .get(pitch % 12))),
+                             lastEdit.note,
+                             score.getTrack(lastEdit.staff).getKey(),
+                             score.getMeasure(lastEdit.staff,
+                                              (lastEdit.time / score
+                                                .getMeasureLength())));
                     break;
             }
         }
@@ -2263,4 +2288,30 @@ public class MusicSheet extends AppCompatActivity {
     int getScrollCoord()      { return scrollView.getScrollY(); }
 
     void scrollToCoord(int y) { scrollView.smoothScrollTo(0, y); }
+
+    public void deleteNote(View view) {
+        RelativeLayout rl = (RelativeLayout)selectedNote.getImageView()
+                                                        .getParent();
+        editHistory.push(score.removeNote(selectedNoteStaff, selectedNoteTime,
+                                          selectedNote.getPitch()));
+        ArrayList<Pair<Integer, LinkedList<Note>>> measure = score
+          .getMeasure(selectedNoteStaff,
+                      (selectedNoteTime / score.getMeasureLength()));
+
+        for (Pair<Integer, LinkedList<Note>> p : measure) {
+            if (p.first == selectedNoteTime) {
+                if (p.second.size() == 1
+                    && p.second.getFirst().getNoteType() == Note.NoteType.REST)
+                    drawNote(rl, new XYCoord(
+                               (selectedNoteTime % score.getMeasureLength()),
+                               (0)),
+                             p.second.getFirst(),
+                             score.getTrack(selectedNoteStaff).getKey(),
+                             measure);
+                break;
+            }
+        }
+        selectedNote = null;
+        findViewById(R.id.delete_button).setVisibility(View.GONE);
+    }
 }
