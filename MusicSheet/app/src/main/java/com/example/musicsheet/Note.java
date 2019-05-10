@@ -77,11 +77,20 @@ class Note {
                 case 0:
                     imageView.setImageResource(R.drawable.blue_whole);
                     break;
+                case 1:
+                    imageView.setImageResource(R.drawable.flipped_blue_half);
+                    break;
                 case 2:
                     imageView.setImageResource(R.drawable.blue_half);
                     break;
+                case 3:
+                    imageView.setImageResource(R.drawable.flipped_blue_quarter);
+                    break;
                 case 4:
                     imageView.setImageResource(R.drawable.blue_quarter);
+                    break;
+                case 5:
+                    imageView.setImageResource(R.drawable.flipped_blue_eighth);
                     break;
                 case 6:
                     imageView.setImageResource(R.drawable.blue_eighth);
