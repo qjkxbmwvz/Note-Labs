@@ -110,9 +110,6 @@ public class MusicSheet extends AppCompatActivity {
 
         setContentView(R.layout.activity_music_sheet);
 
-        //Code for SlidePanes
-        sidePane();
-
         Context context = getApplicationContext();
         tableLayout = new TableLayout(context);
         scrollView = findViewById(R.id.music_sheet_scroll);
@@ -137,6 +134,9 @@ public class MusicSheet extends AppCompatActivity {
         //No Longer Have to Cycle Buttons, but Edit Button must keep its
         // ability to toggle Zoom
         //cycleButtons(null);
+
+        //Code for SlidePanes
+        sidePane();
 
         linePaint = setUpPaint();
 
@@ -2250,16 +2250,30 @@ public class MusicSheet extends AppCompatActivity {
 
     //TODO: factor in adjustment, like everywhere else in the app.
     public void sidePane() {
-        slidePane = findViewById(R.id.sliding_sidebar);
-        ViewGroup.LayoutParams params = slidePane.getLayoutParams();
+        slidePane = (SlidingPaneLayout) findViewById(R.id.sliding_sidebar);
 
-        if (slidePane.isOpen()) {
-            //params.height = 175;
-        } else {
-            params.height = 200;
-        }
-        // Changes the height and width to the specified *pixels*
-        slidePane.setLayoutParams(params);
+        slidePane.setPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View view, float v) {
+
+            }
+
+            @Override
+            public void onPanelOpened(View view) {
+                ViewGroup.LayoutParams params = slidePane.getLayoutParams();
+                params.height = 200;
+                slidePane.setLayoutParams(params);
+                slidePane.setCoveredFadeColor(20);
+            }
+
+            @Override
+            public void onPanelClosed(View view) {
+                ViewGroup.LayoutParams params = slidePane.getLayoutParams();
+                params.height = 1250;
+                slidePane.setLayoutParams(params);
+                slidePane.setCoveredFadeColor(800);
+            }
+        });
     }
 
     void bluifyNote(Note note) { note.bluify(); }
