@@ -2255,7 +2255,10 @@ public class MusicSheet extends AppCompatActivity {
         slidePane.setPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View view, float v) {
-
+                ViewGroup.LayoutParams params = slidePane.getLayoutParams();
+                params.height = 1250;
+                slidePane.setLayoutParams(params);
+                slidePane.setSliderFadeColor(Color.TRANSPARENT);
             }
 
             @Override
@@ -2263,15 +2266,15 @@ public class MusicSheet extends AppCompatActivity {
                 ViewGroup.LayoutParams params = slidePane.getLayoutParams();
                 params.height = 200;
                 slidePane.setLayoutParams(params);
-                slidePane.setCoveredFadeColor(20);
+                //slidePane.setSliderFadeColor(Color.TRANSPARENT);
             }
 
             @Override
             public void onPanelClosed(View view) {
-                ViewGroup.LayoutParams params = slidePane.getLayoutParams();
-                params.height = 1250;
-                slidePane.setLayoutParams(params);
-                slidePane.setCoveredFadeColor(800);
+//                ViewGroup.LayoutParams params = slidePane.getLayoutParams();
+//                params.height = 1250;
+//                slidePane.setLayoutParams(params);
+                //slidePane.setSliderFadeColor(Color.TRANSPARENT);
             }
         });
     }
