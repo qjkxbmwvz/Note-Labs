@@ -813,7 +813,7 @@ public class MusicSheet extends AppCompatActivity {
                                       if (b)
                                           velocityText.setText(
                                             getString(
-                                              R.string.transposition_text, i));
+                                              R.string.velocity_text, i));
                                   }
 
                                   @Override
