@@ -69,7 +69,6 @@ class Note {
             ((RelativeLayout)dotImageView.getParent()).removeView(dotImageView);
     }
 
-    //TODO: add flipped notes for the odd cases.
     void bluify() {
         if (imageView != null) {
             Object tag = imageView.getTag();
@@ -94,6 +93,13 @@ class Note {
                     break;
                 case 6:
                     imageView.setImageResource(R.drawable.blue_eighth);
+                    break;
+                case 7:
+                    imageView.setImageResource(
+                      R.drawable.flipped_blue_sixteenth);
+                    break;
+                case 8:
+                    imageView.setImageResource(R.drawable.blue_sixteenth);
                     break;
             }
         }
@@ -123,6 +129,13 @@ class Note {
                     break;
                 case 6:
                     imageView.setImageResource(R.drawable.eighth_note);
+                    break;
+                case 7:
+                    imageView.setImageResource(
+                      R.drawable.flipped_sixteenth_note);
+                    break;
+                case 8:
+                    imageView.setImageResource(R.drawable.sixteenth_note);
                     break;
             }
         }

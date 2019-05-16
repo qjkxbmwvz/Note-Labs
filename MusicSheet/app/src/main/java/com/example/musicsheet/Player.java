@@ -31,7 +31,10 @@ public class Player implements Runnable, MidiDriver.OnMidiStartListener {
     void prepare(int tempo, int startTime, ArrayList<Track> tracks) {
         this.tempo = tempo;
         this.startTime = startTime;
-        times = new TreeMap<>();
+        if (times != null)
+            times.clear();
+        else
+            times = new TreeMap<>();
 
         for (byte i = 0; i < tracks.size(); ++i) {
             Iterator<Integer> tIt = tracks.get(i).getTimeIterator();

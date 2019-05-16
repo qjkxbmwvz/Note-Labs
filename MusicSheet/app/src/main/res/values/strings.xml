@@ -156,6 +156,7 @@
         <item>"Gunshot"</item>
     </string-array>
     <string name="tempo_text">Tempo: %d</string>
+    <string name="velocity_text">Velocity: %d</string>
     <string name="transposition_text">Transposition: %d</string>
     <string name="numerator_text">Time signature numerator: %d</string>
     <string name="denominator_text">Time signature denominator: %d</string>

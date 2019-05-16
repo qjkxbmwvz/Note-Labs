@@ -57,6 +57,9 @@ class Score {
                 < oldMeasureCount * oldMeasureLength)
                 ++measureCount;
 
+        if (measureCount < oldMeasureCount && measureCount % 2 == 0)
+            ++measureCount;
+
         for (Track track : tracks) {
             for (int i = 0; i < oldMeasureCount * oldMeasureLength;
                  i += oldMeasureLength) {
