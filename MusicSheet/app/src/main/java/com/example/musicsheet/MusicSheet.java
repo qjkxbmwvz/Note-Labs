@@ -145,6 +145,7 @@ public class MusicSheet extends AppCompatActivity {
 
         //Code for SlidePanes
         ResizeSlidePane(1350, 285); //Resizes the first time so its always the same size
+        slidePane.openPane();
         sidePane();
 
         linePaint = setUpPaint();
@@ -2431,6 +2432,7 @@ public class MusicSheet extends AppCompatActivity {
         params.height = h;
         params.width = w;
         slidePane.setLayoutParams(params);
+        slidePane.setSliderFadeColor(Color.TRANSPARENT);
     }
 
     //TODO: factor in adjustment, like everywhere else in the app.
@@ -2440,7 +2442,7 @@ public class MusicSheet extends AppCompatActivity {
               @Override
               public void onPanelSlide(View view, float v) {
                   ResizeSlidePane(1350, 285);
-                  slidePane.setSliderFadeColor(Color.TRANSPARENT);
+
               }
 
               @Override
