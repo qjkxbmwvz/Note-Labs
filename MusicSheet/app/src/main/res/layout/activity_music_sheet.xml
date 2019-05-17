@@ -27,6 +27,7 @@
         android:layout_width="412dp"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@android:color/darker_gray"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -91,9 +92,9 @@
         android:layout_marginStart="250dp"
         android:layout_marginTop="100dp"
         android:layout_marginBottom="100dp"
-        android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -115,7 +116,7 @@
                 android:adjustViewBounds="false"
                 android:contentDescription="@string/todo"
                 android:cropToPadding="false"
-                android:scaleType="fitXY"
+                android:scaleType="centerInside"
                 app:srcCompat="@drawable/tab" />
 
             <LinearLayout

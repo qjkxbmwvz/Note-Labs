@@ -36,6 +36,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -118,6 +119,8 @@ public class MusicSheet extends AppCompatActivity {
         Context context = getApplicationContext();
         tableLayout = new TableLayout(context);
         scrollView = findViewById(R.id.music_sheet_scroll);
+        slidePane = findViewById(R.id.sliding_sidebar);
+
 
         score = new Score(player);
         measures = new HashMap<>();
@@ -141,6 +144,7 @@ public class MusicSheet extends AppCompatActivity {
         //cycleButtons(null);
 
         //Code for SlidePanes
+        ResizeSlidePane(1350, 285); //Resizes the first time so its always the same size
         sidePane();
 
         linePaint = setUpPaint();
@@ -2422,25 +2426,27 @@ public class MusicSheet extends AppCompatActivity {
         alertDialog.show();
     }
 
+    private void ResizeSlidePane(int h, int w){
+        ViewGroup.LayoutParams params = slidePane.getLayoutParams();
+        params.height = h;
+        params.width = w;
+        slidePane.setLayoutParams(params);
+    }
+
     //TODO: factor in adjustment, like everywhere else in the app.
     public void sidePane() {
-        slidePane = (SlidingPaneLayout)findViewById(R.id.sliding_sidebar);
 
-        slidePane
-          .setPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
+        slidePane.setPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
               @Override
               public void onPanelSlide(View view, float v) {
-                  ViewGroup.LayoutParams params = slidePane.getLayoutParams();
-                  params.height = 1250;
-                  slidePane.setLayoutParams(params);
+                  ResizeSlidePane(1350, 285);
                   slidePane.setSliderFadeColor(Color.TRANSPARENT);
               }
 
               @Override
+              //idk why but panelOpened is actually when the panel is all the way to the right
               public void onPanelOpened(View view) {
-                  ViewGroup.LayoutParams params = slidePane.getLayoutParams();
-                  params.height = 200;
-                  slidePane.setLayoutParams(params);
+                  ResizeSlidePane(220, 90);
                   //slidePane.setSliderFadeColor(Color.TRANSPARENT);
               }
 
