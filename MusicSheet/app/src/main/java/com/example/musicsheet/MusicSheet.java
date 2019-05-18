@@ -2499,7 +2499,7 @@ public class MusicSheet extends AppCompatActivity {
                       (selectedNoteTime / score.getMeasureLength()));
 
         for (Pair<Integer, LinkedList<Note>> p : measure) {
-            if (p.first == selectedNoteTime) {
+            if (p.first == selectedNoteTime % score.getMeasureLength()) {
                 if (p.second.size() == 1
                     && p.second.getFirst().getNoteType() == Note.NoteType.REST)
                     drawNote(rl, new XYCoord(
